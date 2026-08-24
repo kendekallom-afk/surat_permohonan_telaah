@@ -1312,8 +1312,48 @@ function loadFormState() {
     }
     // Jika savedState === 'false', biarkan terbuka (tidak ada class tambahan)
 }
+		// SERVICE WORKER REGISTRATION ===== -->
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            // Karena sw.js satu folder dengan index.html, path-nya cukup '/surat_permohonan_telaah/sw.js'
+            navigator.serviceWorker.register('/surat_permohonan_telaah/sw.js')
+                .then(function(registration) {
+                    console.log('[SW] Service Worker registered with scope:', registration.scope);
+                    registration.update();
+                    
+                    if (registration.waiting) {
+                        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                    
+                    registration.addEventListener('updatefound', function() {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', function() {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('[SW] New Service Worker installed, waiting to activate...');
+                            }
+                        });
+                    });
+                })
+                .catch(function(error) {
+                    console.error('[SW] Service Worker registration failed:', error);
+                });
+        });
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', function() {
+            if (!refreshing) {
+                refreshing = true;
+                console.log('[SW] New controller found, reloading page...');
+                window.location.reload();
+            }
+        });
+    } else {
+        console.log('[SW] Service Worker not supported in this browser.');
+    }
+
     </script>
 	<!-- Input File Tersembunyi untuk Fitur Buka File -->
 	<input type="file" id="file-input-txt" accept=".txt" style="display: none;" onchange="bacaFileTxt(event)">
+	
 </body>
 </html>
