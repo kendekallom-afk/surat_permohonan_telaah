@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Sulbar - Surat Permohonan</title>
+    <!-- Library html2pdf.js -->
+    <!-- Library jsPDF Direct Engine -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Google Fonts: Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4A6FA5;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --success-hover: #15803d;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --dark: #0f172a;
+            --indigo-royal: #3f51b5;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-600: #475569;
+            --slate-800: #1e293b;
+        }
+
+        * { box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { padding: 16px; background-color: #f8fafc; margin: 0; color: #334155; }
+        .container { max-width: 768px; margin: 0 auto; }
+        
+        .card { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 6px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.06); 
+            margin-bottom: 20px; 
+            border: 1px solid var(--slate-200);
+        }
+
+        .header { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    border-bottom: 1px solid var(--slate-200); 
+    padding-bottom: 12px; 
+    margin-bottom: 20px; 
+}
+
+/* Container untuk Logo + Teks mGPS Point */
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Jarak antara gambar logo dan tulisan */
+    font-size: 15px;
+    font-weight: 700;
+    color: #CBD5E1;
+    letter-spacing: -0.2px;
+}
+
+/* Pengaturan Ukuran Gambar Logo */
+.brand-logo {
+    height: 28px;        /* Tinggi logo disesuaikan agar pas di header */
+    width: auto;         /* Rasio gambar tetap proporsional */
+    object-fit: contain;
+    display: block;
+}
+
+/* OPSI TAMBAHAN (Jika header Anda berwarna gelap dan logo menyatu/tidak kelihatan):
+   Aktifkan baris di bawah ini agar warna logo biru gelap berubah menjadi terang/putih. */
+/*
+.brand-logo {
+    filter: brightness(0) invert(1);
+}
+*/
+
+        /* Container Tombol di Kanan */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Styling Tombol Berbentuk Rounded (Buka & Refresh) */
+        .btn-header {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #0f172a;
+            transition: all 0.2s;
+        }
+        .btn-header:hover { 
+            background-color: #f8fafc; 
+            border-color: #cbd5e1;
+        }
+		/* Styling Tombol Copy Kecil di Atas Koordinat */
+		.btn-copy-small {
+			background: transparent;
+			border: none;
+			padding: 2px;
+			cursor: pointer;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--slate-600);
+			transition: color 0.2s;
+			}
+		.btn-copy-small:hover {
+			color: var(--primary);
+			}
+/*--*/
+        .btn-icon-text {
+            background: transparent;
+            border: 1px solid var(--slate-200);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--slate-800);
+            transition: background 0.2s;
+        }
+        .btn-icon-text:hover { background: var(--slate-100); }
+
+        .label { 
+            font-size: 13px; 
+            color: var(--slate-600); 
+            font-weight: 400; 
+            text-transform: none; 
+            letter-spacing: normal; 
+        }
+
+        .val { 
+            font-size: 18px; 
+            font-weight: 400; 
+            color: var(--indigo-royal); 
+            margin: 4px 0 16px 0; 
+            word-break: break-all; 
+            font-family: 'Roboto', monospace; 
+        }
+        
+        .grid-coords { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 500px) { .grid-coords { grid-template-columns: 1fr; } }
+
+        .info-status { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        
+        .badge { 
+            padding: 6px 14px; 
+            border-radius: 20px; 
+            font-weight: 400; 
+            font-size: 12px; 
+            color: #000000 !important; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+        }
+        .badge span {
+            color: #000000 !important;
+            font-weight: 400;
+        }
+        .acc-good { background-color: #dcfce7; }
+        .acc-warn { background-color: #fef3c7; }
+        .sat-info { background-color: var(--slate-100); }
+
+        /* Container & Style 4 Tombol Segi Empat Sama Sisi */
+        .btn-action-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .btn-square {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 4px;
+            font-weight: 400;
+            font-size: 11px;
+            text-transform: none;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            line-height: 1.2;
+            color: white;
+        }
+
+        .btn-square .icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .btn-square:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-square:active { transform: translateY(0); }
+
+        .btn-blue { background-color: var(--primary); }
+        .btn-green { background-color: var(--success); }
+        .btn-purple { background-color: #7c3aed; }
+        .btn-red { background-color: var(--danger); }
+        .btn-grey { 
+            background-color: #f1f5f9; 
+            color: var(--slate-800);   
+            border: 1px solid var(--slate-200); 
+        }
+        .btn-grey:hover { 
+            background-color: #e2e8f0; 
+        }
+
+        .btn { 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%; 
+            padding: 12px 16px; 
+            font-size: 14px; 
+            font-weight: 500; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            text-align: center; 
+            transition: all 0.2s;
+            gap: 8px;
+        }
+        .btn-dark { background-color: var(--dark); color: white; }
+        .btn-dark:hover { background-color: #1e293b; }
+        .btn-purple-wide { background-color: #7c3aed; color: white; }
+        .btn-purple-wide:hover { background-color: #6d28d9; }
+
+        #log { 
+            margin-top: 10px; 
+            max-height: 180px; 
+            overflow-y: auto; 
+            background: #f8fafc; 
+            border: 1px solid var(--slate-200); 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-size: 12px; 
+            font-family: monospace; 
+        }
+        .log-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--slate-200);
+        }
+        .log-item:last-child { border-bottom: none; }
+
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-group .btn { flex: 1; min-width: 140px; }
+
+        /* Form Input Styling */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--slate-600); margin-bottom: 6px; }
+        .form-control { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 1px solid var(--slate-200); 
+            border-radius: 8px; 
+            font-size: 14px; 
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus { border-color: var(--primary); }
+        .required-tag { color: var(--danger); }
+        .strike { text-decoration: line-through; }
+
+        .s-date-header { text-align: right; margin-bottom: 5px; }
+        .s-header-text { margin-bottom: 10px; }
+        .s-data-table { width: 100%; margin: 5px 0 10px 0; border-collapse: collapse; }
+        .s-data-table td { padding: 2px 0; vertical-align: top; }
+
+        .s-koordinat-container { display: flex; flex-wrap: wrap; gap: 30px; margin: 5px 0 10px 0; }
+        .s-koordinat-col { min-width: 180px; }
+        .s-koordinat-col ol { margin: 0; padding-left: 22px; }
+        .s-koordinat-col li { margin-bottom: 2px; font-size: 10pt; }
+
+        .s-footer { width: 100%; }
+        .s-ttd-box { float: right; text-align: center; width: 200px; }
+        .s-nb { margin-top: 25px; font-size: 10pt; }
+
+        /* Modal custom UI */
+        .custom-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .custom-modal-box {
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+        .custom-modal-msg { margin: 0 0 16px 0; font-size: 14px; color: var(--slate-800); white-space: pre-wrap; text-align: left; }
+        .custom-modal-input { width: 100%; padding: 10px; border: 1px solid var(--slate-200); border-radius: 8px; font-size: 14px; margin-bottom: 16px; }
+        .custom-modal-actions { display: flex; gap: 8px; }
+        .custom-modal-actions button { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 500; font-size: 14px; cursor: pointer; }
+
+        /* Styling ikon SVG agar pas di dalam tombol square */
+        .win-bin-icon {
+            width: 22px;
+            height: 22px;
+            margin-bottom: 4px;
+        }
+		
+		
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- GPS Card -->
+        <div class="header">
+    <div class="header-brand">
+        <img src="assets/Mlogo.png" alt="mGPS Point Logo" class="brand-logo">
+        <span>mGPS Point</span>
+    </div>
+
+    <div class="header-actions">
+        <button class="btn-header" onclick="document.getElementById('file-input-txt').click()">📁 Buka</button>
+        <button class="btn-header" onclick="refreshGPS()">🔄 Refresh</button>
+    </div>
+</div>
+
+            <!-- Label & Nilai Koordinat -->
+<!-- Label & Nilai Koordinat (Sejajar Presisi) -->
+<div class="grid-coords">
+    <div style="display: flex; gap: 16px; width: 100%;">
+        <!-- Kolom Longitude -->
+        <div style="flex: 1;">
+            <div style="display: flex; align-items: center; min-height: 20px;">
+                <div class="label" style="font-size: 11px;">Longitude (Bujur)</div>
+            </div>
+            <div id="lng" class="val">Menghubungkan...</div>
+        </div>
+
+        <!-- Kolom Latitude -->
+        <div style="flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; min-height: 20px;">
+                <div class="label" style="font-size: 11px;">Latitude (Lintang)</div>
+                <button class="btn-copy-small" onclick="copyKoordinatAktif()" title="Salin Koordinat Aktif">
+                    <svg style="width:16px; height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="lat" class="val">Menghubungkan...</div>
+        </div>
+    </div>
+</div>
+            <!-- Teks Akurasi dan Satelit (Font Hitam & Regular) -->
+            <div class="info-status">
+                <div id="acc-box" class="badge acc-warn">
+                    Akurasi: <span id="acc">-</span> m
+                </div>
+                <div class="badge sat-info">
+                    🛰️ Sinyal: <span id="sat-status">Mencari...</span>
+                </div>
+            </div>
+
+            <!-- Tombol Aksi 1 Baris Segi Empat Sama Sisi -->
+            <div class="btn-action-row">
+                <button class="btn-square btn-blue" onclick="simpanTitik()" title="Ambil Titik Koordinat">
+                    <svg class="win-bin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <span>Ambil Titik</span>
+                </button>
+                <button class="btn-square btn-grey" onclick="copyKoordinat()" title="Salin Koordinat">
+                    <svg class="win-bin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span>Salin</span>
+                </button>
+                <button class="btn-square btn-grey" onclick="simpanTxt()" title="Simpan ke file txt">
+                    <span class="icon">💾</span>
+                    <span>Simpan</span>
+                </button>
+                <button class="btn-square btn-red" onclick="hapusSemuaTitik()" title="Hapus Semua Titik">
+                    <svg class="win-bin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                    <span>Hapus</span>
+                </button>
+            </div>
+
+            <div class="label" style="font-weight: 500;">Daftar Titik Tersimpan</div>
+            <div id="log">Belum ada titik tersimpan.</div>
+        </div>
+
+        <!-- Form Pemohon -->
+        <div class="card">
+            <div style="font-size: 15px; font-weight: 700; color: var(--slate-800); margin-bottom: 16px;">📄 Data Pemohon</div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nama Lengkap Pemohon <span class="required-tag">*</span></label>
+                    <input type="text" id="pemohon-nama" class="form-control" placeholder="Contoh: KAMBOTI">
+                </div>
+                <div class="form-group">
+                    <label>Pekerjaan (Opsional)</label>
+                    <input type="text" id="pemohon-pekerjaan" class="form-control" placeholder="Contoh: WIRASWASTA">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Alamat Pemohon / KTP (Opsional)</label>
+                <input type="text" id="pemohon-alamat" class="form-control" placeholder="Contoh: Bunde, Kec. Sampaga, Kab. Mamuju">
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>No. HP / WhatsApp <span class="required-tag">*</span></label>
+                    <input type="text" id="pemohon-hp" class="form-control" placeholder="Contoh: 081234567890">
+                </div>
+                <div class="form-group">
+                    <label>Untuk Keperluan Permohonan (Opsional)</label>
+                    <input type="text" id="pemohon-keperluan" class="form-control" placeholder="Contoh: Penerbitan PBB">
+                </div>
+            </div>
+
+            <div class="label" style="margin: 16px 0 15px 0; font-weight: 700;">📍 Data Lokasi Lahan yg Dimohonkan</div>
+
+            <div class="form-group">
+                <label>Jalan / Dusun Lokasi Lahan (Opsional)</label>
+                <input type="text" id="lahan-jalan" class="form-control" placeholder="Contoh: Jl. Poros Bunde / Dusun Girimulya">
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Desa / Kelurahan Lahan <span class="required-tag">*</span></label>
+                    <input type="text" id="lahan-desa-input" class="form-control" placeholder="Ketik nama Desa/Kelurahan..." oninput="autoCariWilayah()">
+                </div>
+                <div class="form-group">
+                    <label>Kecamatan Lahan (Otomatis / Manual)</label>
+                    <input type="text" id="lahan-kec" class="form-control" placeholder="Otomatis terisi...">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Kabupaten & Provinsi Lahan (Opsional)</label>
+                <input type="text" id="lahan-kab" class="form-control" value="Mamuju, Provinsi Sulawesi Barat">
+            </div>
+        </div>
+
+        <!-- Action Card -->
+        <div class="card">
+            <div class="btn-group">
+                <button class="btn btn-purple-wide" onclick="cetakSurat()">🖨️ CETAK SURAT PERMOHONAN</button>
+            </div>
+        </div>
+
+        <!-- Testing Card -->
+        <div class="card" style="border: 2px dashed #f59e0b; background-color: #fffbeb;">
+            <div class="label" style="margin-bottom: 10px; color: #b45309; font-weight: 500;">🧪 Mode Uji Coba</div>
+            <button class="btn" style="background:#f59e0b; color:#fff;" onclick="isiDataUji()">🧪 ISI DATA CONTOH & TITIK KOORDINAT</button>
+        </div>
+    </div>
+
+    <!-- Modal Elements -->
+    <div id="custom-alert-modal" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <p id="custom-alert-msg" class="custom-modal-msg"></p>
+            <div class="custom-modal-actions">
+                <button style="background:var(--primary);color:#fff;" onclick="document.getElementById('custom-alert-modal').style.display='none'">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-confirm-modal" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <p id="custom-confirm-msg" class="custom-modal-msg"></p>
+            <div class="custom-modal-actions">
+                <button id="custom-confirm-yes" style="background:var(--danger);color:#fff;">Ya, Hapus</button>
+                <button id="custom-confirm-no" style="background:var(--slate-600);color:#fff;">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-prompt-modal" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <p id="custom-prompt-msg" class="custom-modal-msg"></p>
+            <input id="custom-prompt-input" class="custom-modal-input" type="text">
+            <div class="custom-modal-actions">
+                <button id="custom-prompt-ok" style="background:var(--success);color:#fff;">Simpan</button>
+                <button id="custom-prompt-cancel" style="background:var(--slate-600);color:#fff;">Batal</button>
+            </div>
+        </div>
+    </div>
+
+   
+
+    <script>
+        const databaseWilayah = [
+            { kec: "Bonehau", tipe: "Desa", nama: "Banua Ada" }, { kec: "Bonehau", tipe: "Desa", nama: "Bonehau" },
+            { kec: "Bonehau", tipe: "Desa", nama: "Buttu Ada" }, { kec: "Bonehau", tipe: "Desa", nama: "Hinua" },
+            { kec: "Bonehau", tipe: "Desa", nama: "Kinatang" }, { kec: "Bonehau", tipe: "Desa", nama: "Lumika" },
+            { kec: "Bonehau", tipe: "Desa", nama: "Mappu" }, { kec: "Bonehau", tipe: "Desa", nama: "Salutiwo" },
+            { kec: "Bonehau", tipe: "Desa", nama: "Tamalea" }, { kec: "Kalukku", tipe: "Desa", nama: "Belang Belang" },
+            { kec: "Kalukku", tipe: "Desa", nama: "Beru-Beru" }, { kec: "Kalukku", tipe: "Desa", nama: "Guliling" },
+            { kec: "Kalukku", tipe: "Desa", nama: "Kabuloang" }, { kec: "Kalukku", tipe: "Desa", nama: "Kalukku Barat" },
+            { kec: "Kalukku", tipe: "Desa", nama: "Keang" }, { kec: "Kalukku", tipe: "Desa", nama: "Pammulukang" },
+            { kec: "Kalukku", tipe: "Desa", nama: "Pokkang" }, { kec: "Kalukku", tipe: "Desa", nama: "Sondoang" },
+            { kec: "Kalukku", tipe: "Desa", nama: "Uhaimate" }, { kec: "Kalukku", tipe: "Kelurahan", nama: "Banua Ada" },
+            { kec: "Kalukku", tipe: "Kelurahan", nama: "Kalukku" }, { kec: "Kalukku", tipe: "Kelurahan", nama: "Sinyonyoi" },
+            { kec: "Kalukku", tipe: "Kelurahan", nama: "Sinyonyoi Selatan" }, { kec: "Kalumpang", tipe: "Desa", nama: "Batu Makkada" },
+            { kec: "Kalumpang", tipe: "Desa", nama: "Kalumpang" }, { kec: "Kalumpang", tipe: "Desa", nama: "Karama" },
+            { kec: "Kalumpang", tipe: "Desa", nama: "Karataun" }, { kec: "Kalumpang", tipe: "Desa", nama: "Kondo Bulo" },
+            { kec: "Kalumpang", tipe: "Desa", nama: "Lasa'" }, { kec: "Kalumpang", tipe: "Desa", nama: "Limbong" },
+            { kec: "Kalumpang", tipe: "Desa", nama: "Makkaliki" }, { kec: "Kalumpang", tipe: "Desa", nama: "Polio" },
+            { kec: "Kalumpang", tipe: "Desa", nama: "Salumakki" }, { kec: "Kalumpang", tipe: "Desa", nama: "Sandapang" },
+            { kec: "Kalumpang", tipe: "Desa", nama: "Siraun" }, { kec: "Kalumpang", tipe: "Desa", nama: "Tumoga" },
+            { kec: "Kepulauan Bala-balakang", tipe: "Desa", nama: "Bala Balakang" }, { kec: "Kepulauan Bala-balakang", tipe: "Desa", nama: "Bala Balakang Timur" },
+            { kec: "Mamuju", tipe: "Desa", nama: "Bambu" }, { kec: "Mamuju", tipe: "Desa", nama: "Batu Pannu" },
+            { kec: "Mamuju", tipe: "Desa", nama: "Karampuang" }, { kec: "Mamuju", tipe: "Desa", nama: "Tadui" },
+            { kec: "Mamuju", tipe: "Kelurahan", nama: "Binanga" }, { kec: "Mamuju", tipe: "Kelurahan", nama: "Kasiwa" },
+            { kec: "Mamuju", tipe: "Kelurahan", nama: "Karema" }, { kec: "Mamuju", tipe: "Kelurahan", nama: "Mamunyu" },
+            { kec: "Mamuju", tipe: "Kelurahan", nama: "Rimuku" }, { kec: "Papalang", tipe: "Desa", nama: "Batu Ampa" },
+            { kec: "Papalang", tipe: "Desa", nama: "Boda-Boda" }, { kec: "Papalang", tipe: "Desa", nama: "Bonda" },
+            { kec: "Papalang", tipe: "Desa", nama: "Papalang" }, { kec: "Papalang", tipe: "Desa", nama: "Salukayu" },
+            { kec: "Papalang", tipe: "Desa", nama: "Sisango" }, { kec: "Papalang", tipe: "Desa", nama: "Sukadamai" },
+            { kec: "Papalang", tipe: "Desa", nama: "Toabo" }, { kec: "Papalang", tipe: "Desa", nama: "Topore" },
+            { kec: "Sampaga", tipe: "Desa", nama: "Bunde" }, { kec: "Sampaga", tipe: "Desa", nama: "Kalonding" },
+            { kec: "Sampaga", tipe: "Desa", nama: "Losso" }, { kec: "Sampaga", tipe: "Desa", nama: "Salubarana" },
+            { kec: "Sampaga", tipe: "Desa", nama: "Sampaga" }, { kec: "Sampaga", tipe: "Desa", nama: "Tanambuah" },
+            { kec: "Sampaga", tipe: "Desa", nama: "Tarailu" }, { kec: "Simboro", tipe: "Desa", nama: "Botteng" },
+            { kec: "Simboro", tipe: "Desa", nama: "Botteng Utara" }, { kec: "Simboro", tipe: "Desa", nama: "Pati'di" },
+            { kec: "Simboro", tipe: "Desa", nama: "Saletto" }, { kec: "Simboro", tipe: "Desa", nama: "Sumare" },
+            { kec: "Simboro", tipe: "Desa", nama: "Tapandullu" }, { kec: "Simboro", tipe: "Kelurahan", nama: "Rangas" },
+            { kec: "Simboro", tipe: "Kelurahan", nama: "Simboro" }, { kec: "Tapalang", tipe: "Desa", nama: "Bela" },
+            { kec: "Tapalang", tipe: "Desa", nama: "Kopeang" }, { kec: "Tapalang", tipe: "Desa", nama: "Orobatu" },
+            { kec: "Tapalang", tipe: "Desa", nama: "Rantedoda" }, { kec: "Tapalang", tipe: "Desa", nama: "Taan" },
+            { kec: "Tapalang", tipe: "Desa", nama: "Takandeang" }, { kec: "Tapalang", tipe: "Desa", nama: "Tampalang" },
+            { kec: "Tapalang", tipe: "Kelurahan", nama: "Dayanginna" }, { kec: "Tapalang", tipe: "Kelurahan", nama: "Galung" },
+            { kec: "Tapalang", tipe: "Kelurahan", nama: "Kasambang" }, { kec: "Tapalang Barat", tipe: "Desa", nama: "Ahu" },
+            { kec: "Tapalang Barat", tipe: "Desa", nama: "Dungkait" }, { kec: "Tapalang Barat", tipe: "Desa", nama: "Labuang Rano" },
+            { kec: "Tapalang Barat", tipe: "Desa", nama: "Lebani" }, { kec: "Tapalang Barat", tipe: "Desa", nama: "Pangasaan" },
+            { kec: "Tapalang Barat", tipe: "Desa", nama: "Pasabu" }, { kec: "Tapalang Barat", tipe: "Desa", nama: "Tanete Pao" },
+            { kec: "Tommo", tipe: "Desa", nama: "Buana Sakti" }, { kec: "Tommo", tipe: "Desa", nama: "Campaloga" },
+            { kec: "Tommo", tipe: "Desa", nama: "Kakullasan" }, { kec: "Tommo", tipe: "Desa", nama: "Kalepu" },
+            { kec: "Tommo", tipe: "Desa", nama: "Leling" }, { kec: "Tommo", tipe: "Desa", nama: "Leling Barat" },
+            { kec: "Tommo", tipe: "Desa", nama: "Leling Utara" }, { kec: "Tommo", tipe: "Desa", nama: "Malino" },
+            { kec: "Tommo", tipe: "Desa", nama: "Rantemario" }, { kec: "Tommo", tipe: "Desa", nama: "Saludengen" },
+            { kec: "Tommo", tipe: "Desa", nama: "Sandana" }, { kec: "Tommo", tipe: "Desa", nama: "Tamejarra" },
+            { kec: "Tommo", tipe: "Desa", nama: "Tamemongga" }, { kec: "Tommo", tipe: "Desa", nama: "Tommo" }
+        ];
+
+        let currentLat = null, currentLng = null, currentAcc = null, watchID = null;
+        let daftarTitik = [];
+        let matchedTipe = null;
+
+        function showAlert(msg) {
+            document.getElementById('custom-alert-msg').innerText = msg;
+            document.getElementById('custom-alert-modal').style.display = 'flex';
+        }
+
+        function showConfirm(msg, onYes) {
+            const modal = document.getElementById('custom-confirm-modal');
+            document.getElementById('custom-confirm-msg').innerText = msg;
+            modal.style.display = 'flex';
+
+            const yesBtn = document.getElementById('custom-confirm-yes');
+            const noBtn = document.getElementById('custom-confirm-no');
+
+            const newYes = yesBtn.cloneNode(true);
+            const newNo = noBtn.cloneNode(true);
+            yesBtn.parentNode.replaceChild(newYes, yesBtn);
+            noBtn.parentNode.replaceChild(newNo, noBtn);
+
+            newYes.onclick = function () { modal.style.display = 'none'; onYes(); };
+            newNo.onclick = function () { modal.style.display = 'none'; };
+        }
+
+        function showPrompt(msg, defaultVal, onSubmit) {
+            const modal = document.getElementById('custom-prompt-modal');
+            document.getElementById('custom-prompt-msg').innerText = msg;
+            const inputEl = document.getElementById('custom-prompt-input');
+            inputEl.value = defaultVal || '';
+            modal.style.display = 'flex';
+            setTimeout(() => inputEl.focus(), 100);
+
+            const okBtn = document.getElementById('custom-prompt-ok');
+            const cancelBtn = document.getElementById('custom-prompt-cancel');
+
+            const newOk = okBtn.cloneNode(true);
+            const newCancel = cancelBtn.cloneNode(true);
+            okBtn.parentNode.replaceChild(newOk, okBtn);
+            cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+
+            newOk.onclick = function () {
+                const val = inputEl.value;
+                modal.style.display = 'none';
+                onSubmit(val);
+            };
+            newCancel.onclick = function () { modal.style.display = 'none'; };
+        }
+
+        window.onerror = function (msg, url, line) {
+            showAlert("Error Sistem:\n" + msg + "\n(baris " + line + ")");
+            return true;
+        };
+
+        function toProperCase(str) {
+            return str.toLowerCase().replace(/(?:^|\s|-|\/)\S/g, a => a.toUpperCase());
+        }
+
+        function autoCariWilayah() {
+            const inputVal = document.getElementById("lahan-desa-input").value.trim().toLowerCase();
+            const kecInput = document.getElementById("lahan-kec");
+
+            if (!inputVal) { kecInput.value = ""; matchedTipe = null; return; }
+            const found = databaseWilayah.find(item => item.nama.toLowerCase() === inputVal);
+
+            if (found) {
+                kecInput.value = found.kec;
+                matchedTipe = found.tipe;
+            } else {
+                matchedTipe = null;
+            }
+        }
+
+        const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
+
+        function startGPS() {
+            if ("geolocation" in navigator) {
+                if (watchID !== null) navigator.geolocation.clearWatch(watchID);
+                watchID = navigator.geolocation.watchPosition(updatePosition, handleError, geoOptions);
+            } else {
+                showAlert("Perangkat Anda tidak mendukung fitur GPS.");
+            }
+        }
+
+        function refreshGPS() {
+            document.getElementById("lat").innerText = "Memperbarui...";
+            document.getElementById("lng").innerText = "Memperbarui...";
+            document.getElementById("sat-status").innerText = "Mencari...";
+            startGPS();
+        }
+
+        function updatePosition(pos) {
+            currentLat = pos.coords.latitude.toFixed(6);
+            currentLng = pos.coords.longitude.toFixed(6);
+            currentAcc = Math.round(pos.coords.accuracy);
+
+            document.getElementById("lat").innerText = currentLat;
+            document.getElementById("lng").innerText = currentLng;
+            document.getElementById("acc").innerText = currentAcc;
+
+            const accBox = document.getElementById("acc-box");
+            const satStatus = document.getElementById("sat-status");
+
+            if (currentAcc <= 5) {
+                accBox.className = "badge acc-good";
+                satStatus.innerText = "Sangat Kuat (3D Fix)";
+            } else if (currentAcc <= 12) {
+                accBox.className = "badge acc-good";
+                satStatus.innerText = "Bagus (Fix)";
+            } else {
+                accBox.className = "badge acc-warn";
+                satStatus.innerText = "Lemah (Proses Kunci)";
+            }
+        }
+
+        function handleError(err) {
+            document.getElementById("lat").innerText = "Error Akses GPS";
+            document.getElementById("lng").innerText = "Cek Akses Lokasi";
+            document.getElementById("sat-status").innerText = "Terputus";
+        }
+/*   --- copy data dan koordinat */
+function copyKoordinat() {
+    if (daftarTitik.length === 0) {
+        return showAlert("Belum ada titik tersimpan di dalam log!");
+    }
+
+    // 1. Ambil data input
+    const nama = document.getElementById("pemohon-nama").value.trim();
+    const desa = document.getElementById("lahan-desa-input").value.trim();
+    const kec = document.getElementById("lahan-kec").value.trim();
+
+    let teksSalinan = "";
+
+    // 2. Jika data pemohon/lahan terisi, susun header informasi
+    if (nama !== "" || desa !== "" || kec !== "") {
+        if (nama !== "") teksSalinan += `Nama Pemohon: ${nama}\n`;
+        if (desa !== "") teksSalinan += `Desa/Kelurahan: ${toProperCase(desa)}\n`;
+        if (kec !== "") teksSalinan += `Kecamatan: ${kec}\n`;
+        teksSalinan += `\n--- Daftar Titik Koordinat ---\n`;
+    }
+
+    // 3. Susun daftar titik koordinat dari log
+    const teksTitik = daftarTitik.map((t, i) => `${i + 1}. ${t.nama}: ${t.lng}, ${t.lat} (${t.acc}m)`).join("\n");
+    teksSalinan += teksTitik;
+
+    // 4. Eksekusi Salin
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(teksSalinan).then(() => {
+            showAlert("Berhasil menyalin data:\n\n" + teksSalinan);
+        }).catch(() => fallbackCopy(teksSalinan));
+    } else {
+        fallbackCopy(teksSalinan);
+    }
+}
+/*tutup copy data dan koordinat  */
+       
+			// Fungsi menyalin koordinat yang sedang aktif tampil di layar
+			function copyKoordinatAktif() {
+			if (!currentLng || !currentLat) return showAlert("Tunggu hingga sinyal GPS terunci!");
+    
+			const teksAktif = `${currentLng}, ${currentLat}`;
+
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(teksAktif).then(() => {
+				showAlert("Koordinat aktif berhasil disalin:\n" + teksAktif);
+			}).catch(() => fallbackCopy(teksAktif));
+			} else {
+					fallbackCopy(teksAktif);
+				}
+			}
+/*---*/
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showAlert("Koordinat berhasil disalin:\n" + text);
+            } catch (e) {
+                showAlert("Gagal menyalin otomatis:\n" + text);
+            }
+            document.body.removeChild(ta);
+        }
+
+        function simpanTitik() {
+            if (!currentLat) return showAlert("Tunggu sinyal GPS terunci terlebih dahulu!");
+            showPrompt("Masukkan nama/label titik:", `Titik-${daftarTitik.length + 1}`, function (namaTitik) {
+                if (!namaTitik || namaTitik.trim() === "") return;
+
+                const titik = {
+                    id: daftarTitik.length + 1,
+                    nama: namaTitik.replace(/,/g, " "),
+                    lat: currentLat,
+                    lng: currentLng,
+                    acc: currentAcc,
+                    waktu: new Date().toLocaleTimeString()
+                };
+
+                daftarTitik.push(titik);
+                updateTampilanLog();
+            });
+        }
+
+        /* Fungsi Edit Titik Satu per Satu */
+        function editTitikSatu(index) {
+            const t = daftarTitik[index];
+            
+            showPrompt("Edit Nama Titik:", t.nama, function (namaBaru) {
+                if (!namaBaru || namaBaru.trim() === "") return;
+                
+                const nilaiAwal = `${t.lng}, ${t.lat}`;
+                showPrompt("Edit Koordinat (Format: Longitude, Latitude):", nilaiAwal, function (koordinatBaru) {
+                    if (!koordinatBaru || !koordinatBaru.includes(",")) {
+                        return showAlert("Format salah! Gunakan pemisah koma.\nContoh: 118.848438, -2.672878");
+                    }
+                    
+                    const parts = koordinatBaru.split(",");
+                    const lngBaru = parts[0].trim();
+                    const latBaru = parts[1].trim();
+
+                    if (isNaN(lngBaru) || isNaN(latBaru)) {
+                        return showAlert("Angka Longitude atau Latitude tidak valid!");
+                    }
+
+                    daftarTitik[index].nama = namaBaru.replace(/,/g, " ");
+                    daftarTitik[index].lng = lngBaru;
+                    daftarTitik[index].lat = latBaru;
+
+                    updateTampilanLog();
+                });
+            });
+        }
+
+        /* Fungsi Hapus Titik Satu per Satu dengan Konfirmasi */
+        function hapusTitikSatu(index) {
+            const t = daftarTitik[index];
+            showConfirm(`Apakah Anda yakin ingin menghapus "${t.nama}"?`, function () {
+                daftarTitik.splice(index, 1);
+                updateTampilanLog();
+            });
+        }
+
+        /* Fungsi Menampilkan Log Titik Tersimpan */
+        function updateTampilanLog() {
+            const logDiv = document.getElementById("log");
+            if (daftarTitik.length === 0) {
+                logDiv.innerHTML = "Belum ada titik tersimpan.";
+                return;
+            }
+            let html = "";
+            daftarTitik.forEach((t, i) => {
+                html += `
+                <div class="log-item">
+                    <span><b>${i + 1}. ${t.nama}</b>: ${t.lng}, ${t.lat} (${t.acc}m)</span>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <button onclick="editTitikSatu(${i})" style="border:none; background:none; cursor:pointer; font-size:16px; padding:0;" title="Edit Titik">📝</button>
+                        <button onclick="hapusTitikSatu(${i})" style="border:none; background:none; cursor:pointer; color:#ef4444; font-size:16px; font-weight:bold; padding:0;" title="Hapus Titik">✕</button>
+                    </div>
+                </div>`;
+            });
+            logDiv.innerHTML = html;
+        }
+
+        function hapusSemuaTitik() {
+            if (daftarTitik.length === 0) return showAlert("Tidak ada titik tersimpan untuk dihapus.");
+            showConfirm("Apakah Anda yakin ingin menghapus SELURUH titik?", function () {
+                daftarTitik = [];
+                updateTampilanLog();
+            });
+        }
+
+        
+        function formatOptionalVal(id) {
+            const val = document.getElementById(id).value.trim();
+            return val !== "" ? val : "....";
+        }
+
+     function cetakSurat() {
+    try {
+        if (daftarTitik.length === 0) return showAlert("Isi minimal satu titik koordinat!");
+
+        const nama = document.getElementById("pemohon-nama").value.trim();
+        const hp = document.getElementById("pemohon-hp").value.trim();
+        const desaVal = document.getElementById("lahan-desa-input").value.trim();
+
+        if (!nama || !hp || !desaVal) {
+            return showAlert("Harap lengkapi field mandatory (*): Nama, No HP, dan Desa/Kelurahan!");
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+        const pekerjaan = formatOptionalVal("pemohon-pekerjaan");
+        const alamat = formatOptionalVal("pemohon-alamat");
+        const keperluan = formatOptionalVal("pemohon-keperluan");
+        const jalan = formatOptionalVal("lahan-jalan");
+        const kec = formatOptionalVal("lahan-kec");
+        const kab = formatOptionalVal("lahan-kab");
+        const tglHariIni = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+        let labelWilayah = "Kelurahan/Desa";
+        if (matchedTipe === "Desa") labelWilayah = "Desa";
+        else if (matchedTipe === "Kelurahan") labelWilayah = "Kelurahan";
+
+        const marginLeft = 20;
+        const marginRight = 190;
+        const textWidthLimit = 170;
+
+        doc.setFont("helvetica", "normal");
+
+        // 1. Tanggal Header
+        doc.setFontSize(10);
+        doc.text(`Mamuju, ${tglHariIni}`, marginRight, 20, { align: 'right' });
+
+        // 2. Tujuan Surat
+        let y = 30;
+        doc.text("Yth. Kepala Dinas Lingkungan Hidup dan Kehutanan", marginLeft, y); y += 5;
+        doc.text("Prov. Sulawesi Barat", marginLeft, y); y += 5;
+        doc.text("Di -", marginLeft, y); y += 5;
+        doc.text("      Mamuju", marginLeft, y); y += 10;
+
+        // 3. Perihal
+        doc.setFont("helvetica", "bold");
+        doc.text("Perihal: Permohonan Keterangan Status Kawasan Hutan", marginLeft, y); y += 8;
+
+        // 4. Data Pemohon
+        doc.setFont("helvetica", "normal");
+        doc.text("Yang bertanda tangan di bawah ini:", marginLeft, y); y += 6;
+
+        const dataPemohon = [
+            ["Nama", `: ${nama}`],
+            ["Pekerjaan", `: ${pekerjaan}`],
+            ["Alamat", `: ${alamat}`],
+            ["No. Hp", `: ${hp}`],
+            ["Untuk Keperluan", `: ${keperluan}`]
+        ];
+
+        dataPemohon.forEach(row => {
+            doc.text(row[0], marginLeft + 5, y);
+            doc.text(row[1], marginLeft + 50, y);
+            y += 5;
+        });
+
+        // 5. Paragraf Lahan
+        y += 2;
+        const narasi = `Dengan ini mengajukan Permohonan Kepada Bapak Kepala Dinas Lingkungan Hidup dan Kehutanan atas Status Lahan / Kawasan Hutan atas lokasi kami yang terletak di Jalan ${jalan} ${labelWilayah} ${toProperCase(desaVal)} Kecamatan ${kec} Kabupaten ${kab}.`;
+        
+        const splitText = doc.splitTextToSize(narasi, textWidthLimit);
+        doc.text(splitText, marginLeft, y);
+        y += (splitText.length * 5) + 3;
+
+        doc.text("Dengan titik koordinat lokasi yang dimohonkan sebagai berikut:", marginLeft, y);
+        y += 4;
+
+        // 6. Tabel Titik Koordinat
+        const tableRows = daftarTitik.map((t, index) => [
+            index + 1,
+            `${t.lng}, ${t.lat}`
+        ]);
+
+        doc.autoTable({
+            startY: y,
+            head: [['No', 'Koordinat (Longitude, Latitude)']],
+            body: tableRows,
+            theme: 'plain',
+            margin: { left: marginLeft, right: 100 },
+            styles: { font: 'helvetica', fontSize: 9, cellPadding: 1 },
+            headStyles: { fontStyle: 'bold' },
+            columnStyles: {
+                0: { cellWidth: 10 },
+                1: { cellWidth: 80 }
+            }
+        });
+
+        y = doc.lastAutoTable.finalY + 6;
+
+        // 7. Penutup & Tanda Tangan (Tanpa Underline)
+        doc.text("Demikian permohonan ini saya buat, atas perkenannya kami ucapkan terimakasih.", marginLeft, y);
+        y += 12;
+
+        const posXTTD = 140;
+        doc.text("Yang bermohon,", posXTTD, y);
+        y += 25;
+        
+        doc.setFont("helvetica", "bold");
+        doc.text(nama, posXTTD, y); // Nama ditulis tanpa garis bawah di bawahnya
+
+        // Catatan NB
+        y += 10;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.text("Nb.", marginLeft, y); y += 4;
+        doc.setFont("helvetica", "normal");
+        doc.text("1. Melampirkan Foto copy KTP Pemohon", marginLeft, y); y += 4;
+        doc.text("2. Alas Hak Berupa Fotocopy SHM/Sporadik", marginLeft, y);
+
+        // 8. Simpan File
+        doc.save(`Surat_Permohonan_${nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
+
+    } catch (err) {
+        showAlert("Gagal memproses PDF: " + err.message);
+    }
+}
+
+        function generateAndOpenPDF(nama) {
+            const suratArea = document.getElementById('surat-area');
+
+            suratArea.style.display = 'block';
+            suratArea.style.position = 'fixed';
+            suratArea.style.left = '0';
+            suratArea.style.top = '0';
+            suratArea.style.width = '210mm';
+            suratArea.style.background = '#fff';
+            suratArea.style.zIndex = '-1';
+
+            const namaFile = `Surat Permohonan ${nama}.pdf`;
+
+            setTimeout(() => {
+                const opt = {
+                    margin:       [10, 15, 10, 15],
+                    filename:     namaFile,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true, x: 0, y: 0, scrollX: 0, scrollY: 0 },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                function resetSuratArea() {
+                    suratArea.style.display = 'none';
+                    suratArea.style.position = '';
+                    suratArea.style.left = '';
+                    suratArea.style.top = '';
+                    suratArea.style.width = '';
+                    suratArea.style.zIndex = '';
+                }
+
+                html2pdf().set(opt).from(suratArea).save().then(() => {
+                    resetSuratArea();
+                }).catch((err) => {
+                    resetSuratArea();
+                    showAlert("Gagal mengunduh PDF: " + err.message);
+                });
+            }, 150);
+        }
+
+        function isiDataUji() {
+            currentLat = "-2.674500";
+            currentLng = "119.076200";
+            currentAcc = 5;
+
+            daftarTitik = [
+                { id: 1, nama: "Titik-Uji-1", lat: "-2.674500", lng: "119.076200", acc: 5, waktu: new Date().toLocaleTimeString() },
+                { id: 2, nama: "Titik-Uji-2", lat: "-2.674800", lng: "119.076500", acc: 6, waktu: new Date().toLocaleTimeString() },
+                { id: 3, nama: "Titik-Uji-3", lat: "-2.675100", lng: "119.076100", acc: 4, waktu: new Date().toLocaleTimeString() }
+            ];
+            updateTampilanLog();
+
+            document.getElementById("pemohon-nama").value = "KAMBOTI (CONTOH)";
+            document.getElementById("pemohon-pekerjaan").value = "WIRASWASTA";
+            document.getElementById("pemohon-alamat").value = "Bunde, Kec. Sampaga, Kab. Mamuju";
+            document.getElementById("pemohon-hp").value = "081234567890";
+            document.getElementById("pemohon-keperluan").value = "Penerbitan PBB";
+            document.getElementById("lahan-jalan").value = "Jl. Poros Bunde";
+            document.getElementById("lahan-desa-input").value = "Bunde";
+            autoCariWilayah();
+
+            showAlert("Data dummy berhasil diisikan.");
+        }
+
+        window.onload = function() {
+            startGPS();
+        };
+		
+		function simpanTxt() {
+    if (daftarTitik.length === 0) {
+        return showAlert("Belum ada titik tersimpan untuk disimpan ke file TXT!");
+    }
+
+    // 1. Ambil Data Form
+    const nama = document.getElementById("pemohon-nama").value.trim();
+    const pekerjaan = document.getElementById("pemohon-pekerjaan").value.trim();
+    const alamat = document.getElementById("pemohon-alamat").value.trim();
+    const hp = document.getElementById("pemohon-hp").value.trim();
+    const keperluan = document.getElementById("pemohon-keperluan").value.trim();
+
+    const jalan = document.getElementById("lahan-jalan").value.trim();
+    const desa = document.getElementById("lahan-desa-input").value.trim();
+    const kec = document.getElementById("lahan-kec").value.trim();
+    const kab = document.getElementById("lahan-kab").value.trim();
+
+    // 2. Susun Konten Teks
+    let isiTxt = "========================================\n";
+    isiTxt += "       DATA PERMOHONAN & KOORDINAT      \n";
+    isiTxt += "========================================\n\n";
+
+    isiTxt += "[DATA PEMOHON]\n";
+    isiTxt += `Nama Lengkap : ${nama !== "" ? nama : "-"}\n`;
+    isiTxt += `Pekerjaan    : ${pekerjaan !== "" ? pekerjaan : "-"}\n`;
+    isiTxt += `Alamat KTP   : ${alamat !== "" ? alamat : "-"}\n`;
+    isiTxt += `No. HP/WA    : ${hp !== "" ? hp : "-"}\n`;
+    isiTxt += `Keperluan    : ${keperluan !== "" ? keperluan : "-"}\n\n`;
+
+    isiTxt += "[LOKASI LAHAN]\n";
+    isiTxt += `Jalan/Dusun  : ${jalan !== "" ? jalan : "-"}\n`;
+    isiTxt += `Desa/Kel.    : ${desa !== "" ? toProperCase(desa) : "-"}\n`;
+    isiTxt += `Kecamatan    : ${kec !== "" ? kec : "-"}\n`;
+    isiTxt += `Kab/Prov     : ${kab !== "" ? kab : "-"}\n\n`;
+// Ambil tanggal hari ini dalam format Indonesia (DD/MM/YYYY)
+const tglHariIni = new Date().toLocaleDateString('id-ID');
+    isiTxt += "----------------------------------------\n";
+isiTxt += "DAFTAR TITIK KOORDINAT TERCEK\n";
+isiTxt += "----------------------------------------\n";
+daftarTitik.forEach((t, i) => {
+    isiTxt += `${i + 1}. ${t.nama}\n`;
+    isiTxt += `   Koordinat : ${t.lng}, ${t.lat}\n`;
+    isiTxt += `   Akurasi   : ±${t.acc}m\n`;
+    isiTxt += `   Waktu     : ${t.waktu}\n`;
+    isiTxt += `   Tanggal   : ${tglHariIni}\n\n`;
+});
+
+    // 3. Nama File
+    const namaBersih = nama !== "" ? nama.replace(/[^a-zA-Z0-9]/g, "_") : "Tanpa_Nama";
+    const tgl = new Date().toISOString().split('T')[0];
+    const namaFile = `Koordinat_${namaBersih}_${tgl}.txt`;
+
+    // 4. Memicu Jendela Unduh / Save As
+    try {
+        const blob = new Blob([isiTxt], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = namaFile;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        showAlert("Gagal menyimpan file TXT: " + err.message);
+    }
+}
+function bacaFileTxt(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const teks = e.target.result;
+        
+        try {
+            // Helper fungsi untuk mengambil nilai dari baris teks
+            const ambilNilai = (label) => {
+                const regex = new RegExp(`${label}\\s*:\\s*(.*)`, 'i');
+                const match = teks.match(regex);
+                return match && match[1] && match[1].trim() !== '-' ? match[1].trim() : '';
+            };
+
+            // 1. Isikan Kembali Data Pemohon
+            document.getElementById("pemohon-nama").value = ambilNilai("Nama Lengkap");
+            document.getElementById("pemohon-pekerjaan").value = ambilNilai("Pekerjaan");
+            document.getElementById("pemohon-alamat").value = ambilNilai("Alamat KTP");
+            document.getElementById("pemohon-hp").value = ambilNilai("No. HP/WA");
+            document.getElementById("pemohon-keperluan").value = ambilNilai("Keperluan");
+
+            // 2. Isikan Kembali Data Lahan
+            document.getElementById("lahan-jalan").value = ambilNilai("Jalan/Dusun");
+            document.getElementById("lahan-desa-input").value = ambilNilai("Desa/Kel.");
+            document.getElementById("lahan-kec").value = ambilNilai("Kecamatan");
+            document.getElementById("lahan-kab").value = ambilNilai("Kab/Prov");
+
+            // 3. Ekstrak dan Isikan Kembali Daftar Titik Koordinat
+            daftarTitik = []; // Kosongkan log lama
+            
+            // Regex membaca blok titik koordinat
+            const regexTitik = /(\d+)\.\s*(.*?)\n\s*Koordinat\s*:\s*([\d.-]+),\s*([\d.-]+)\n\s*Akurasi\s*:\s*±?(\d+)m?\n\s*Waktu\s*:\s*(.*?)(?:\n\s*Tanggal\s*:\s*.*?)?(?=\n\n|\n*$)/g;
+let match;
+
+while ((match = regexTitik.exec(teks)) !== null) {
+    daftarTitik.push({
+        nama: match[2].trim(),
+        lng: parseFloat(match[3]),
+        lat: parseFloat(match[4]),
+        acc: parseInt(match[5]),
+        waktu: match[6].trim()
+    });
+}
+
+            // Render/Tampilkan ulang log titik ke layar
+            updateTampilanLog();
+            showAlert("File TXT berhasil dimuat ke dalam form!");
+
+        } catch (err) {
+            showAlert("Format file TXT tidak sesuai atau rusak!");
+        }
+
+        // Reset input file agar bisa memilih file yang sama jika diperlukan
+        event.target.value = '';
+    };
+
+    reader.readAsText(file);
+}
+
+    </script>
+	<!-- Input File Tersembunyi untuk Fitur Buka File -->
+	<input type="file" id="file-input-txt" accept=".txt" style="display: none;" onchange="bacaFileTxt(event)">
+</body>
+</html>
