@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>mGPS Point - Surat Permohonan</title>
     <!-- ===== FAVORITE ICON / TAB ICON ===== -->
     <link rel="icon" type="image/png" href="assets/M.png">
@@ -32,6 +32,10 @@
             --slate-200: #e2e8f0;
             --slate-600: #475569;
             --slate-800: #1e293b;
+        }
+        html, body {
+    /* Memastikan gesture pinch-to-zoom aktif penuh pada layar */
+        touch-action: manipulation;
         }
 
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif; }
