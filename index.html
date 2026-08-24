@@ -39,17 +39,26 @@
         }
 
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif; }
-        body { padding: 16px; background-color: #f8fafc; margin: 0; color: #334155; }
-        .container { max-width: 768px; margin: 0 auto; padding: 0 10px; }
+        body { 
+            padding: 6px 4px; /* Mengurangi jarak pinggir luar body */
+            background-color: #f8fafc; 
+            margin: 0; 
+            color: #334155; 
+            }
+        .container { 
+            max-width: 1000px; /* Diperlebar agar memuat lebih banyak ruang di layar lebar */
+            margin: 0 auto; 
+            padding: 0 2px; /* Mengurangi batas kosong samping kiri-kanan */
+            }
         
         .card { 
             background: white; 
-            padding: 15px; 
+            padding: 10px 12px; /* Padding dalam kartu diperketat/dipadatkan */
             border-radius: 6px; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.06); 
-            margin-bottom: 20px; 
+            margin-bottom: 12px; /* Mengurangi jarak antarkartu */
             border: 1px solid var(--slate-200);
-        }
+            }
 
         .header { 
             display: flex; 
