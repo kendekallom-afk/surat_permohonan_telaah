@@ -109,6 +109,15 @@
             color: #CBD5E1;
             letter-spacing: -0.2px;
         }
+        .brand-title {
+            color: #727579; /* Warna teks "GPS Point" (sesuai warna asal Anda) */
+        }
+
+        /* Styling khusus untuk huruf 'm' */
+        .brand-m {
+        color: #b41414; /* Warna merah */
+        font-weight: 700;
+        }
 
         .brand-logo {
             height: 28px;
@@ -379,7 +388,7 @@
             <div class="header">
                 <div class="header-brand">
                     <img src="assets/Mlogo.png" alt="mGPS Point Logo" class="brand-logo">
-                    <span>mGPS Point</span>
+                    <span class="brand-title"><span class="brand-m">m</span>GPS Point</span>
                 </div>
 
                 <div class="header-actions">
@@ -1087,7 +1096,7 @@
                         // Header Lampiran Foto
                         doc.setFont("helvetica", "bold");
                         doc.setFontSize(12);
-                        doc.text(`LAMPIRAN FOTO DOKUMENTASI ${index + 1}`, pageWidth / 2, 20, { align: 'center' });
+                        doc.text(`LAMPIRAN ${index + 1}`, pageWidth / 2, 20, { align: 'center' });
                         doc.setFont("helvetica", "normal");
                         doc.setFontSize(10);
                         doc.text(`Pemohon: ${nama}`, pageWidth / 2, 26, { align: 'center' });
