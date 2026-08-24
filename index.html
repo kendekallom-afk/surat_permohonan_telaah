@@ -1420,11 +1420,11 @@ function loadFormState() {
 
     </script>
 	<script>
-		// ============================================
+// ============================================
 // FITUR KAMERA (PILIHAN KAMERA ATAU GALERI)
 // ============================================
 
-let fotoData = null; // Untuk menyimpan data base64 foto
+let fotoData = null; // Menyimpan data base64 foto
 
 // ===== TAMPILKAN MODAL PILIHAN =====
 function tampilkanPilihanFoto() {
@@ -1439,16 +1439,10 @@ function tutupPilihanFoto() {
 function ambilDariKamera() {
     tutupPilihanFoto();
     
-    // Cek dukungan kamera
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showAlert("Perangkat Anda tidak mendukung akses kamera. Coba pilih galeri.");
-        return;
-    }
-    
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.capture = 'environment'; // 'environment' = kamera belakang, 'user' = depan
+    input.setAttribute('capture', 'environment'); // Mengaktifkan kamera belakang
     
     input.onchange = function(event) {
         prosesFileFoto(event);
@@ -1463,8 +1457,9 @@ function ambilDariGaleri() {
     
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*';
-    input.capture = false; // Matikan capture agar membuka galeri
+    // Gunakan ekstensi spesifik dan HAPUS atribut capture agar memaksa membuka galeri
+    input.accept = 'image/png, image/jpeg, image/jpg, image/webp';
+    input.removeAttribute('capture');
     
     input.onchange = function(event) {
         prosesFileFoto(event);
@@ -1574,7 +1569,7 @@ function hapusFoto() {
     showAlert("Foto berhasil dihapus.");
 }
 
-// ===== (Opsional) SIMPAN FOTO KE LOCALSTORAGE =====
+// ===== SIMPAN FOTO KE LOCALSTORAGE =====
 function simpanFoto() {
     if (fotoData) {
         localStorage.setItem('fotoPemohon', fotoData);
