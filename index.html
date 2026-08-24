@@ -1363,7 +1363,8 @@ function loadFormState() {
     }
     // Jika savedState === 'false', biarkan terbuka (tidak ada class tambahan)
 }
-		// SERVICE WORKER REGISTRATION ===== -->
+		/*
+		// SERVICE WORKER REGISTRATION (dinonaktifkan sementara) ===== -->
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
             // Karena sw.js satu folder dengan index.html, path-nya cukup '/surat_permohonan_telaah/sw.js'
@@ -1400,7 +1401,7 @@ function loadFormState() {
         });
     } else {
         console.log('[SW] Service Worker not supported in this browser.');
-    }
+    }*/
 // ============================================
 // FITUR KAMERA
 // ============================================
