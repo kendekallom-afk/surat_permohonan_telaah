@@ -704,29 +704,51 @@ function copyKoordinat() {
         return showAlert("Belum ada titik tersimpan di dalam log!");
     }
 
-    // 1. Ambil data input
+    // 1. Ambil SEMUA data dari form
     const nama = document.getElementById("pemohon-nama").value.trim();
+    const pekerjaan = document.getElementById("pemohon-pekerjaan").value.trim();
+    const alamat = document.getElementById("pemohon-alamat").value.trim();
+    const hp = document.getElementById("pemohon-hp").value.trim();
+    const keperluan = document.getElementById("pemohon-keperluan").value.trim();
+
+    const jalan = document.getElementById("lahan-jalan").value.trim();
     const desa = document.getElementById("lahan-desa-input").value.trim();
     const kec = document.getElementById("lahan-kec").value.trim();
+    const kab = document.getElementById("lahan-kab").value.trim();
 
-    let teksSalinan = "";
+    // 2. Susun konten teks LENGKAP
+    let teksSalinan = "========================================\n";
+    teksSalinan += "       DATA PERMOHONAN & KOORDINAT      \n";
+    teksSalinan += "========================================\n\n";
 
-    // 2. Jika data pemohon/lahan terisi, susun header informasi
-    if (nama !== "" || desa !== "" || kec !== "") {
-        if (nama !== "") teksSalinan += `Nama Pemohon: ${nama}\n`;
-        if (desa !== "") teksSalinan += `Desa/Kelurahan: ${toProperCase(desa)}\n`;
-        if (kec !== "") teksSalinan += `Kecamatan: ${kec}\n`;
-        teksSalinan += `\n--- Daftar Titik Koordinat ---\n`;
-    }
+    teksSalinan += "[DATA PEMOHON]\n";
+    teksSalinan += `Nama Lengkap : ${nama || "-"}\n`;
+    teksSalinan += `Pekerjaan    : ${pekerjaan || "-"}\n`;
+    teksSalinan += `Alamat KTP   : ${alamat || "-"}\n`;
+    teksSalinan += `No. HP/WA    : ${hp || "-"}\n`;
+    teksSalinan += `Keperluan    : ${keperluan || "-"}\n\n`;
 
-    // 3. Susun daftar titik koordinat dari log
-    const teksTitik = daftarTitik.map((t, i) => `${i + 1}. ${t.nama}: ${t.lng}, ${t.lat} (${t.acc}m)`).join("\n");
-    teksSalinan += teksTitik;
+    teksSalinan += "[LOKASI LAHAN]\n";
+    teksSalinan += `Jalan/Dusun  : ${jalan || "-"}\n`;
+    teksSalinan += `Desa/Kel.    : ${desa ? toProperCase(desa) : "-"}\n`;
+    teksSalinan += `Kecamatan    : ${kec || "-"}\n`;
+    teksSalinan += `Kab/Prov     : ${kab || "-"}\n\n`;
 
-    // 4. Eksekusi Salin
+    teksSalinan += "----------------------------------------\n";
+    teksSalinan += "DAFTAR TITIK KOORDINAT\n";
+    teksSalinan += "----------------------------------------\n";
+
+    daftarTitik.forEach((t, i) => {
+        teksSalinan += `${i + 1}. ${t.nama}\n`;
+        teksSalinan += `   Koordinat : ${t.lng}, ${t.lat}\n`;
+        teksSalinan += `   Akurasi   : ±${t.acc}m\n`;
+        teksSalinan += `   Waktu     : ${t.waktu}\n\n`;
+    });
+
+    // 3. Eksekusi Salin
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(teksSalinan).then(() => {
-            showAlert("Berhasil menyalin data:\n\n" + teksSalinan);
+            showAlert("✅ Semua data berhasil disalin ke clipboard!");
         }).catch(() => fallbackCopy(teksSalinan));
     } else {
         fallbackCopy(teksSalinan);
