@@ -47,7 +47,52 @@
     padding-bottom: 12px; 
     margin-bottom: 20px; 
 }
+/* ===== Toggle Form ===== */
+.form-toggle-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 0;
+}
 
+.form-toggle-header:hover {
+    opacity: 0.8;
+}
+
+.toggle-icon {
+    font-size: 20px;
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+.toggle-icon.rotated {
+    transform: rotate(180deg);
+}
+
+.form-body {
+    overflow: hidden;
+    max-height: 2000px;
+    transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+    opacity: 1;
+    padding-top: 10px;
+}
+
+.form-body.collapsed {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    pointer-events: none; /* Mencegah interaksi saat tersembunyi */
+}
+
+/* Opsional: Efek lebih halus untuk seluruh card */
+.card-form {
+    transition: all 0.3s ease;
+}
+/*tutup toggle form*/
 /* Container untuk Logo + Teks mGPS Point */
 .header-brand {
     display: flex;
@@ -420,73 +465,94 @@
             <div id="log">Belum ada titik tersimpan.</div>
         </div>
 
-        <!-- Form Pemohon -->
-        <div class="card">
-            <div style="font-size: 15px; font-weight: 700; color: var(--slate-800); margin-bottom: 16px;">📄 Data Pemohon</div>
+ <!-- Form Pemohon dengan Toggle -->
+<div class="card card-form">
+    <!-- Header dengan Tombol Toggle -->
+    <div class="form-toggle-header" onclick="toggleForm()">
+        <div style="font-size: 15px; font-weight: 700; color: var(--slate-800);">
+            📄 Data Pemohon & Lokasi
+            <span style="font-size: 11px; font-weight: 400; color: var(--slate-600); margin-left: 8px;">
+                <!--(klik untuk buka/tutup)-->
+            </span>
+        </div>
+        <span class="toggle-icon" id="toggleIcon">▼</span>
+    </div>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Nama Lengkap Pemohon <span class="required-tag">*</span></label>
-                    <input type="text" id="pemohon-nama" class="form-control" placeholder="Contoh: KAMBOTI">
-                </div>
-                <div class="form-group">
-                    <label>Pekerjaan (Opsional)</label>
-                    <input type="text" id="pemohon-pekerjaan" class="form-control" placeholder="Contoh: WIRASWASTA">
-                </div>
-            </div>
-
+    <!-- Body Form (Bisa Disembunyikan) -->
+    <div class="form-body" id="formBody">
+        <!-- ===== FORM DATA PEMOHON ===== -->
+        <div class="form-grid">
             <div class="form-group">
-                <label>Alamat Pemohon / KTP (Opsional)</label>
-                <input type="text" id="pemohon-alamat" class="form-control" placeholder="Contoh: Bunde, Kec. Sampaga, Kab. Mamuju">
+                <label>Nama Lengkap Pemohon <span class="required-tag">*</span></label>
+                <input type="text" id="pemohon-nama" class="form-control" placeholder="Contoh: KAMBOTI">
             </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>No. HP / WhatsApp <span class="required-tag">*</span></label>
-                    <input type="text" id="pemohon-hp" class="form-control" placeholder="Contoh: 081234567890">
-                </div>
-                <div class="form-group">
-                    <label>Untuk Keperluan Permohonan (Opsional)</label>
-                    <input type="text" id="pemohon-keperluan" class="form-control" placeholder="Contoh: Penerbitan PBB">
-                </div>
-            </div>
-
-            <div class="label" style="margin: 16px 0 15px 0; font-weight: 700;">📍 Data Lokasi Lahan yg Dimohonkan</div>
-
             <div class="form-group">
-                <label>Jalan / Dusun Lokasi Lahan (Opsional)</label>
-                <input type="text" id="lahan-jalan" class="form-control" placeholder="Contoh: Jl. Poros Bunde / Dusun Girimulya">
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Desa / Kelurahan Lahan <span class="required-tag">*</span></label>
-                    <input type="text" id="lahan-desa-input" class="form-control" placeholder="Ketik nama Desa/Kelurahan..." oninput="autoCariWilayah()">
-                </div>
-                <div class="form-group">
-                    <label>Kecamatan Lahan (Otomatis / Manual)</label>
-                    <input type="text" id="lahan-kec" class="form-control" placeholder="Otomatis terisi...">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Kabupaten & Provinsi Lahan (Opsional)</label>
-                <input type="text" id="lahan-kab" class="form-control" value="Mamuju, Provinsi Sulawesi Barat">
+                <label>Pekerjaan (Opsional)</label>
+                <input type="text" id="pemohon-pekerjaan" class="form-control" placeholder="Contoh: WIRASWASTA">
             </div>
         </div>
 
-        <!-- Action Card -->
+        <div class="form-group">
+            <label>Alamat Pemohon / KTP (Opsional)</label>
+            <input type="text" id="pemohon-alamat" class="form-control" placeholder="Contoh: Bunde, Kec. Sampaga, Kab. Mamuju">
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>No. HP / WhatsApp <span class="required-tag">*</span></label>
+                <input type="text" id="pemohon-hp" class="form-control" placeholder="Contoh: 081234567890">
+            </div>
+            <div class="form-group">
+                <label>Untuk Keperluan Permohonan (Opsional)</label>
+                <input type="text" id="pemohon-keperluan" class="form-control" placeholder="Contoh: Penerbitan PBB">
+            </div>
+        </div>
+
+        <div class="label" style="margin: 16px 0 15px 0; font-weight: 700;">📍 Data Lokasi Lahan yg Dimohonkan</div>
+
+        <div class="form-group">
+            <label>Jalan / Dusun Lokasi Lahan (Opsional)</label>
+            <input type="text" id="lahan-jalan" class="form-control" placeholder="Contoh: Jl. Poros Bunde / Dusun Girimulya">
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Desa / Kelurahan Lahan <span class="required-tag">*</span></label>
+                <input type="text" id="lahan-desa-input" class="form-control" placeholder="Ketik nama Desa/Kelurahan..." oninput="autoCariWilayah()">
+            </div>
+            <div class="form-group">
+                <label>Kecamatan Lahan (Otomatis / Manual)</label>
+                <input type="text" id="lahan-kec" class="form-control" placeholder="Otomatis terisi...">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Kabupaten & Provinsi Lahan (Opsional)</label>
+            <input type="text" id="lahan-kab" class="form-control" value="Mamuju, Provinsi Sulawesi Barat">
+        </div>
+
+        <!-- ===== TOMBOL CETAK (SEKARANG DI DALAM FORM) ===== -->
+        <div style="margin-top: 20px; border-top: 1px solid var(--slate-200); padding-top: 20px;">
+            <button class="btn btn-purple-wide" onclick="cetakSurat()" style="width: 100%;">
+                🖨️ CETAK SURAT PERMOHONAN
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- HAPUS KODE INI (Card Tombol Cetak yang Lama) -->
+        <!-- Action Card --
         <div class="card">
             <div class="btn-group">
                 <button class="btn btn-purple-wide" onclick="cetakSurat()">🖨️ CETAK SURAT PERMOHONAN</button>
             </div>
         </div>
-
-        <!-- Testing Card -->
+-->
+        <!-- Testing Card --
         <div class="card" style="border: 2px dashed #f59e0b; background-color: #fffbeb;">
             <div class="label" style="margin-bottom: 10px; color: #b45309; font-weight: 500;">🧪 Mode Uji Coba</div>
             <button class="btn" style="background:#f59e0b; color:#fff;" onclick="isiDataUji()">🧪 ISI DATA CONTOH & TITIK KOORDINAT</button>
-        </div>
+        </div>-->
     </div>
 
     <!-- Modal Elements -->
@@ -1074,6 +1140,7 @@ function copyKoordinat() {
 
         window.onload = function() {
             startGPS();
+			loadFormState(); // <-- Pastikan baris ini ada
         };
 		
 		function simpanTxt() {
@@ -1203,7 +1270,43 @@ while ((match = regexTitik.exec(teks)) !== null) {
 
     reader.readAsText(file);
 }
+// ===== Toggle Form =====
+// ===== Toggle Form =====
+function toggleForm() {
+    const formBody = document.getElementById('formBody');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    // Toggle class 'collapsed' pada form body
+    formBody.classList.toggle('collapsed');
+    
+    // Rotasi ikon panah
+    toggleIcon.classList.toggle('rotated');
+    
+    // Simpan status ke localStorage
+    const isCollapsed = formBody.classList.contains('collapsed');
+    localStorage.setItem('formCollapsed', isCollapsed);
+}
 
+// ===== Cek status tersimpan saat halaman dimuat =====
+function loadFormState() {
+    const formBody = document.getElementById('formBody');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    // Cek apakah ada status tersimpan di localStorage
+    const savedState = localStorage.getItem('formCollapsed');
+    
+    if (savedState === null) {
+        // Jika belum pernah disimpan, DEFAULT: TERTUTUP (collapsed)
+        formBody.classList.add('collapsed');
+        toggleIcon.classList.add('rotated');
+        localStorage.setItem('formCollapsed', 'true');
+    } else if (savedState === 'true') {
+        // Jika status tersimpan adalah 'true' (tertutup)
+        formBody.classList.add('collapsed');
+        toggleIcon.classList.add('rotated');
+    }
+    // Jika savedState === 'false', biarkan terbuka (tidak ada class tambahan)
+}
     </script>
 	<!-- Input File Tersembunyi untuk Fitur Buka File -->
 	<input type="file" id="file-input-txt" accept=".txt" style="display: none;" onchange="bacaFileTxt(event)">
