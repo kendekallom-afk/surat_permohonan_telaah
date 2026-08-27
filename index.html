@@ -18,7 +18,7 @@
 
     <!-- ===== FONT ROBOTO (LOKAL) ===== -->
     <link href="/surat_permohonan_telaah/font/Roboto/roboto.css" rel="stylesheet">
-    <style>
+     <style>
         :root {
             --primary: #4A6FA5;
             --primary-hover: #1d4ed8;
@@ -701,7 +701,7 @@
     <div style="display: flex; gap: 12px;">
         <!-- Tombol LIHAT -->
         <button type="button" onclick="prosesSurat('preview')" style="flex: 1; background-color: #1d6ed8; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <span>👁️</span> LIHAT
+            <span>📄️</span> LIHAT
         </button>
         <!-- Tombol CETAK -->
         <button type="button" onclick="prosesSurat('cetak')" style="flex: 1; background-color: #7c3aed; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
@@ -1537,57 +1537,43 @@
         }
 
         function enhanceFoto() {
-    // 1. Validasi: pastikan canvas dan context (ctx) sudah tersedia
-    if (!ctx || !canvas) {
-        alert('Silakan unggah dan sesuaikan foto terlebih dahulu!');
-        return;
-    }
-
-    try {
-        // 2. Ambil data piksel dari seluruh area canvas
-        let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let data = imgData.data;
-
-        // 3. Parameter pengolahan (dapat disesuaikan nilainya)
-        let threshold = 140; // Batas pemisah hitam dan putih (0 - 255)
-        let contrast = 1.8;   // Pengali kontras
-        let brightness = 1.1; // Pengali kecerahan
-
-        // 4. Perulangan (looping) untuk setiap piksel (RGAA: Red, Green, Blue, Alpha)
-        for (let i = 0; i < data.length; i += 4) {
-            // Formula konversi RGB ke skala abu-abu (Grayscale)
-            let gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-
-            // Penyesuaian kontras & kecerahan
-            gray = ((gray / 255 - 0.5) * contrast + 0.5) * 255;
-            gray = Math.min(255, gray * brightness);
-
-            // Binarization: Thresholding menjadi Hitam Pekat atau Putih Bersih
-            if (gray > threshold) {
-                // Latar belakang / area terang -> Putih
-                data[i]     = 255; // Red
-                data[i + 1] = 255; // Green
-                data[i + 2] = 255; // Blue
-            } else {
-                // Teks / garis / area gelap -> Hitam
-                data[i]     = 0;   // Red
-                data[i + 1] = 0;   // Green
-                data[i + 2] = 0;   // Blue
+            if (!ctx || !canvas) {
+                alert('Silakan unggah dan sesuaikan foto terlebih dahulu!');
+                return;
             }
-            // Catatan: data[i + 3] adalah Nilai Alpha (Transparansi), dibiarkan tetap (tidak diubah)
+
+            try {
+                let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                let data = imgData.data;
+
+                let threshold = 140;
+                let contrast = 1.8;
+                let brightness = 1.1;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    let gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+                    gray = ((gray / 255 - 0.5) * contrast + 0.5) * 255;
+                    gray = Math.min(255, gray * brightness);
+
+                    if (gray > threshold) {
+                        data[i]     = 255;
+                        data[i + 1] = 255;
+                        data[i + 2] = 255;
+                    } else {
+                        data[i]     = 0;
+                        data[i + 1] = 0;
+                        data[i + 2] = 0;
+                    }
+                }
+
+                ctx.putImageData(imgData, 0, 0);
+                alert('✨ Enhance berhasil! Foto menjadi hitam-putih kontras seperti scan.');
+
+            } catch (error) {
+                console.error('Gagal memproses gambar:', error);
+                alert('Terjadi kesalahan saat memproses gambar. Pastikan gambar dimuat dari sumber lokal atau domain yang sama (CORS).');
+            }
         }
-
-        // 5. Tulis ulang data piksel yang telah diproses kembali ke Canvas
-        ctx.putImageData(imgData, 0, 0);
-
-        // 6. Tampilkan notifikasi keberhasilan
-        alert('✨ Enhance berhasil! Foto menjadi hitam-putih kontras seperti scan.');
-
-    } catch (error) {
-        console.error('Gagal memproses gambar:', error);
-        alert('Terjadi kesalahan saat memproses gambar. Pastikan gambar dimuat dari sumber lokal atau domain yang sama (CORS).');
-    }
-}
 
         function resetEditor() {
             if (fotoAsli) {
@@ -1774,11 +1760,201 @@
         }
 
         // ============================================
-        // FUNGSI CETAK PDF
+        // FUNGSI PEMBUAT DOKUMEN PDF (TERPISAH)
         // ============================================
-        function cetakSurat() {
+        function buatDokumenPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+            // Ambil semua data dari form
+            const nama = document.getElementById("pemohon-nama").value.trim();
+            const pekerjaan = formatOptionalVal("pemohon-pekerjaan");
+            const alamat = formatOptionalVal("pemohon-alamat");
+            const hp = document.getElementById("pemohon-hp").value.trim();
+            const keperluan = formatOptionalVal("pemohon-keperluan");
+            const jalan = formatOptionalVal("lahan-jalan");
+            const desaVal = document.getElementById("lahan-desa-input").value.trim();
+            const kec = formatOptionalVal("lahan-kec");
+            const kab = formatOptionalVal("lahan-kab");
+            const tglHariIni = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            let labelWilayah = "Kelurahan/Desa";
+            if (matchedTipe === "Desa") labelWilayah = "Desa";
+            else if (matchedTipe === "Kelurahan") labelWilayah = "Kelurahan";
+
+            const marginLeft = 20;
+            const marginRight = 190;
+            const textWidthLimit = 170;
+
+            doc.setFont("helvetica", "normal");
+
+            // --- HALAMAN 1: SURAT PERMOHONAN ---
+            doc.setFontSize(10);
+            doc.text(`Mamuju, ${tglHariIni}`, marginRight, 20, { align: 'right' });
+
+            let y = 30;
+            doc.text("Yth. Kepala Dinas Lingkungan Hidup dan Kehutanan", marginLeft, y); y += 5;
+            doc.text("Prov. Sulawesi Barat", marginLeft, y); y += 5;
+            doc.text("Di -", marginLeft, y); y += 5;
+            doc.text("      Mamuju", marginLeft, y); y += 10;
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Perihal: Permohonan Keterangan Status Kawasan Hutan", marginLeft, y); y += 8;
+
+            doc.setFont("helvetica", "normal");
+            doc.text("Yang bertanda tangan di bawah ini:", marginLeft, y); y += 6;
+
+            const dataPemohon = [
+                ["Nama", `: ${nama}`],
+                ["Pekerjaan", `: ${pekerjaan}`],
+                ["Alamat", `: ${alamat}`],
+                ["No. Hp", `: ${hp}`],
+                ["Untuk Keperluan", `: ${keperluan}`]
+            ];
+
+            dataPemohon.forEach(row => {
+                doc.text(row[0], marginLeft + 5, y);
+                doc.text(row[1], marginLeft + 50, y);
+                y += 5;
+            });
+
+            y += 2;
+            const narasi = `Dengan ini mengajukan Permohonan Kepada Bapak Kepala Dinas Lingkungan Hidup dan Kehutanan atas Status Lahan / Kawasan Hutan atas lokasi kami yang terletak di ${jalan} ${labelWilayah}, ${toProperCase(desaVal)}, Kecamatan ${kec}, Kabupaten ${kab}.`;
+
+            const splitText = doc.splitTextToSize(narasi, textWidthLimit);
+            doc.text(splitText, marginLeft, y);
+            y += (splitText.length * 5) + 3;
+
+            doc.text("Dengan titik koordinat lokasi yang dimohonkan sebagai berikut:", marginLeft, y);
+            y += 4;
+
+            const tableRows = daftarTitik.map((t, index) => [
+                index + 1,
+                `${t.lng}, ${t.lat}`
+            ]);
+
+            doc.autoTable({
+                startY: y,
+                head: [['No', 'Koordinat (Longitude, Latitude)']],
+                body: tableRows,
+                theme: 'plain',
+                margin: { left: marginLeft, right: 100 },
+                styles: { font: 'helvetica', fontSize: 9, cellPadding: 1 },
+                headStyles: { fontStyle: 'bold' },
+                columnStyles: {
+                    0: { cellWidth: 10 },
+                    1: { cellWidth: 80 }
+                }
+            });
+
+            y = doc.lastAutoTable.finalY + 6;
+
+            // --- PENUTUP & TANDA TANGAN (SANGAT RAPAT) ---
+doc.text("Demikian permohonan ini saya buat, atas perkenannya kami ucapkan terimakasih.", marginLeft, y);
+y += 8;
+
+const pageWidth = doc.internal.pageSize.getWidth();
+const posXCenter = pageWidth - 50;
+
+doc.text("Yang bermohon,", posXCenter, y, { align: 'center' });
+y += 2;
+
+if (ttdData) {
+    try {
+        const imgProps = doc.getImageProperties(ttdData);
+        let imgW = imgProps.width, imgH = imgProps.height;
+        const maxTtdWidth = 60, maxTtdHeight = 30;
+        let ttdW = imgW, ttdH = imgH;
+        if (ttdW > ttdH) {
+            if (ttdW > maxTtdWidth) {
+                ttdH = Math.round(ttdH * maxTtdWidth / ttdW);
+                ttdW = maxTtdWidth;
+            }
+        } else {
+            if (ttdH > maxTtdHeight) {
+                ttdW = Math.round(ttdW * maxTtdHeight / ttdH);
+                ttdH = maxTtdHeight;
+            }
+        }
+        const posXTTD_img = posXCenter - (ttdW / 2);
+        const posYTTD_img = y - 2;
+        doc.addImage(ttdData, 'JPEG', posXTTD_img, posYTTD_img, ttdW, ttdH);
+        y = posYTTD_img + ttdH + 1;
+    } catch (err) {
+        console.warn('Gagal menambahkan tanda tangan:', err);
+        y += 6;
+    }
+} else {
+    y += 6;
+}
+
+doc.setFont("helvetica", "bold");
+doc.text(nama, posXCenter, y, { align: 'center' });
+// Lanjut ke Catatan NB...
+
+            // Catatan NB
+            y += 10;
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "bold");
+            doc.text("Nb.", marginLeft, y); y += 4;
+            doc.setFont("helvetica", "normal");
+            doc.text("1. Melampirkan Foto copy KTP Pemohon", marginLeft, y); y += 4;
+            doc.text("2. Alas Hak Berupa Fotocopy SHM/Sporadik", marginLeft, y);
+
+            // --- HALAMAN FOTO LAMPIRAN ---
+            if (daftarFoto.length > 0) {
+                const pageWidth2 = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 20;
+                const maxImgW = pageWidth2 - (margin * 2);
+                const maxImgH = pageHeight - (margin * 2) - 25;
+
+                daftarFoto.forEach((fotoBase64, index) => {
+                    doc.addPage();
+
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(12);
+                    doc.text(`LAMPIRAN ${index + 1}`, pageWidth2 / 2, 20, { align: 'center' });
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(10);
+                    doc.text(`Pemohon: ${nama}`, pageWidth2 / 2, 26, { align: 'center' });
+                    doc.setLineWidth(0.2);
+                    doc.line(margin, 29, pageWidth2 - margin, 29);
+
+                    const imgProperties = doc.getImageProperties(fotoBase64);
+                    let imgW = imgProperties.width;
+                    let imgH = imgProperties.height;
+
+                    const ratio = Math.min(maxImgW / imgW, maxImgH / imgH);
+                    const finalW = imgW * ratio;
+                    const finalH = imgH * ratio;
+
+                    const posX = (pageWidth2 - finalW) / 2;
+                    const posY = 35 + ((maxImgH - finalH) / 2);
+
+                    doc.addImage(fotoBase64, 'JPEG', posX, posY, finalW, finalH);
+                    doc.setDrawColor(200, 200, 200);
+                    doc.rect(posX, posY, finalW, finalH);
+
+                    doc.setFontSize(9);
+                    doc.setTextColor(100);
+                    doc.text(`Halaman ${index + 2}`, pageWidth2 / 2, pageHeight - 10, { align: 'center' });
+                    doc.setTextColor(0);
+                });
+            }
+
+            return doc;
+        }
+
+        // ============================================
+        // FUNGSI PROSES SURAT (LIHAT & CETAK)
+        // ============================================
+        function prosesSurat(mode) {
             try {
-                if (daftarTitik.length === 0) return showAlert("Isi minimal satu titik koordinat!");
+                // Validasi data
+                if (daftarTitik.length === 0) {
+                    return showAlert("Isi minimal satu titik koordinat!");
+                }
 
                 const nama = document.getElementById("pemohon-nama").value.trim();
                 const hp = document.getElementById("pemohon-hp").value.trim();
@@ -1788,182 +1964,21 @@
                     return showAlert("Harap lengkapi field mandatory (*): Nama, No HP, dan Desa/Kelurahan!");
                 }
 
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                // Buat dokumen PDF
+                const doc = buatDokumenPDF();
 
-                const pekerjaan = formatOptionalVal("pemohon-pekerjaan");
-                const alamat = formatOptionalVal("pemohon-alamat");
-                const keperluan = formatOptionalVal("pemohon-keperluan");
-                const jalan = formatOptionalVal("lahan-jalan");
-                const kec = formatOptionalVal("lahan-kec");
-                const kab = formatOptionalVal("lahan-kab");
-                const tglHariIni = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-
-                let labelWilayah = "Kelurahan/Desa";
-                if (matchedTipe === "Desa") labelWilayah = "Desa";
-                else if (matchedTipe === "Kelurahan") labelWilayah = "Kelurahan";
-
-                const marginLeft = 20;
-                const marginRight = 190;
-                const textWidthLimit = 170;
-
-                doc.setFont("helvetica", "normal");
-
-                // --- HALAMAN 1: SURAT PERMOHONAN ---
-                doc.setFontSize(10);
-                doc.text(`Mamuju, ${tglHariIni}`, marginRight, 20, { align: 'right' });
-
-                let y = 30;
-                doc.text("Yth. Kepala Dinas Lingkungan Hidup dan Kehutanan", marginLeft, y); y += 5;
-                doc.text("Prov. Sulawesi Barat", marginLeft, y); y += 5;
-                doc.text("Di -", marginLeft, y); y += 5;
-                doc.text("      Mamuju", marginLeft, y); y += 10;
-
-                doc.setFont("helvetica", "bold");
-                doc.text("Perihal: Permohonan Keterangan Status Kawasan Hutan", marginLeft, y); y += 8;
-
-                doc.setFont("helvetica", "normal");
-                doc.text("Yang bertanda tangan di bawah ini:", marginLeft, y); y += 6;
-
-                const dataPemohon = [
-                    ["Nama", `: ${nama}`],
-                    ["Pekerjaan", `: ${pekerjaan}`],
-                    ["Alamat", `: ${alamat}`],
-                    ["No. Hp", `: ${hp}`],
-                    ["Untuk Keperluan", `: ${keperluan}`]
-                ];
-
-                dataPemohon.forEach(row => {
-                    doc.text(row[0], marginLeft + 5, y);
-                    doc.text(row[1], marginLeft + 50, y);
-                    y += 5;
-                });
-
-                y += 2;
-                const narasi = `Dengan ini mengajukan Permohonan Kepada Bapak Kepala Dinas Lingkungan Hidup dan Kehutanan atas Status Lahan / Kawasan Hutan atas lokasi kami yang terletak di ${jalan} ${labelWilayah}, ${toProperCase(desaVal)}, Kecamatan ${kec}, Kabupaten ${kab}.`;
-
-                const splitText = doc.splitTextToSize(narasi, textWidthLimit);
-                doc.text(splitText, marginLeft, y);
-                y += (splitText.length * 5) + 3;
-
-                doc.text("Dengan titik koordinat lokasi yang dimohonkan sebagai berikut:", marginLeft, y);
-                y += 4;
-
-                const tableRows = daftarTitik.map((t, index) => [
-                    index + 1,
-                    `${t.lng}, ${t.lat}`
-                ]);
-
-                doc.autoTable({
-                    startY: y,
-                    head: [['No', 'Koordinat (Longitude, Latitude)']],
-                    body: tableRows,
-                    theme: 'plain',
-                    margin: { left: marginLeft, right: 100 },
-                    styles: { font: 'helvetica', fontSize: 9, cellPadding: 1 },
-                    headStyles: { fontStyle: 'bold' },
-                    columnStyles: {
-                        0: { cellWidth: 10 },
-                        1: { cellWidth: 80 }
-                    }
-                });
-
-                y = doc.lastAutoTable.finalY + 6;
-
-                // --- PENUTUP & TANDA TANGAN (VERSI CENTER DENGAN GESERAN) ---
-                doc.text("Demikian permohonan ini saya buat, atas perkenannya kami ucapkan terimakasih.", marginLeft, y);
-                y += 12;
-
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const posXCenter = pageWidth - 50; // Geser ke kanan
-
-                doc.text("Yang bermohon,", posXCenter, y, { align: 'center' });
-                y += 6;
-
-                if (ttdData) {
-                    try {
-                        const imgProps = doc.getImageProperties(ttdData);
-                        let imgW = imgProps.width, imgH = imgProps.height;
-                        const maxTtdWidth = 60, maxTtdHeight = 30;
-                        let ttdW = imgW, ttdH = imgH;
-                        if (ttdW > ttdH) {
-                            if (ttdW > maxTtdWidth) {
-                                ttdH = Math.round(ttdH * maxTtdWidth / ttdW);
-                                ttdW = maxTtdWidth;
-                            }
-                        } else {
-                            if (ttdH > maxTtdHeight) {
-                                ttdW = Math.round(ttdW * maxTtdHeight / ttdH);
-                                ttdH = maxTtdHeight;
-                            }
-                        }
-                        const posXTTD_img = posXCenter - (ttdW / 2);
-                        const posYTTD_img = y + 2;
-                        doc.addImage(ttdData, 'JPEG', posXTTD_img, posYTTD_img, ttdW, ttdH);
-                        y = posYTTD_img + ttdH + 5;
-                    } catch (err) {
-                        console.warn('Gagal menambahkan tanda tangan:', err);
-                        y += 20;
-                    }
-                } else {
-                    y += 20;
+                if (mode === 'preview') {
+                    // PREVIEW: Tampilkan di tab baru tanpa menyimpan
+                    const pdfBlob = doc.output('blob');
+                    const blobUrl = URL.createObjectURL(pdfBlob);
+                    window.open(blobUrl, '_blank');
+                    // Bersihkan URL setelah beberapa saat
+                    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+                } else if (mode === 'cetak') {
+                    // CETAK: Simpan file
+                    const fileName = `Surat_Permohonan_${nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
+                    doc.save(fileName);
                 }
-
-                doc.setFont("helvetica", "bold");
-                doc.text(nama, posXCenter, y, { align: 'center' });
-
-                // Catatan NB
-                y += 10;
-                doc.setFontSize(9);
-                doc.setFont("helvetica", "bold");
-                doc.text("Nb.", marginLeft, y); y += 4;
-                doc.setFont("helvetica", "normal");
-                doc.text("1. Melampirkan Foto copy KTP Pemohon", marginLeft, y); y += 4;
-                doc.text("2. Alas Hak Berupa Fotocopy SHM/Sporadik", marginLeft, y);
-
-                // --- HALAMAN FOTO LAMPIRAN ---
-                if (daftarFoto.length > 0) {
-                    const pageWidth2 = doc.internal.pageSize.getWidth();
-                    const pageHeight = doc.internal.pageSize.getHeight();
-                    const margin = 20;
-                    const maxImgW = pageWidth2 - (margin * 2);
-                    const maxImgH = pageHeight - (margin * 2) - 25;
-
-                    daftarFoto.forEach((fotoBase64, index) => {
-                        doc.addPage();
-
-                        doc.setFont("helvetica", "bold");
-                        doc.setFontSize(12);
-                        doc.text(`LAMPIRAN ${index + 1}`, pageWidth2 / 2, 20, { align: 'center' });
-                        doc.setFont("helvetica", "normal");
-                        doc.setFontSize(10);
-                        doc.text(`Pemohon: ${nama}`, pageWidth2 / 2, 26, { align: 'center' });
-                        doc.setLineWidth(0.2);
-                        doc.line(margin, 29, pageWidth2 - margin, 29);
-
-                        const imgProperties = doc.getImageProperties(fotoBase64);
-                        let imgW = imgProperties.width;
-                        let imgH = imgProperties.height;
-
-                        const ratio = Math.min(maxImgW / imgW, maxImgH / imgH);
-                        const finalW = imgW * ratio;
-                        const finalH = imgH * ratio;
-
-                        const posX = (pageWidth2 - finalW) / 2;
-                        const posY = 35 + ((maxImgH - finalH) / 2);
-
-                        doc.addImage(fotoBase64, 'JPEG', posX, posY, finalW, finalH);
-                        doc.setDrawColor(200, 200, 200);
-                        doc.rect(posX, posY, finalW, finalH);
-
-                        doc.setFontSize(9);
-                        doc.setTextColor(100);
-                        doc.text(`Halaman ${index + 2}`, pageWidth2 / 2, pageHeight - 10, { align: 'center' });
-                        doc.setTextColor(0);
-                    });
-                }
-
-                doc.save(`Surat_Permohonan_${nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
 
             } catch (err) {
                 showAlert("Gagal memproses PDF: " + err.message);
@@ -2122,24 +2137,6 @@
             startGPS();
             loadFormState();
         };
-		function prosesSurat(mode) {
-    // Panggil fungsi pembuat doc PDF Anda yang sudah ada
-    // Contoh: const doc = buatPDF();
-
-    if (mode === 'preview') {
-        // LIHAT: Buka PDF di Tab Baru (Preview)
-        const pdfBlob = doc.output('blob');
-        const blobUrl = URL.createObjectURL(pdfBlob);
-        window.open(blobUrl, '_blank');
-    } else if (mode === 'cetak') {
-        // CETAK: Download / Simpan file
-        const nama = document.getElementById('nama') ? document.getElementById('nama').value : 'Pemohon';
-        const fileName = `Surat_Permohonan_${nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
-        
-        // Pilihan pengunduhan bawaan
-        doc.save(fileName);
-    }
-}
     </script>
 
 </body>
