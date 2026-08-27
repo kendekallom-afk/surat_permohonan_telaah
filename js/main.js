@@ -67,6 +67,109 @@ function formatOptionalVal(id) { /* ... */ }
 // ============================================
 // FUNGSI GPS
 // ============================================
+// ============================================
+// FUNGSI GPS (DENGAN WINDOW SCOPE)
+// ============================================
+
+// Buat fungsi global dengan window
+window.startGPS = function() {
+    console.log('🟢 startGPS() dipanggil');
+    
+    if (!("geolocation" in navigator)) {
+        console.error('❌ Geolocation tidak didukung');
+        document.getElementById("lat").innerText = "Tidak Didukung";
+        document.getElementById("lng").innerText = "Tidak Didukung";
+        document.getElementById("sat-status").innerText = "Tidak Didukung";
+        return;
+    }
+
+    // Bersihkan watch sebelumnya
+    if (window.watchID !== null && window.watchID !== undefined) {
+        navigator.geolocation.clearWatch(window.watchID);
+        window.watchID = null;
+    }
+
+    // Update status
+    document.getElementById("lat").innerText = "Mengambil lokasi...";
+    document.getElementById("lng").innerText = "Mengambil lokasi...";
+    document.getElementById("sat-status").innerText = "Mencari sinyal...";
+    document.getElementById("acc").innerText = "-";
+
+    // Mulai watch position
+    try {
+        window.watchID = navigator.geolocation.watchPosition(
+            window.updatePosition,
+            window.handleError,
+            { enableHighAccuracy: true, timeout: 30000, maximumAge: 5000 }
+        );
+        console.log('🟢 GPS started with watchID:', window.watchID);
+    } catch (error) {
+        console.error('🔴 Error starting GPS:', error);
+    }
+};
+
+// Buat fungsi updatePosition global
+window.updatePosition = function(pos) {
+    console.log('📍 Posisi GPS diperbarui:', pos.coords.latitude, pos.coords.longitude);
+    
+    window.currentLat = pos.coords.latitude.toFixed(6);
+    window.currentLng = pos.coords.longitude.toFixed(6);
+    window.currentAcc = Math.round(pos.coords.accuracy);
+
+    document.getElementById("lat").innerText = window.currentLat;
+    document.getElementById("lng").innerText = window.currentLng;
+    document.getElementById("acc").innerText = window.currentAcc;
+
+    const accBox = document.getElementById("acc-box");
+    const satStatus = document.getElementById("sat-status");
+
+    if (window.currentAcc <= 5) {
+        accBox.className = "badge acc-good";
+        satStatus.innerText = "🟢 Sangat Kuat (3D Fix)";
+    } else if (window.currentAcc <= 12) {
+        accBox.className = "badge acc-good";
+        satStatus.innerText = "🟢 Bagus (Fix)";
+    } else if (window.currentAcc <= 30) {
+        accBox.className = "badge acc-warn";
+        satStatus.innerText = "🟡 Sedang (Proses Kunci)";
+    } else {
+        accBox.className = "badge acc-warn";
+        satStatus.innerText = "🔴 Lemah (Cari Sinyal)";
+    }
+};
+
+// Buat fungsi handleError global
+window.handleError = function(err) {
+    console.error('🔴 GPS Error:', err);
+    
+    document.getElementById("lat").innerText = "Error";
+    document.getElementById("lng").innerText = "Error";
+    document.getElementById("sat-status").innerText = "Terputus";
+    document.getElementById("acc").innerText = "-";
+
+    let errorMsg = "";
+    switch(err.code) {
+        case err.PERMISSION_DENIED:
+            errorMsg = "❌ Izin lokasi ditolak!";
+            break;
+        case err.POSITION_UNAVAILABLE:
+            errorMsg = "❌ Sinyal GPS tidak tersedia!";
+            break;
+        case err.TIMEOUT:
+            errorMsg = "⏰ Timeout! Coba di area terbuka.";
+            break;
+        default:
+            errorMsg = "❌ Error: " + err.message;
+    }
+    
+    // Tampilkan di log
+    var logDiv = document.getElementById('log');
+    if (logDiv && logDiv.innerHTML.includes('Belum ada titik')) {
+        logDiv.innerHTML = '⚠️ ' + errorMsg;
+    }
+};
+// lanjut ....
+
 function startGPS() { /* ... */ }
 function refreshGPS() { /* ... */ }
 function updatePosition(pos) { /* ... */ }
