@@ -1873,7 +1873,7 @@ function initEditorCanvasTanpaCrop() {
             });
 
             y += 2;
-            const narasi = `Dengan ini mengajukan Permohonan Kepada Bapak Kepala Dinas Lingkungan Hidup dan Kehutanan atas Status Lahan / Kawasan Hutan atas lokasi kami yang terletak di ${jalan} ${labelWilayah}, ${toProperCase(desaVal)}, Kecamatan ${kec}, Kabupaten ${kab}.`;
+            const narasi = `Dengan ini mengajukan Permohonan Kepada Bapak Kepala Dinas Lingkungan Hidup dan Kehutanan atas Status Lahan / Kawasan Hutan atas lokasi kami yang terletak di ${jalan}, ${labelWilayah} ${toProperCase(desaVal)}, Kecamatan ${kec}, Kabupaten ${kab}.`;
 
             const splitText = doc.splitTextToSize(narasi, textWidthLimit);
             doc.text(splitText, marginLeft, y);
