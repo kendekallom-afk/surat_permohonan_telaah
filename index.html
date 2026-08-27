@@ -4,39 +4,457 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>mGPS Point - Surat Permohonan</title>
-    
-    <!-- ===== FAVICON ===== -->
+    <!-- ===== FAVORITE ICON / TAB ICON ===== -->
     <link rel="icon" type="image/png" href="assets/M.png">
-    
-    <!-- ===== CSS EKSTERNAL ===== -->
-    <link rel="stylesheet" href="css/style.css">
-    
-    <!-- ===== FONT ROBOTO ===== -->
+    <!-- ===== PRELOAD RESOURCE LOKAL ===== -->
+    <link rel="preload" href="/surat_permohonan_telaah/lib/jspdf.umd.min.js" as="script">
+    <link rel="preload" href="/surat_permohonan_telaah/lib/jspdf.plugin.autotable.min.js" as="script">
+    <link rel="preload" href="/surat_permohonan_telaah/font/Roboto/roboto.css" as="style">
+    <link rel="preload" href="/surat_permohonan_telaah/assets/Mlogo.png" as="image">
+
+    <!-- ===== LIBRARY (LOKAL) ===== -->
+    <script src="/surat_permohonan_telaah/lib/jspdf.umd.min.js"></script>
+    <script src="/surat_permohonan_telaah/lib/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- ===== FONT ROBOTO (LOKAL) ===== -->
     <link href="/surat_permohonan_telaah/font/Roboto/roboto.css" rel="stylesheet">
-    
-    <!-- ===== PRELOAD LIBRARY ===== -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" as="script">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js" as="script">
+     <style>
+        :root {
+            --primary: #4A6FA5;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --success-hover: #15803d;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --dark: #0f172a;
+            --indigo-royal: #3f51b5;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-600: #475569;
+            --slate-800: #1e293b;
+        }
+        html, body {
+            touch-action: manipulation;
+        }
+
+        * { box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { 
+            padding: 6px 4px;
+            background-color: #f8fafc; 
+            margin: 0; 
+            color: #334155; 
+        }
+        .container { 
+            max-width: 1000px;
+            margin: 0 auto; 
+            padding: 0 2px;
+        }
+
+        .card { 
+            background: white; 
+            padding: 10px 12px;
+            border-radius: 6px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.06); 
+            margin-bottom: 12px;
+            border: 1px solid var(--slate-200);
+        }
+
+        .header { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            border-bottom: 1px solid var(--slate-200); 
+            padding-bottom: 12px; 
+            margin-bottom: 20px; 
+        }
+
+        .form-toggle-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            padding: 4px 0;
+        }
+
+        .form-toggle-header:hover {
+            opacity: 0.8;
+        }
+
+        .toggle-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .form-body {
+            overflow: hidden;
+            max-height: 2500px;
+            transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+            opacity: 1;
+            padding-top: 10px;
+        }
+
+        .form-body.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin: 0;
+            pointer-events: none;
+        }
+
+        .card-form {
+            transition: all 0.3s ease;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #CBD5E1;
+            letter-spacing: -0.2px;
+        }
+        .brand-title {
+            color: #727579;
+        }
+
+        .brand-m {
+            color: #b41414;
+            font-weight: 700;
+        }
+
+        .brand-logo {
+            height: 28px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-header {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #0f172a;
+            transition: all 0.2s;
+        }
+        .btn-header:hover { 
+            background-color: #f8fafc; 
+            border-color: #cbd5e1;
+        }
+
+        .btn-copy-small {
+            background: transparent;
+            border: none;
+            padding: 2px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--slate-600);
+            transition: color 0.2s;
+        }
+        .btn-copy-small:hover {
+            color: var(--primary);
+        }
+
+        .label { 
+            font-size: 13px; 
+            color: var(--slate-600); 
+            font-weight: 400; 
+            text-transform: none; 
+            letter-spacing: normal; 
+        }
+
+        .val { 
+            font-size: 22px; 
+            font-weight: 500; 
+            color: var(--indigo-royal); 
+            margin: 4px 0 16px 0; 
+            word-break: break-all; 
+            font-family: 'Roboto', monospace; 
+        }
+
+        .grid-coords { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 500px) { .grid-coords { grid-template-columns: 1fr; } }
+
+        .info-status { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+
+        .badge { 
+            padding: 6px 14px; 
+            border-radius: 20px; 
+            font-weight: 400; 
+            font-size: 12px; 
+            color: #000000 !important; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+        }
+        .badge span {
+            color: #000000 !important;
+            font-weight: 400;
+        }
+        .acc-good { background-color: #dcfce7; }
+        .acc-warn { background-color: #fef3c7; }
+        .sat-info { background-color: var(--slate-100); }
+
+        .btn-action-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .btn-square {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 4px;
+            font-weight: 400;
+            font-size: 11px;
+            text-transform: none;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            line-height: 1.2;
+            color: white;
+        }
+
+        .btn-square .icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .btn-square:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-square:active { transform: translateY(0); }
+
+        .btn-blue { background-color: var(--primary); color: white; }
+        .btn-green { background-color: var(--success); color: white; }
+        .btn-purple { background-color: #7c3aed; color: white; }
+        .btn-red { background-color: var(--danger); color: white; }
+        .btn-grey { 
+            background-color: #f1f5f9; 
+            color: var(--slate-800);   
+            border: 1px solid var(--slate-200); 
+        }
+        .btn-grey:hover { 
+            background-color: #e2e8f0; 
+        }
+
+        .btn { 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%; 
+            padding: 12px 16px; 
+            font-size: 14px; 
+            font-weight: 500; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            text-align: center; 
+            transition: all 0.2s;
+            gap: 8px;
+        }
+        .btn-dark { background-color: var(--dark); color: white; }
+        .btn-dark:hover { background-color: #1e293b; }
+        .btn-purple-wide { background-color: #7c3aed; color: white; }
+        .btn-purple-wide:hover { background-color: #6d28d9; }
+
+        #log { 
+            margin-top: 10px; 
+            max-height: 180px; 
+            overflow-y: auto; 
+            background: #f8fafc; 
+            border: 1px solid var(--slate-200); 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-size: 12px; 
+            font-family: monospace; 
+        }
+        .log-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--slate-200);
+        }
+        .log-item:last-child { border-bottom: none; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--slate-600); margin-bottom: 6px; }
+        .form-control { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 1px solid var(--slate-200); 
+            border-radius: 8px; 
+            font-size: 14px; 
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus { border-color: var(--primary); }
+        .required-tag { color: var(--danger); }
+
+        .custom-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .custom-modal-box {
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+        .custom-modal-msg { margin: 0 0 16px 0; font-size: 14px; color: var(--slate-800); white-space: pre-wrap; text-align: left; }
+        .custom-modal-input { width: 100%; padding: 10px; border: 1px solid var(--slate-200); border-radius: 8px; font-size: 14px; margin-bottom: 16px; }
+        .custom-modal-actions { display: flex; gap: 8px; }
+        .custom-modal-actions button { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 500; font-size: 14px; cursor: pointer; }
+
+        .win-bin-icon {
+            width: 22px;
+            height: 22px;
+            margin-bottom: 4px;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .photo-item {
+            position: relative;
+            border: 1px solid var(--slate-200);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            aspect-ratio: 1/1;
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-item .btn-remove-photo {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(220, 38, 38, 0.85);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Styling untuk Modal Tanda Tangan */
+        #modal-ttd .custom-modal-box {
+            max-width: 420px;
+            padding: 20px;
+        }
+
+        #canvas-ttd {
+            background: white;
+            border-radius: 6px;
+            touch-action: none;
+            cursor: crosshair;
+            min-height: 150px;
+            width: 100%;
+        }
+
+        .btn-ttd {
+            background: #4A6FA5;
+            color: white;
+        }
+
+        .btn-ttd:hover {
+            background: #3d5f8a;
+        }
+
+        #preview-ttd img {
+            max-height: 80px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 5px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Styling untuk Editor Foto TTD */
+        #modal-editor-ttd .custom-modal-box {
+            max-width: 500px;
+            padding: 16px;
+        }
+
+        #canvas-editor-ttd {
+            background: white;
+            touch-action: none;
+            cursor: crosshair;
+            width: 100%;
+            height: auto;
+            max-height: 350px;
+            display: block;
+        }
+    </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- ============================================================ -->
-        <!-- GPS CARD -->
-        <!-- ============================================================ -->
+        <!-- GPS Card -->
         <div class="card">
             <div class="header">
                 <div class="header-brand">
                     <img src="assets/Mlogo.png" alt="mGPS Point Logo" class="brand-logo">
                     <span class="brand-title"><span class="brand-m"><b>m</b></span>GPS Point</span>
                 </div>
+
                 <div class="header-actions">
                     <button class="btn-header" onclick="document.getElementById('file-input-txt').click()">📁 Buka</button>
                     <button class="btn-header" onclick="refreshGPS()">🔄 Refresh</button>
                 </div>
             </div>
 
-            <!-- Koordinat -->
+            <!-- Label & Nilai Koordinat -->
             <div class="grid-coords">
                 <div style="display: flex; gap: 16px; width: 100%;">
                     <div style="flex: 1;">
@@ -45,6 +463,7 @@
                         </div>
                         <div id="lng" class="val">Menghubungkan...</div>
                     </div>
+
                     <div style="flex: 1;">
                         <div style="display: flex; justify-content: space-between; align-items: center; min-height: 20px;">
                             <div class="label" style="font-size: 11px;">Latitude (Lintang)</div>
@@ -60,7 +479,7 @@
                 </div>
             </div>
 
-            <!-- Status -->
+            <!-- Teks Akurasi dan Satelit -->
             <div class="info-status">
                 <div id="acc-box" class="badge acc-warn">
                     Akurasi: <span id="acc">-</span> m
@@ -70,7 +489,7 @@
                 </div>
             </div>
 
-            <!-- Tombol Aksi -->
+            <!-- Tombol Aksi 1 Baris -->
             <div class="btn-action-row">
                 <button class="btn-square btn-blue" onclick="simpanTitik()" title="Ambil Titik Koordinat">
                     <svg class="win-bin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -106,9 +525,7 @@
             <div id="log">Belum ada titik tersimpan.</div>
         </div>
 
-        <!-- ============================================================ -->
-        <!-- FORM PEMOHON -->
-        <!-- ============================================================ -->
+        <!-- Form Pemohon dengan Toggle -->
         <div class="card card-form">
             <div class="form-toggle-header" onclick="toggleForm()">
                 <div style="font-size: 15px; font-weight: 700; color: var(--slate-800);">
@@ -118,7 +535,6 @@
             </div>
 
             <div class="form-body" id="formBody">
-                <!-- Data Pemohon -->
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Nama Lengkap Pemohon <span class="required-tag">*</span></label>
@@ -146,7 +562,6 @@
                     </div>
                 </div>
 
-                <!-- Lokasi Lahan -->
                 <div class="label" style="margin: 16px 0 15px 0; font-weight: 700;">📍 Data Lokasi Lahan yg Dimohonkan</div>
 
                 <div class="form-group">
@@ -170,7 +585,7 @@
                     <input type="text" id="lahan-kab" class="form-control" value="Mamuju, Provinsi Sulawesi Barat">
                 </div>
 
-                <!-- Tanda Tangan -->
+                <!-- ===== TOMBOL TANDA TANGAN ===== -->
                 <div class="form-group" style="margin-top: 20px;">
                     <button class="btn btn-blue" onclick="bukaModalTandaTangan()" style="padding: 14px; font-size: 15px; background: #4A6FA5;">
                         ✍️ TANDA TANGAN
@@ -182,7 +597,84 @@
                     </div>
                 </div>
 
-                <!-- Foto Dokumentasi -->
+                <!-- ===== MODAL TANDA TANGAN ===== -->
+                <div id="modal-ttd" class="custom-modal-overlay">
+                    <div class="custom-modal-box" style="max-width: 400px; max-height: 90vh; overflow-y: auto;">
+                        <h3 style="margin-top: 0; color: var(--slate-800); text-align: center;">✍️ Tanda Tangan</h3>
+                        <p style="font-size: 13px; color: var(--slate-600); text-align: center; margin-bottom: 15px;">
+                            Silakan tanda tangan di kotak di bawah, atau ambil dari kamera/galeri
+                        </p>
+
+                        <!-- Kanvas Tanda Tangan -->
+                        <div style="border: 2px dashed var(--slate-200); border-radius: 8px; background: white; margin-bottom: 12px; touch-action: none;">
+                            <canvas id="canvas-ttd" style="width: 100%; height: 150px; display: block; touch-action: none; cursor: crosshair;"></canvas>
+                        </div>
+
+                        <!-- Tombol Aksi Kanvas -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <button onclick="hapusKanvas()" style="flex: 1; padding: 8px; background: #f1f5f9; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">🗑️ Hapus</button>
+                            <button onclick="simpanDariKanvas()" style="flex: 1; padding: 8px; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer;">✅ Simpan</button>
+                        </div>
+
+                        <!-- Divider -->
+                        <div style="text-align: center; margin: 10px 0; color: var(--slate-600); font-size: 12px;">— ATAU —</div>
+
+                        <!-- Tombol Opsi Kamera & Galeri -->
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="ambilFotoTtdDariKamera()" style="flex: 1; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                                📷 Ambil Foto
+                            </button>
+                            <button onclick="ambilFotoTtdDariGaleri()" style="flex: 1; padding: 10px; background: var(--slate-600); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                                🖼️ Pilih dari Galeri
+                            </button>
+                        </div>
+
+                        <!-- Tombol Batal -->
+                        <button onclick="tutupModalTtd()" style="width: 100%; margin-top: 12px; padding: 10px; background: transparent; color: var(--slate-600); border: 1px solid var(--slate-200); border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            Batal
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== MODAL EDITOR FOTO TANDA TANGAN ===== -->
+                <div id="modal-editor-ttd" class="custom-modal-overlay">
+                    <div class="custom-modal-box" style="max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 16px;">
+                        <h3 style="margin-top: 0; color: var(--slate-800); text-align: center; font-size: 16px;">✂️ Edit Foto Tanda Tangan</h3>
+                        <p style="font-size: 12px; color: var(--slate-600); text-align: center; margin-bottom: 10px;">
+                            Seret/atur kotak crop, lalu klik "Crop" untuk memotong
+                        </p>
+                        
+                        <!-- Container Gambar -->
+                        <div style="position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: #f0f0f0; margin-bottom: 10px; touch-action: none;">
+                            <canvas id="canvas-editor-ttd" style="width: 100%; display: block; touch-action: none; max-height: 350px;"></canvas>
+                        </div>
+                        
+                        <!-- Tombol Kontrol -->
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
+                            <button onclick="terapkanCrop()" style="flex: 1; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                                ✂️ Crop
+                            </button>
+                            <button onclick="enhanceFoto()" style="flex: 1; padding: 8px; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                                ✨ Enhance
+                            </button>
+                            <button onclick="resetEditor()" style="flex: 0.5; padding: 8px; background: var(--slate-600); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                                ↺ Reset
+                            </button>
+                        </div>
+                        
+                        <!-- Tombol Simpan / Batal -->
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="simpanDariEditor()" style="flex: 1; padding: 10px; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                                ✅ Simpan Tanda Tangan
+                            </button>
+                            <button onclick="tutupEditor()" style="flex: 1; padding: 10px; background: var(--slate-600); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                                ❌ Batal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== FITUR KAMERA/GALERI (MULTI-FOTO) ===== -->
                 <div class="form-group">
                     <label>Foto KTP / Dokumentasi Lahan (Bisa Lebih dari 1 Foto)</label>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
@@ -193,93 +685,57 @@
                             ❌ Hapus Semua
                         </button>
                     </div>
+
+                    <!-- Container Pratinjau Foto Grid -->
                     <div id="preview-foto-container" style="display: none; margin-top: 12px; border: 1px dashed var(--slate-200); padding: 10px; border-radius: 8px;">
                         <div class="label" style="margin-bottom: 6px; font-weight: 500;">Daftar Foto Dilampirkan: (<span id="jumlah-foto">0</span>)</div>
                         <div id="photo-grid" class="photo-grid"></div>
                     </div>
                 </div>
 
-                <!-- Tombol Cetak -->
+                <!-- TOMBOL CETAK SURAT -->
                 <div class="form-group" style="margin-top: 20px;">
-                    <div class="form-group" style="margin-top: 15px;">
-                        <label style="display: block; font-size: 14px; color: #555555; margin-bottom: 8px;">Surat Permohonan</label>
-                        <div style="display: flex; gap: 12px;">
-                            <button type="button" onclick="prosesSurat('preview')" style="flex: 1; background-color: #1d6ed8; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                <span>📄️</span> LIHAT
-                            </button>
-                            <button type="button" onclick="prosesSurat('cetak')" style="flex: 1; background-color: #7c3aed; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                <span>🖨️</span> CETAK
-                            </button>
-                        </div>
-                    </div>
+                    <!-- Tag Surat Permohonan -->
+<div class="form-group" style="margin-top: 15px;">
+    <label style="display: block; font-size: 14px; color: #555555; margin-bottom: 8px;">Surat Permohonan</label>
+    <div style="display: flex; gap: 12px;">
+        <!-- Tombol LIHAT -->
+        <button type="button" onclick="prosesSurat('preview')" style="flex: 1; background-color: #1d6ed8; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>📄️</span> LIHAT
+        </button>
+        <!-- Tombol CETAK -->
+        <button type="button" onclick="prosesSurat('cetak')" style="flex: 1; background-color: #7c3aed; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>🖨️</span> CETAK
+        </button>
+    </div>
+</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- MODALS -->
-    <!-- ============================================================ -->
-
-    <!-- Modal Tanda Tangan -->
-    <div id="modal-ttd" class="custom-modal-overlay">
-        <div class="custom-modal-box" style="max-width: 400px; max-height: 90vh; overflow-y: auto;">
-            <h3 style="margin-top: 0; color: var(--slate-800); text-align: center;">✍️ Tanda Tangan</h3>
-            <p style="font-size: 13px; color: var(--slate-600); text-align: center; margin-bottom: 15px;">
-                Silakan tanda tangan di kotak di bawah, atau ambil dari kamera/galeri
-            </p>
-            <div style="border: 2px dashed var(--slate-200); border-radius: 8px; background: white; margin-bottom: 12px; touch-action: none;">
-                <canvas id="canvas-ttd" style="width: 100%; height: 150px; display: block; touch-action: none; cursor: crosshair;"></canvas>
-            </div>
-            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
-                <button onclick="hapusKanvas()" style="flex: 1; padding: 8px; background: #f1f5f9; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">🗑️ Hapus</button>
-                <button onclick="simpanDariKanvas()" style="flex: 1; padding: 8px; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer;">✅ Simpan</button>
-            </div>
-            <div style="text-align: center; margin: 10px 0; color: var(--slate-600); font-size: 12px;">— ATAU —</div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button onclick="ambilFotoTtdDariKamera()" style="flex: 1; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">📷 Ambil Foto</button>
-                <button onclick="ambilFotoTtdDariGaleri()" style="flex: 1; padding: 10px; background: var(--slate-600); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">🖼️ Pilih dari Galeri</button>
-            </div>
-            <button onclick="tutupModalTtd()" style="width: 100%; margin-top: 12px; padding: 10px; background: transparent; color: var(--slate-600); border: 1px solid var(--slate-200); border-radius: 6px; cursor: pointer; font-size: 14px;">Batal</button>
-        </div>
-    </div>
-
-    <!-- Modal Editor Foto -->
-    <div id="modal-editor-ttd" class="custom-modal-overlay">
-        <div class="custom-modal-box" style="max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 16px;">
-            <h3 style="margin-top: 0; color: var(--slate-800); text-align: center; font-size: 16px;">✂️ Edit Foto Tanda Tangan</h3>
-            <p style="font-size: 12px; color: var(--slate-600); text-align: center; margin-bottom: 10px;">
-                Seret/atur kotak crop, lalu klik "Crop" untuk memotong
-            </p>
-            <div style="position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: #f0f0f0; margin-bottom: 10px; touch-action: none;">
-                <canvas id="canvas-editor-ttd" style="width: 100%; display: block; touch-action: none; max-height: 350px;"></canvas>
-            </div>
-            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
-                <button onclick="terapkanCrop()" style="flex: 1; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px;">✂️ Crop</button>
-                <button onclick="enhanceFoto()" style="flex: 1; padding: 8px; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px;">✨ Enhance</button>
-                <button onclick="resetEditor()" style="flex: 0.5; padding: 8px; background: var(--slate-600); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px;">↺ Reset</button>
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <button onclick="simpanDariEditor()" style="flex: 1; padding: 10px; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">✅ Simpan Tanda Tangan</button>
-                <button onclick="tutupEditor()" style="flex: 1; padding: 10px; background: var(--slate-600); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">❌ Batal</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Pilih Foto -->
+    <!-- MODAL PILIHAN FOTO -->
     <div id="modal-pilih-foto" class="custom-modal-overlay">
         <div class="custom-modal-box" style="max-width: 320px; text-align: center;">
             <h3 style="margin-top: 0; color: var(--slate-800);">📸 Pilih Sumber Foto</h3>
-            <p style="font-size: 14px; color: var(--slate-600); margin-bottom: 20px;">Ambil foto dari kamera atau pilih file galeri</p>
+            <p style="font-size: 14px; color: var(--slate-600); margin-bottom: 20px;">
+                Ambil foto dari kamera atau pilih file galeri
+            </p>
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button onclick="ambilDariKamera()" style="padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">📷 Kamera</button>
-                <button onclick="ambilDariGaleri()" style="padding: 14px; background: var(--slate-600); color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">🖼️ Galeri</button>
-                <button onclick="tutupPilihanFoto()" style="padding: 10px; background: transparent; color: var(--slate-600); border: 1px solid var(--slate-200); border-radius: 10px; font-size: 14px; cursor: pointer;">Batal</button>
+                <button onclick="ambilDariKamera()" style="padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">
+                    📷 Kamera
+                </button>
+                <button onclick="ambilDariGaleri()" style="padding: 14px; background: var(--slate-600); color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">
+                    🖼️ Galeri
+                </button>
+                <button onclick="tutupPilihanFoto()" style="padding: 10px; background: transparent; color: var(--slate-600); border: 1px solid var(--slate-200); border-radius: 10px; font-size: 14px; cursor: pointer;">
+                    Batal
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Alert, Confirm, Prompt -->
+    <!-- Modal Custom UI Alert, Confirm, Prompt -->
     <div id="custom-alert-modal" class="custom-modal-overlay">
         <div class="custom-modal-box">
             <p id="custom-alert-msg" class="custom-modal-msg"></p>
@@ -310,53 +766,1432 @@
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- INPUTS & SCRIPTS -->
-    <!-- ============================================================ -->
     <input type="file" id="file-input-txt" accept=".txt" style="display:none;" onchange="bacaFileTxt(event)">
 
-    <!-- ===== LIBRARY JS (LOAD DI AKHIR BODY) ===== -->
-        <!-- ===== JAVASCRIPT ===== -->
-    <!-- 1. Library dari CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    
-    <!-- 2. Main JS -->
-    <script src="js/main.js"></script>
-    
-    <!-- 3. Safety Net - Jika main.js gagal -->
     <script>
-        (function() {
-            console.log('🛡️ Safety net aktif');
-            
-            // Cek apakah GPS sudah jalan setelah 3 detik
-            setTimeout(function() {
-                if (!window.currentLat || !window.currentLng) {
-                    console.warn('⚠️ GPS belum aktif, mencoba fallback...');
-                    
-                    // Coba jalankan GPS langsung
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                            function(pos) {
-                                console.log('✅ Fallback GPS berhasil!');
-                                window.currentLat = pos.coords.latitude.toFixed(6);
-                                window.currentLng = pos.coords.longitude.toFixed(6);
-                                window.currentAcc = Math.round(pos.coords.accuracy);
-                                
-                                document.getElementById("lat").innerText = window.currentLat;
-                                document.getElementById("lng").innerText = window.currentLng;
-                                document.getElementById("acc").innerText = window.currentAcc;
-                                document.getElementById("sat-status").innerText = "✅ Terkunci (Fallback)";
-                            },
-                            function(err) {
-                                console.error('❌ Fallback GPS gagal:', err.message);
-                            },
-                            { enableHighAccuracy: true, timeout: 10000 }
-                        );
+        // ============================================
+        // DATABASE WILAYAH
+        // ============================================
+        const databaseWilayah = [
+            { kec: "Bonehau", tipe: "Desa", nama: "Banua Ada" }, { kec: "Bonehau", tipe: "Desa", nama: "Bonehau" },
+            { kec: "Bonehau", tipe: "Desa", nama: "Buttu Ada" }, { kec: "Bonehau", tipe: "Desa", nama: "Hinua" },
+            { kec: "Bonehau", tipe: "Desa", nama: "Kinatang" }, { kec: "Bonehau", tipe: "Desa", nama: "Lumika" },
+            { kec: "Bonehau", tipe: "Desa", nama: "Mappu" }, { kec: "Bonehau", tipe: "Desa", nama: "Salutiwo" },
+            { kec: "Bonehau", tipe: "Desa", nama: "Tamalea" }, { kec: "Kalukku", tipe: "Desa", nama: "Belang Belang" },
+            { kec: "Kalukku", tipe: "Desa", nama: "Beru-Beru" }, { kec: "Kalukku", tipe: "Desa", nama: "Guliling" },
+            { kec: "Kalukku", tipe: "Desa", nama: "Kabuloang" }, { kec: "Kalukku", tipe: "Desa", nama: "Kalukku Barat" },
+            { kec: "Kalukku", tipe: "Desa", nama: "Keang" }, { kec: "Kalukku", tipe: "Desa", nama: "Pammulukang" },
+            { kec: "Kalukku", tipe: "Desa", nama: "Pokkang" }, { kec: "Kalukku", tipe: "Desa", nama: "Sondoang" },
+            { kec: "Kalukku", tipe: "Desa", nama: "Uhaimate" }, { kec: "Kalukku", tipe: "Kelurahan", nama: "Banua Ada" },
+            { kec: "Kalukku", tipe: "Kelurahan", nama: "Kalukku" }, { kec: "Kalukku", tipe: "Kelurahan", nama: "Sinyonyoi" },
+            { kec: "Kalukku", tipe: "Kelurahan", nama: "Sinyonyoi Selatan" }, { kec: "Kalumpang", tipe: "Desa", nama: "Batu Makkada" },
+            { kec: "Kalumpang", tipe: "Desa", nama: "Kalumpang" }, { kec: "Kalumpang", tipe: "Desa", nama: "Karama" },
+            { kec: "Kalumpang", tipe: "Desa", nama: "Karataun" }, { kec: "Kalumpang", tipe: "Desa", nama: "Kondo Bulo" },
+            { kec: "Kalumpang", tipe: "Desa", nama: "Lasa'" }, { kec: "Kalumpang", tipe: "Desa", nama: "Limbong" },
+            { kec: "Kalumpang", tipe: "Desa", nama: "Makkaliki" }, { kec: "Kalumpang", tipe: "Desa", nama: "Polio" },
+            { kec: "Kalumpang", tipe: "Desa", nama: "Salumakki" }, { kec: "Kalumpang", tipe: "Desa", nama: "Sandapang" },
+            { kec: "Kalumpang", tipe: "Desa", nama: "Siraun" }, { kec: "Kalumpang", tipe: "Desa", nama: "Tumoga" },
+            { kec: "Kepulauan Bala-balakang", tipe: "Desa", nama: "Bala Balakang" }, { kec: "Kepulauan Bala-balakang", tipe: "Desa", nama: "Bala Balakang Timur" },
+            { kec: "Mamuju", tipe: "Desa", nama: "Bambu" }, { kec: "Mamuju", tipe: "Desa", nama: "Batu Pannu" },
+            { kec: "Mamuju", tipe: "Desa", nama: "Karampuang" }, { kec: "Mamuju", tipe: "Desa", nama: "Tadui" },
+            { kec: "Mamuju", tipe: "Kelurahan", nama: "Binanga" }, { kec: "Mamuju", tipe: "Kelurahan", nama: "Kasiwa" },
+            { kec: "Mamuju", tipe: "Kelurahan", nama: "Karema" }, { kec: "Mamuju", tipe: "Kelurahan", nama: "Mamunyu" },
+            { kec: "Mamuju", tipe: "Kelurahan", nama: "Rimuku" }, { kec: "Papalang", tipe: "Desa", nama: "Batu Ampa" },
+            { kec: "Papalang", tipe: "Desa", nama: "Boda-Boda" }, { kec: "Papalang", tipe: "Desa", nama: "Bonda" },
+            { kec: "Papalang", tipe: "Desa", nama: "Papalang" }, { kec: "Papalang", tipe: "Desa", nama: "Salukayu" },
+            { kec: "Papalang", tipe: "Desa", nama: "Sisango" }, { kec: "Papalang", tipe: "Desa", nama: "Sukadamai" },
+            { kec: "Papalang", tipe: "Desa", nama: "Toabo" }, { kec: "Papalang", tipe: "Desa", nama: "Topore" },
+            { kec: "Sampaga", tipe: "Desa", nama: "Bunde" }, { kec: "Sampaga", tipe: "Desa", nama: "Kalonding" },
+            { kec: "Sampaga", tipe: "Desa", nama: "Losso" }, { kec: "Sampaga", tipe: "Desa", nama: "Salubarana" },
+            { kec: "Sampaga", tipe: "Desa", nama: "Sampaga" }, { kec: "Sampaga", tipe: "Desa", nama: "Tanambuah" },
+            { kec: "Sampaga", tipe: "Desa", nama: "Tarailu" }, { kec: "Simboro", tipe: "Desa", nama: "Botteng" },
+            { kec: "Simboro", tipe: "Desa", nama: "Botteng Utara" }, { kec: "Simboro", tipe: "Desa", nama: "Pati'di" },
+            { kec: "Simboro", tipe: "Desa", nama: "Saletto" }, { kec: "Simboro", tipe: "Desa", nama: "Sumare" },
+            { kec: "Simboro", tipe: "Desa", nama: "Tapandullu" }, { kec: "Simboro", tipe: "Kelurahan", nama: "Rangas" },
+            { kec: "Simboro", tipe: "Kelurahan", nama: "Simboro" }, { kec: "Tapalang", tipe: "Desa", nama: "Bela" },
+            { kec: "Tapalang", tipe: "Desa", nama: "Kopeang" }, { kec: "Tapalang", tipe: "Desa", nama: "Orobatu" },
+            { kec: "Tapalang", tipe: "Desa", nama: "Rantedoda" }, { kec: "Tapalang", tipe: "Desa", nama: "Taan" },
+            { kec: "Tapalang", tipe: "Desa", nama: "Takandeang" }, { kec: "Tapalang", tipe: "Desa", nama: "Tampalang" },
+            { kec: "Tapalang", tipe: "Kelurahan", nama: "Dayanginna" }, { kec: "Tapalang", tipe: "Kelurahan", nama: "Galung" },
+            { kec: "Tapalang", tipe: "Kelurahan", nama: "Kasambang" }, { kec: "Tapalang Barat", tipe: "Desa", nama: "Ahu" },
+            { kec: "Tapalang Barat", tipe: "Desa", nama: "Dungkait" }, { kec: "Tapalang Barat", tipe: "Desa", nama: "Labuang Rano" },
+            { kec: "Tapalang Barat", tipe: "Desa", nama: "Lebani" }, { kec: "Tapalang Barat", tipe: "Desa", nama: "Pangasaan" },
+            { kec: "Tapalang Barat", tipe: "Desa", nama: "Pasabu" }, { kec: "Tapalang Barat", tipe: "Desa", nama: "Tanete Pao" },
+            { kec: "Tommo", tipe: "Desa", nama: "Buana Sakti" }, { kec: "Tommo", tipe: "Desa", nama: "Campaloga" },
+            { kec: "Tommo", tipe: "Desa", nama: "Kakullasan" }, { kec: "Tommo", tipe: "Desa", nama: "Kalepu" },
+            { kec: "Tommo", tipe: "Desa", nama: "Leling" }, { kec: "Tommo", tipe: "Desa", nama: "Leling Barat" },
+            { kec: "Tommo", tipe: "Desa", nama: "Leling Utara" }, { kec: "Tommo", tipe: "Desa", nama: "Malino" },
+            { kec: "Tommo", tipe: "Desa", nama: "Rantemario" }, { kec: "Tommo", tipe: "Desa", nama: "Saludengen" },
+            { kec: "Tommo", tipe: "Desa", nama: "Sandana" }, { kec: "Tommo", tipe: "Desa", nama: "Tamejarra" },
+            { kec: "Tommo", tipe: "Desa", nama: "Tamemongga" }, { kec: "Tommo", tipe: "Desa", nama: "Tommo" }
+        ];
+
+        // ============================================
+        // VARIABEL GLOBAL
+        // ============================================
+        let currentLat = null, currentLng = null, currentAcc = null, watchID = null;
+        let daftarTitik = [];
+        let matchedTipe = null;
+        let ttdData = null;
+        let daftarFoto = [];
+
+        // Variabel untuk Editor Foto
+        let fotoAsli = null;
+        let fotoSementara = null;
+        let cropX = 0, cropY = 0, cropW = 0, cropH = 0;
+        let editorCanvas, editorCtx;
+        let isDragging = false;
+        let dragStartX = 0, dragStartY = 0;
+        let dragType = 'move';
+
+        // ============================================
+        // FUNGSI UTILITY
+        // ============================================
+        function showAlert(msg) {
+            document.getElementById('custom-alert-msg').innerText = msg;
+            document.getElementById('custom-alert-modal').style.display = 'flex';
+        }
+
+        function showConfirm(msg, onYes) {
+            const modal = document.getElementById('custom-confirm-modal');
+            document.getElementById('custom-confirm-msg').innerText = msg;
+            modal.style.display = 'flex';
+
+            const yesBtn = document.getElementById('custom-confirm-yes');
+            const noBtn = document.getElementById('custom-confirm-no');
+
+            const newYes = yesBtn.cloneNode(true);
+            const newNo = noBtn.cloneNode(true);
+            yesBtn.parentNode.replaceChild(newYes, yesBtn);
+            noBtn.parentNode.replaceChild(newNo, noBtn);
+
+            newYes.onclick = function () { modal.style.display = 'none'; onYes(); };
+            newNo.onclick = function () { modal.style.display = 'none'; };
+        }
+
+        function showPrompt(msg, defaultVal, onSubmit) {
+            const modal = document.getElementById('custom-prompt-modal');
+            document.getElementById('custom-prompt-msg').innerText = msg;
+            const inputEl = document.getElementById('custom-prompt-input');
+            inputEl.value = defaultVal || '';
+            modal.style.display = 'flex';
+            setTimeout(() => inputEl.focus(), 100);
+
+            const okBtn = document.getElementById('custom-prompt-ok');
+            const cancelBtn = document.getElementById('custom-prompt-cancel');
+
+            const newOk = okBtn.cloneNode(true);
+            const newCancel = cancelBtn.cloneNode(true);
+            okBtn.parentNode.replaceChild(newOk, okBtn);
+            cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+
+            newOk.onclick = function () {
+                const val = inputEl.value;
+                modal.style.display = 'none';
+                onSubmit(val);
+            };
+            newCancel.onclick = function () { modal.style.display = 'none'; };
+        }
+
+        window.onerror = function (msg, url, line) {
+            showAlert("Error Sistem:\n" + msg + "\n(baris " + line + ")");
+            return true;
+        };
+
+        function toProperCase(str) {
+            return str.toLowerCase().replace(/(?:^|\s|-|\/)\S/g, a => a.toUpperCase());
+        }
+
+        function autoCariWilayah() {
+            const inputVal = document.getElementById("lahan-desa-input").value.trim().toLowerCase();
+            const kecInput = document.getElementById("lahan-kec");
+
+            if (!inputVal) { kecInput.value = ""; matchedTipe = null; return; }
+            const found = databaseWilayah.find(item => item.nama.toLowerCase() === inputVal);
+
+            if (found) {
+                kecInput.value = found.kec;
+                matchedTipe = found.tipe;
+            } else {
+                matchedTipe = null;
+            }
+        }
+
+        function formatOptionalVal(id) {
+            const val = document.getElementById(id).value.trim();
+            return val !== "" ? val : "....";
+        }
+
+        // ============================================
+        // FUNGSI GPS
+        // ============================================
+        const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
+
+        function startGPS() {
+            if ("geolocation" in navigator) {
+                if (watchID !== null) navigator.geolocation.clearWatch(watchID);
+                watchID = navigator.geolocation.watchPosition(updatePosition, handleError, geoOptions);
+            } else {
+                showAlert("Perangkat Anda tidak mendukung fitur GPS.");
+            }
+        }
+
+        function refreshGPS() {
+            document.getElementById("lat").innerText = "Memperbarui...";
+            document.getElementById("lng").innerText = "Memperbarui...";
+            document.getElementById("sat-status").innerText = "Mencari...";
+            startGPS();
+        }
+
+        function updatePosition(pos) {
+            currentLat = pos.coords.latitude.toFixed(6);
+            currentLng = pos.coords.longitude.toFixed(6);
+            currentAcc = Math.round(pos.coords.accuracy);
+
+            document.getElementById("lat").innerText = currentLat;
+            document.getElementById("lng").innerText = currentLng;
+            document.getElementById("acc").innerText = currentAcc;
+
+            const accBox = document.getElementById("acc-box");
+            const satStatus = document.getElementById("sat-status");
+
+            if (currentAcc <= 5) {
+                accBox.className = "badge acc-good";
+                satStatus.innerText = "Sangat Kuat (3D Fix)";
+            } else if (currentAcc <= 12) {
+                accBox.className = "badge acc-good";
+                satStatus.innerText = "Bagus (Fix)";
+            } else {
+                accBox.className = "badge acc-warn";
+                satStatus.innerText = "Lemah (Proses Kunci)";
+            }
+        }
+
+        function handleError(err) {
+            document.getElementById("lat").innerText = "Error Akses GPS";
+            document.getElementById("lng").innerText = "Cek Akses Lokasi";
+            document.getElementById("sat-status").innerText = "Terputus";
+        }
+
+        // ============================================
+        // FUNGSI MANAJEMEN TITIK
+        // ============================================
+        function copyKoordinat() {
+            if (daftarTitik.length === 0) {
+                return showAlert("Belum ada titik tersimpan di dalam log!");
+            }
+
+            const nama = document.getElementById("pemohon-nama").value.trim();
+            const pekerjaan = document.getElementById("pemohon-pekerjaan").value.trim();
+            const alamat = document.getElementById("pemohon-alamat").value.trim();
+            const hp = document.getElementById("pemohon-hp").value.trim();
+            const keperluan = document.getElementById("pemohon-keperluan").value.trim();
+
+            const jalan = document.getElementById("lahan-jalan").value.trim();
+            const desa = document.getElementById("lahan-desa-input").value.trim();
+            const kec = document.getElementById("lahan-kec").value.trim();
+            const kab = document.getElementById("lahan-kab").value.trim();
+
+            let teksSalinan = "========================================\n";
+            teksSalinan += "       DATA PERMOHONAN & KOORDINAT      \n";
+            teksSalinan += "========================================\n\n";
+
+            teksSalinan += "[DATA PEMOHON]\n";
+            teksSalinan += `Nama Lengkap : ${nama || "-"}\n`;
+            teksSalinan += `Pekerjaan    : ${pekerjaan || "-"}\n`;
+            teksSalinan += `Alamat KTP   : ${alamat || "-"}\n`;
+            teksSalinan += `No. HP/WA    : ${hp || "-"}\n`;
+            teksSalinan += `Keperluan    : ${keperluan || "-"}\n\n`;
+
+            teksSalinan += "[LOKASI LAHAN]\n";
+            teksSalinan += `Jalan/Dusun  : ${jalan || "-"}\n`;
+            teksSalinan += `Desa/Kel.    : ${desa ? toProperCase(desa) : "-"}\n`;
+            teksSalinan += `Kecamatan    : ${kec || "-"}\n`;
+            teksSalinan += `Kab/Prov     : ${kab || "-"}\n\n`;
+
+            teksSalinan += "----------------------------------------\n";
+            teksSalinan += "DAFTAR TITIK KOORDINAT\n";
+            teksSalinan += "----------------------------------------\n";
+
+            daftarTitik.forEach((t, i) => {
+                teksSalinan += `${i + 1}. ${t.nama}\n`;
+                teksSalinan += `   Koordinat : ${t.lng}, ${t.lat}\n`;
+                teksSalinan += `   Akurasi   : ±${t.acc}m\n`;
+                teksSalinan += `   Waktu     : ${t.waktu}\n\n`;
+            });
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(teksSalinan).then(() => {
+                    showAlert("✅ Semua data berhasil disalin ke clipboard!");
+                }).catch(() => fallbackCopy(teksSalinan));
+            } else {
+                fallbackCopy(teksSalinan);
+            }
+        }
+
+        function copyKoordinatAktif() {
+            if (!currentLng || !currentLat) return showAlert("Tunggu hingga sinyal GPS terunci!");
+
+            const teksAktif = `${currentLng}, ${currentLat}`;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(teksAktif).then(() => {
+                    showAlert("Koordinat aktif berhasil disalin:\n" + teksAktif);
+                }).catch(() => fallbackCopy(teksAktif));
+            } else {
+                fallbackCopy(teksAktif);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showAlert("Koordinat berhasil disalin:\n" + text);
+            } catch (e) {
+                showAlert("Gagal menyalin otomatis:\n" + text);
+            }
+            document.body.removeChild(ta);
+        }
+
+        function simpanTitik() {
+            if (!currentLat) return showAlert("Tunggu sinyal GPS terunci terlebih dahulu!");
+            showPrompt("Masukkan nama/label titik:", `Titik-${daftarTitik.length + 1}`, function (namaTitik) {
+                if (!namaTitik || namaTitik.trim() === "") return;
+
+                const titik = {
+                    id: daftarTitik.length + 1,
+                    nama: namaTitik.replace(/,/g, " "),
+                    lat: currentLat,
+                    lng: currentLng,
+                    acc: currentAcc,
+                    waktu: new Date().toLocaleTimeString()
+                };
+
+                daftarTitik.push(titik);
+                updateTampilanLog();
+            });
+        }
+
+        function editTitikSatu(index) {
+            const t = daftarTitik[index];
+
+            showPrompt("Edit Nama Titik:", t.nama, function (namaBaru) {
+                if (!namaBaru || namaBaru.trim() === "") return;
+
+                const nilaiAwal = `${t.lng}, ${t.lat}`;
+                showPrompt("Edit Koordinat (Format: Longitude, Latitude):", nilaiAwal, function (koordinatBaru) {
+                    if (!koordinatBaru || !koordinatBaru.includes(",")) {
+                        return showAlert("Format salah! Gunakan pemisah koma.\nContoh: 118.848438, -2.672878");
+                    }
+
+                    const parts = koordinatBaru.split(",");
+                    const lngBaru = parts[0].trim();
+                    const latBaru = parts[1].trim();
+
+                    if (isNaN(lngBaru) || isNaN(latBaru)) {
+                        return showAlert("Angka Longitude atau Latitude tidak valid!");
+                    }
+
+                    daftarTitik[index].nama = namaBaru.replace(/,/g, " ");
+                    daftarTitik[index].lng = lngBaru;
+                    daftarTitik[index].lat = latBaru;
+
+                    updateTampilanLog();
+                });
+            });
+        }
+
+        function hapusTitikSatu(index) {
+            const t = daftarTitik[index];
+            showConfirm(`Apakah Anda yakin ingin menghapus "${t.nama}"?`, function () {
+                daftarTitik.splice(index, 1);
+                updateTampilanLog();
+            });
+        }
+
+        function updateTampilanLog() {
+            const logDiv = document.getElementById("log");
+            if (daftarTitik.length === 0) {
+                logDiv.innerHTML = "Belum ada titik tersimpan.";
+                return;
+            }
+            let html = "";
+            daftarTitik.forEach((t, i) => {
+                html += `
+                <div class="log-item">
+                    <span><b>${i + 1}. ${t.nama}</b>: ${t.lng}, ${t.lat} (${t.acc}m)</span>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <button onclick="editTitikSatu(${i})" style="border:none; background:none; cursor:pointer; font-size:16px; padding:0;" title="Edit Titik">📝</button>
+                        <button onclick="hapusTitikSatu(${i})" style="border:none; background:none; cursor:pointer; color:#ef4444; font-size:16px; font-weight:bold; padding:0;" title="Hapus Titik">✕</button>
+                    </div>
+                </div>`;
+            });
+            logDiv.innerHTML = html;
+        }
+
+        function hapusSemuaTitik() {
+            if (daftarTitik.length === 0) return showAlert("Tidak ada titik tersimpan untuk dihapus.");
+            showConfirm("Apakah Anda yakin ingin menghapus SELURUH titik?", function () {
+                daftarTitik = [];
+                updateTampilanLog();
+            });
+        }
+
+        // ============================================
+        // FUNGSI TANDA TANGAN (KANVAS, KAMERA, GALERI)
+        // ============================================
+        let isDrawing = false;
+        let lastX = 0, lastY = 0;
+        let canvas, ctx;
+
+        function bukaModalTandaTangan() {
+            const modal = document.getElementById('modal-ttd');
+            modal.style.display = 'flex';
+            setTimeout(() => initCanvas(), 100);
+        }
+
+        function tutupModalTtd() {
+            document.getElementById('modal-ttd').style.display = 'none';
+        }
+
+        function initCanvas() {
+            canvas = document.getElementById('canvas-ttd');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * (window.devicePixelRatio || 1);
+            canvas.height = rect.height * (window.devicePixelRatio || 1);
+            ctx = canvas.getContext('2d');
+            ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, rect.width, rect.height);
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', stopDrawing, { passive: false });
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getCanvasPosition(e);
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getCanvasPosition(e);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function stopDrawing() { isDrawing = false; }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const pos = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+            isDrawing = true;
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const pos = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function getCanvasPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        }
+
+        function hapusKanvas() {
+            const rect = canvas.getBoundingClientRect();
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, rect.width, rect.height);
+        }
+
+        function simpanDariKanvas() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            let isEmpty = true;
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i] < 250 || data[i+1] < 250 || data[i+2] < 250) {
+                    isEmpty = false;
+                    break;
+                }
+            }
+            if (isEmpty) {
+                showAlert('Harap tulis tanda tangan terlebih dahulu!');
+                return;
+            }
+
+            const dataUrl = canvas.toDataURL('image/png');
+            const img = new Image();
+            img.onload = function() {
+                const compressedCanvas = document.createElement('canvas');
+                const maxWidth = 400, maxHeight = 150;
+                let width = img.width, height = img.height;
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round(height * maxWidth / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round(width * maxHeight / height);
+                        height = maxHeight;
                     }
                 }
-            }, 3000);
-        })();
+                compressedCanvas.width = width;
+                compressedCanvas.height = height;
+                const compressedCtx = compressedCanvas.getContext('2d');
+                compressedCtx.fillStyle = 'white';
+                compressedCtx.fillRect(0, 0, width, height);
+                compressedCtx.drawImage(img, 0, 0, width, height);
+                ttdData = compressedCanvas.toDataURL('image/jpeg', 0.9);
+                tampilkanPreviewTtd();
+                tutupModalTtd();
+                showAlert('✅ Tanda tangan berhasil disimpan!');
+            };
+            img.src = dataUrl;
+        }
+
+        function ambilFotoTtdDariKamera() {
+            tutupModalTtd();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.setAttribute('capture', 'environment');
+            input.onchange = function(event) { prosesFotoTtd(event); };
+            input.click();
+        }
+
+        function ambilFotoTtdDariGaleri() {
+            tutupModalTtd();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/png, image/jpeg, image/jpg';
+            input.removeAttribute('capture');
+            input.onchange = function(event) { prosesFotoTtd(event); };
+            input.click();
+        }
+
+        // ============================================
+        // FUNGSI EDITOR FOTO (CROP & ENHANCE)
+        // ============================================
+        function bukaEditorFoto(dataUrl) {
+            fotoAsli = dataUrl;
+            fotoSementara = dataUrl;
+            
+            const modal = document.getElementById('modal-editor-ttd');
+            modal.style.display = 'flex';
+            
+            setTimeout(() => {
+                initEditorCanvas();
+            }, 100);
+        }
+
+        function tutupEditor() {
+            document.getElementById('modal-editor-ttd').style.display = 'none';
+            fotoAsli = null;
+            fotoSementara = null;
+        }
+
+        function initEditorCanvas() {
+            editorCanvas = document.getElementById('canvas-editor-ttd');
+            const container = editorCanvas.parentElement;
+            const maxWidth = container.clientWidth - 4;
+            const maxHeight = 350;
+            
+            const img = new Image();
+            img.onload = function() {
+                let width = img.width;
+                let height = img.height;
+                
+                const scale = Math.min(maxWidth / width, maxHeight / height);
+                const displayW = width * scale;
+                const displayH = height * scale;
+                
+                editorCanvas.width = displayW;
+                editorCanvas.height = displayH;
+                
+                editorCtx = editorCanvas.getContext('2d');
+                editorCtx.drawImage(img, 0, 0, displayW, displayH);
+                
+                // Inisialisasi crop area (default: 80% dari gambar, di tengah)
+                cropX = displayW * 0.1;
+                cropY = displayH * 0.1;
+                cropW = displayW * 0.8;
+                cropH = displayH * 0.8;
+                
+                gambarCropArea();
+                
+                // Event untuk drag
+                editorCanvas.addEventListener('mousedown', mulaiDrag);
+                editorCanvas.addEventListener('mousemove', drag);
+                editorCanvas.addEventListener('mouseup', stopDrag);
+                editorCanvas.addEventListener('mouseleave', stopDrag);
+                editorCanvas.addEventListener('touchstart', touchMulaiDrag, { passive: false });
+                editorCanvas.addEventListener('touchmove', touchDrag, { passive: false });
+                editorCanvas.addEventListener('touchend', stopDrag, { passive: false });
+            };
+            img.src = fotoSementara;
+        }
+
+        function gambarCropArea() {
+            const img = new Image();
+            img.onload = function() {
+                // Bersihkan canvas
+                editorCtx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
+                
+                // Gambar foto
+                editorCtx.drawImage(img, 0, 0, editorCanvas.width, editorCanvas.height);
+                
+                // Buat overlay gelap di LUAR area crop
+                editorCtx.save();
+                editorCtx.beginPath();
+                // Buat path persegi panjang untuk area crop
+                editorCtx.rect(cropX, cropY, cropW, cropH);
+                // Gunakan evenodd rule untuk membuat lubang
+                editorCtx.rect(0, 0, editorCanvas.width, editorCanvas.height);
+                editorCtx.clip('evenodd');
+                
+                // Isi overlay gelap di luar crop
+                editorCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                editorCtx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
+                editorCtx.restore();
+                
+                // Gambar border crop (garis hijau putus-putus)
+                editorCtx.strokeStyle = '#00ff00';
+                editorCtx.lineWidth = 2;
+                editorCtx.setLineDash([5, 5]);
+                editorCtx.strokeRect(cropX, cropY, cropW, cropH);
+                editorCtx.setLineDash([]);
+                
+                // Gambar handle di sudut
+                const handles = [
+                    [cropX, cropY],
+                    [cropX + cropW, cropY],
+                    [cropX, cropY + cropH],
+                    [cropX + cropW, cropY + cropH]
+                ];
+                handles.forEach(([x, y]) => {
+                    editorCtx.fillStyle = '#00ff00';
+                    editorCtx.beginPath();
+                    editorCtx.arc(x, y, 6, 0, Math.PI * 2);
+                    editorCtx.fill();
+                    editorCtx.strokeStyle = 'white';
+                    editorCtx.lineWidth = 2;
+                    editorCtx.stroke();
+                });
+            };
+            img.src = fotoSementara;
+        }
+
+        function mulaiDrag(e) {
+            const rect = editorCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const scaleX = editorCanvas.width / rect.width;
+            const scaleY = editorCanvas.height / rect.height;
+            const canvasX = x * scaleX;
+            const canvasY = y * scaleY;
+            
+            const handles = [
+                { x: cropX, y: cropY, type: 'nw' },
+                { x: cropX + cropW, y: cropY, type: 'ne' },
+                { x: cropX, y: cropY + cropH, type: 'sw' },
+                { x: cropX + cropW, y: cropY + cropH, type: 'se' }
+            ];
+            
+            let found = false;
+            for (let h of handles) {
+                if (Math.abs(canvasX - h.x) < 15 && Math.abs(canvasY - h.y) < 15) {
+                    dragType = 'resize';
+                    dragStartX = canvasX;
+                    dragStartY = canvasY;
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found && canvasX >= cropX && canvasX <= cropX + cropW &&
+                canvasY >= cropY && canvasY <= cropY + cropH) {
+                dragType = 'move';
+                dragStartX = canvasX - cropX;
+                dragStartY = canvasY - cropY;
+                found = true;
+            }
+            
+            isDragging = found;
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            const rect = editorCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const scaleX = editorCanvas.width / rect.width;
+            const scaleY = editorCanvas.height / rect.height;
+            const canvasX = x * scaleX;
+            const canvasY = y * scaleY;
+            
+            if (dragType === 'move') {
+                let newX = canvasX - dragStartX;
+                let newY = canvasY - dragStartY;
+                newX = Math.max(0, Math.min(newX, editorCanvas.width - cropW));
+                newY = Math.max(0, Math.min(newY, editorCanvas.height - cropH));
+                cropX = newX;
+                cropY = newY;
+            } else if (dragType === 'resize') {
+                const newW = Math.max(20, canvasX - cropX);
+                const newH = Math.max(20, canvasY - cropY);
+                cropW = Math.min(newW, editorCanvas.width - cropX);
+                cropH = Math.min(newH, editorCanvas.height - cropY);
+            }
+            
+            gambarCropArea();
+        }
+
+        function stopDrag() {
+            isDragging = false;
+        }
+
+        function touchMulaiDrag(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            mulaiDrag(mouseEvent);
+        }
+
+        function touchDrag(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            drag(mouseEvent);
+        }
+
+        function terapkanCrop() {
+    if (!fotoSementara) return;
+    
+    const img = new Image();
+    img.onload = function() {
+        const scaleX = img.width / editorCanvas.width;
+        const scaleY = img.height / editorCanvas.height;
+        
+        // Buat canvas baru untuk hasil crop
+        const cropCanvas = document.createElement('canvas');
+        const cropWidth = cropW * scaleX;
+        const cropHeight = cropH * scaleY;
+        cropCanvas.width = cropWidth;
+        cropCanvas.height = cropHeight;
+        
+        const cropCtx = cropCanvas.getContext('2d');
+        // Gambar hanya area crop
+        cropCtx.drawImage(
+            img,
+            cropX * scaleX, cropY * scaleY, cropWidth, cropHeight,
+            0, 0, cropWidth, cropHeight
+        );
+        
+        // Simpan hasil crop ke fotoSementara
+        fotoSementara = cropCanvas.toDataURL('image/jpeg', 0.95);
+        
+        // Reset crop area ke ukuran penuh (agar tidak ada garis putus-putus)
+        cropX = 0;
+        cropY = 0;
+        cropW = 1;
+        cropH = 1;
+        
+        // Inisialisasi ulang editor dengan hasil crop (tanpa garis crop)
+        initEditorCanvasTanpaCrop();
+        
+        showAlert('✅ Crop berhasil diterapkan!');
+    };
+    img.src = fotoSementara;
+}
+
+// Fungsi baru: inisialisasi editor TANPA garis crop
+function initEditorCanvasTanpaCrop() {
+    editorCanvas = document.getElementById('canvas-editor-ttd');
+    const container = editorCanvas.parentElement;
+    const maxWidth = container.clientWidth - 4;
+    const maxHeight = 350;
+    
+    const img = new Image();
+    img.onload = function() {
+        let width = img.width;
+        let height = img.height;
+        
+        const scale = Math.min(maxWidth / width, maxHeight / height);
+        const displayW = width * scale;
+        const displayH = height * scale;
+        
+        editorCanvas.width = displayW;
+        editorCanvas.height = displayH;
+        
+        editorCtx = editorCanvas.getContext('2d');
+        // Gambar foto full tanpa overlay crop
+        editorCtx.drawImage(img, 0, 0, displayW, displayH);
+        
+        // Simpan fotoSementara yang sudah di-crop
+        fotoSementara = editorCanvas.toDataURL('image/jpeg', 0.95);
+    };
+    img.src = fotoSementara;
+}
+
+        function enhanceFoto() {
+    // Validasi: pastikan editorCanvas dan editorCtx tersedia
+    if (!editorCanvas || !editorCtx) {
+        alert('Silakan unggah foto terlebih dahulu!');
+        return;
+    }
+
+    try {
+        // Ambil data gambar dari canvas editor
+        let imgData = editorCtx.getImageData(0, 0, editorCanvas.width, editorCanvas.height);
+        let data = imgData.data;
+
+        // ===== PARAMETER LEBIH LEMBUT =====
+        const threshold = 120;      // Turun dari 170 ke 120 (lebih banyak detail yang dipertahankan)
+        const contrast = 1.3;       // Turun dari 2.0 ke 1.3 (kontras lebih natural)
+        const brightness = 1.05;    // Turun dari 1.2 ke 1.05 (tidak terlalu terang)
+
+        // Proses setiap piksel
+        for (let i = 0; i < data.length; i += 4) {
+            // Konversi ke grayscale
+            let gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+            
+            // Terapkan kontras dan kecerahan
+            gray = ((gray / 255 - 0.5) * contrast + 0.5) * 255;
+            gray = Math.min(255, Math.max(0, gray * brightness));
+            
+            // Thresholding: jadi hitam atau putih
+            if (gray > threshold) {
+                data[i] = 255;
+                data[i + 1] = 255;
+                data[i + 2] = 255;
+            } else {
+                data[i] = 0;
+                data[i + 1] = 0;
+                data[i + 2] = 0;
+            }
+        }
+
+        // Tulis ulang data yang sudah diproses ke canvas
+        editorCtx.putImageData(imgData, 0, 0);
+
+        // Simpan hasil ke fotoSementara
+        fotoSementara = editorCanvas.toDataURL('image/jpeg', 0.95);
+        
+        alert('✅ Enhance selesai!');
+
+    } catch (error) {
+        console.error('Gagal memproses gambar:', error);
+        alert('Terjadi kesalahan saat memproses gambar: ' + error.message);
+    }
+}
+
+        function resetEditor() {
+            if (fotoAsli) {
+                fotoSementara = fotoAsli;
+                initEditorCanvas();
+                showAlert('↺ Foto direset ke semula');
+            }
+        }
+
+        function simpanDariEditor() {
+            if (fotoSementara) {
+                ttdData = fotoSementara;
+                tampilkanPreviewTtd();
+                tutupEditor();
+                showAlert('✅ Tanda tangan hasil edit berhasil disimpan!');
+            }
+        }
+
+        // ============================================
+        // FUNGSI PROSES FOTO TTD (DIEDIT)
+        // ============================================
+        function prosesFotoTtd(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            kompresFoto(file, 800, 600, 0.8)
+                .then(dataUrl => {
+                    bukaEditorFoto(dataUrl);
+                })
+                .catch(err => showAlert('Gagal memproses foto: ' + err.message));
+        }
+
+        function tampilkanPreviewTtd() {
+            const container = document.getElementById('preview-ttd');
+            const imgPreview = document.getElementById('img-preview-ttd');
+            if (ttdData) {
+                imgPreview.src = ttdData;
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        function hapusTandaTangan() {
+            showConfirm('Apakah Anda yakin ingin menghapus tanda tangan?', function() {
+                ttdData = null;
+                document.getElementById('preview-ttd').style.display = 'none';
+                showAlert('Tanda tangan telah dihapus.');
+            });
+        }
+
+        function kompresFoto(file, maxWidth, maxHeight, quality) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        let width = img.width, height = img.height;
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height = Math.round(height * maxWidth / width);
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width = Math.round(width * maxHeight / height);
+                                height = maxHeight;
+                            }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, 0, width, height);
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = function() { reject(new Error('Gagal memuat gambar')); };
+                    img.src = e.target.result;
+                };
+                reader.onerror = function() { reject(new Error('Gagal membaca file')); };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ============================================
+        // FUNGSI FOTO DOKUMENTASI
+        // ============================================
+        function tampilkanPilihanFoto() {
+            document.getElementById('modal-pilih-foto').style.display = 'flex';
+        }
+
+        function tutupPilihanFoto() {
+            document.getElementById('modal-pilih-foto').style.display = 'none';
+        }
+
+        function ambilDariKamera() {
+            tutupPilihanFoto();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.setAttribute('capture', 'environment');
+            input.onchange = function(event) { prosesFileFoto(event); };
+            input.click();
+        }
+
+        function ambilDariGaleri() {
+            tutupPilihanFoto();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/png, image/jpeg, image/jpg, image/webp';
+            input.multiple = true;
+            input.removeAttribute('capture');
+            input.onchange = function(event) { prosesFileFoto(event); };
+            input.click();
+        }
+
+        function prosesFileFoto(event) {
+            const files = Array.from(event.target.files);
+            if (!files || files.length === 0) return;
+
+            let promises = files.map(file => {
+                if (file.size > 2 * 1024 * 1024) {
+                    return kompresFoto(file, 1200, 1200, 0.8);
+                } else {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
+                }
+            });
+
+            Promise.all(promises)
+                .then(results => {
+                    daftarFoto = daftarFoto.concat(results);
+                    renderGaleriFoto();
+                    showAlert(`✅ Berhasil menambahkan ${results.length} foto.`);
+                })
+                .catch(err => {
+                    showAlert("Gagal memproses foto: " + err.message);
+                });
+        }
+
+        function renderGaleriFoto() {
+            const container = document.getElementById('preview-foto-container');
+            const grid = document.getElementById('photo-grid');
+            const counter = document.getElementById('jumlah-foto');
+
+            if (daftarFoto.length === 0) {
+                container.style.display = 'none';
+                grid.innerHTML = '';
+                counter.textContent = '0';
+                return;
+            }
+
+            container.style.display = 'block';
+            counter.textContent = daftarFoto.length;
+
+            let html = '';
+            daftarFoto.forEach((foto, index) => {
+                html += `
+                    <div class="photo-item">
+                        <img src="${foto}" alt="Foto ${index + 1}">
+                        <button type="button" class="btn-remove-photo" onclick="hapusFotoSatu(${index})" title="Hapus foto ini">✕</button>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+
+        function hapusFotoSatu(index) {
+            daftarFoto.splice(index, 1);
+            renderGaleriFoto();
+        }
+
+        function hapusSemuaFoto() {
+            if (daftarFoto.length === 0) return showAlert("Belum ada foto yang dilampirkan.");
+            showConfirm("Apakah Anda yakin ingin menghapus SELURUH foto?", function() {
+                daftarFoto = [];
+                renderGaleriFoto();
+            });
+        }
+
+        // ============================================
+        // FUNGSI PEMBUAT DOKUMEN PDF (TERPISAH)
+        // ============================================
+        function buatDokumenPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+            // Ambil semua data dari form
+            const nama = document.getElementById("pemohon-nama").value.trim();
+            const pekerjaan = formatOptionalVal("pemohon-pekerjaan");
+            const alamat = formatOptionalVal("pemohon-alamat");
+            const hp = document.getElementById("pemohon-hp").value.trim();
+            const keperluan = formatOptionalVal("pemohon-keperluan");
+            const jalan = formatOptionalVal("lahan-jalan");
+            const desaVal = document.getElementById("lahan-desa-input").value.trim();
+            const kec = formatOptionalVal("lahan-kec");
+            const kab = formatOptionalVal("lahan-kab");
+            const tglHariIni = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            let labelWilayah = "Kelurahan/Desa";
+            if (matchedTipe === "Desa") labelWilayah = "Desa";
+            else if (matchedTipe === "Kelurahan") labelWilayah = "Kelurahan";
+
+            const marginLeft = 20;
+            const marginRight = 190;
+            const textWidthLimit = 170;
+
+            doc.setFont("helvetica", "normal");
+
+            // --- HALAMAN 1: SURAT PERMOHONAN ---
+            doc.setFontSize(10);
+            doc.text(`Mamuju, ${tglHariIni}`, marginRight, 20, { align: 'right' });
+
+            let y = 30;
+            doc.text("Yth. Kepala Dinas Lingkungan Hidup dan Kehutanan", marginLeft, y); y += 5;
+            doc.text("Prov. Sulawesi Barat", marginLeft, y); y += 5;
+            doc.text("Di -", marginLeft, y); y += 5;
+            doc.text("      Mamuju", marginLeft, y); y += 10;
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Perihal: Permohonan Keterangan Status Kawasan Hutan", marginLeft, y); y += 8;
+
+            doc.setFont("helvetica", "normal");
+            doc.text("Yang bertanda tangan di bawah ini:", marginLeft, y); y += 6;
+
+            const dataPemohon = [
+                ["Nama", `: ${nama}`],
+                ["Pekerjaan", `: ${pekerjaan}`],
+                ["Alamat", `: ${alamat}`],
+                ["No. Hp", `: ${hp}`],
+                ["Untuk Keperluan", `: ${keperluan}`]
+            ];
+
+            dataPemohon.forEach(row => {
+                doc.text(row[0], marginLeft + 5, y);
+                doc.text(row[1], marginLeft + 50, y);
+                y += 5;
+            });
+
+            y += 2;
+            const narasi = `Dengan ini mengajukan Permohonan Kepada Bapak Kepala Dinas Lingkungan Hidup dan Kehutanan atas Status Lahan / Kawasan Hutan atas lokasi kami yang terletak di ${jalan} ${labelWilayah}, ${toProperCase(desaVal)}, Kecamatan ${kec}, Kabupaten ${kab}.`;
+
+            const splitText = doc.splitTextToSize(narasi, textWidthLimit);
+            doc.text(splitText, marginLeft, y);
+            y += (splitText.length * 5) + 3;
+
+            doc.text("Dengan titik koordinat lokasi yang dimohonkan sebagai berikut:", marginLeft, y);
+            y += 4;
+
+            const tableRows = daftarTitik.map((t, index) => [
+                index + 1,
+                `${t.lng}, ${t.lat}`
+            ]);
+
+            doc.autoTable({
+                startY: y,
+                head: [['No', 'Koordinat (Longitude, Latitude)']],
+                body: tableRows,
+                theme: 'plain',
+                margin: { left: marginLeft, right: 100 },
+                styles: { font: 'helvetica', fontSize: 9, cellPadding: 1 },
+                headStyles: { fontStyle: 'bold' },
+                columnStyles: {
+                    0: { cellWidth: 10 },
+                    1: { cellWidth: 80 }
+                }
+            });
+
+            y = doc.lastAutoTable.finalY + 6;
+
+            // --- PENUTUP & TANDA TANGAN (SANGAT RAPAT) ---
+doc.text("Demikian permohonan ini saya buat, atas perkenannya kami ucapkan terimakasih.", marginLeft, y);
+y += 8;
+
+const pageWidth = doc.internal.pageSize.getWidth();
+const posXCenter = pageWidth - 50;
+
+doc.text("Yang bermohon,", posXCenter, y, { align: 'center' });
+y += 2;
+
+if (ttdData) {
+    try {
+        const imgProps = doc.getImageProperties(ttdData);
+        let imgW = imgProps.width, imgH = imgProps.height;
+        const maxTtdWidth = 60, maxTtdHeight = 30;
+        let ttdW = imgW, ttdH = imgH;
+        if (ttdW > ttdH) {
+            if (ttdW > maxTtdWidth) {
+                ttdH = Math.round(ttdH * maxTtdWidth / ttdW);
+                ttdW = maxTtdWidth;
+            }
+        } else {
+            if (ttdH > maxTtdHeight) {
+                ttdW = Math.round(ttdW * maxTtdHeight / ttdH);
+                ttdH = maxTtdHeight;
+            }
+        }
+        const posXTTD_img = posXCenter - (ttdW / 2);
+        const posYTTD_img = y - 2;
+        doc.addImage(ttdData, 'JPEG', posXTTD_img, posYTTD_img, ttdW, ttdH);
+        y = posYTTD_img + ttdH + 1;
+    } catch (err) {
+        console.warn('Gagal menambahkan tanda tangan:', err);
+        y += 6;
+    }
+} else {
+    y += 6;
+}
+
+doc.setFont("helvetica", "bold");
+doc.text(nama, posXCenter, y, { align: 'center' });
+// Lanjut ke Catatan NB...
+
+            // Catatan NB
+            y += 10;
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "bold");
+            doc.text("Nb.", marginLeft, y); y += 4;
+            doc.setFont("helvetica", "normal");
+            doc.text("1. Melampirkan Foto copy KTP Pemohon", marginLeft, y); y += 4;
+            doc.text("2. Alas Hak Berupa Fotocopy SHM/Sporadik", marginLeft, y);
+
+            // --- HALAMAN FOTO LAMPIRAN ---
+            if (daftarFoto.length > 0) {
+                const pageWidth2 = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 20;
+                const maxImgW = pageWidth2 - (margin * 2);
+                const maxImgH = pageHeight - (margin * 2) - 25;
+
+                daftarFoto.forEach((fotoBase64, index) => {
+                    doc.addPage();
+
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(12);
+                    doc.text(`LAMPIRAN ${index + 1}`, pageWidth2 / 2, 20, { align: 'center' });
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(10);
+                    doc.text(`Pemohon: ${nama}`, pageWidth2 / 2, 26, { align: 'center' });
+                    doc.setLineWidth(0.2);
+                    doc.line(margin, 29, pageWidth2 - margin, 29);
+
+                    const imgProperties = doc.getImageProperties(fotoBase64);
+                    let imgW = imgProperties.width;
+                    let imgH = imgProperties.height;
+
+                    const ratio = Math.min(maxImgW / imgW, maxImgH / imgH);
+                    const finalW = imgW * ratio;
+                    const finalH = imgH * ratio;
+
+                    const posX = (pageWidth2 - finalW) / 2;
+                    const posY = 35 + ((maxImgH - finalH) / 2);
+
+                    doc.addImage(fotoBase64, 'JPEG', posX, posY, finalW, finalH);
+                    doc.setDrawColor(200, 200, 200);
+                    doc.rect(posX, posY, finalW, finalH);
+
+                    doc.setFontSize(9);
+                    doc.setTextColor(100);
+                    doc.text(`Halaman ${index + 2}`, pageWidth2 / 2, pageHeight - 10, { align: 'center' });
+                    doc.setTextColor(0);
+                });
+            }
+
+            return doc;
+        }
+
+        // ============================================
+        // FUNGSI PROSES SURAT (LIHAT & CETAK)
+        // ============================================
+        function prosesSurat(mode) {
+            try {
+                // Validasi data
+                if (daftarTitik.length === 0) {
+                    return showAlert("Isi minimal satu titik koordinat!");
+                }
+
+                const nama = document.getElementById("pemohon-nama").value.trim();
+                const hp = document.getElementById("pemohon-hp").value.trim();
+                const desaVal = document.getElementById("lahan-desa-input").value.trim();
+
+                if (!nama || !hp || !desaVal) {
+                    return showAlert("Harap lengkapi field mandatory (*): Nama, No HP, dan Desa/Kelurahan!");
+                }
+
+                // Buat dokumen PDF
+                const doc = buatDokumenPDF();
+
+                if (mode === 'preview') {
+                    // PREVIEW: Tampilkan di tab baru tanpa menyimpan
+                    const pdfBlob = doc.output('blob');
+                    const blobUrl = URL.createObjectURL(pdfBlob);
+                    window.open(blobUrl, '_blank');
+                    // Bersihkan URL setelah beberapa saat
+                    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+                } else if (mode === 'cetak') {
+                    // CETAK: Simpan file
+                    const fileName = `Surat_Permohonan_${nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
+                    doc.save(fileName);
+                }
+
+            } catch (err) {
+                showAlert("Gagal memproses PDF: " + err.message);
+            }
+        }
+
+        // ============================================
+        // FUNGSI LAINNYA
+        // ============================================
+        function simpanTxt() {
+            if (daftarTitik.length === 0) {
+                return showAlert("Belum ada titik tersimpan untuk disimpan ke file TXT!");
+            }
+
+            const nama = document.getElementById("pemohon-nama").value.trim();
+            const pekerjaan = document.getElementById("pemohon-pekerjaan").value.trim();
+            const alamat = document.getElementById("pemohon-alamat").value.trim();
+            const hp = document.getElementById("pemohon-hp").value.trim();
+            const keperluan = document.getElementById("pemohon-keperluan").value.trim();
+
+            const jalan = document.getElementById("lahan-jalan").value.trim();
+            const desa = document.getElementById("lahan-desa-input").value.trim();
+            const kec = document.getElementById("lahan-kec").value.trim();
+            const kab = document.getElementById("lahan-kab").value.trim();
+
+            let isiTxt = "========================================\n";
+            isiTxt += "       DATA PERMOHONAN & KOORDINAT      \n";
+            isiTxt += "========================================\n\n";
+
+            isiTxt += "[DATA PEMOHON]\n";
+            isiTxt += `Nama Lengkap : ${nama !== "" ? nama : "-"}\n`;
+            isiTxt += `Pekerjaan    : ${pekerjaan !== "" ? pekerjaan : "-"}\n`;
+            isiTxt += `Alamat KTP   : ${alamat !== "" ? alamat : "-"}\n`;
+            isiTxt += `No. HP/WA    : ${hp !== "" ? hp : "-"}\n`;
+            isiTxt += `Keperluan    : ${keperluan !== "" ? keperluan : "-"}\n\n`;
+
+            isiTxt += "[LOKASI LAHAN]\n";
+            isiTxt += `Jalan/Dusun  : ${jalan !== "" ? jalan : "-"}\n`;
+            isiTxt += `Desa/Kel.    : ${desa !== "" ? toProperCase(desa) : "-"}\n`;
+            isiTxt += `Kecamatan    : ${kec !== "" ? kec : "-"}\n`;
+            isiTxt += `Kab/Prov     : ${kab !== "" ? kab : "-"}\n\n`;
+
+            const tglHariIni = new Date().toLocaleDateString('id-ID');
+            isiTxt += "----------------------------------------\n";
+            isiTxt += "DAFTAR TITIK KOORDINAT TERCEK\n";
+            isiTxt += "----------------------------------------\n";
+            daftarTitik.forEach((t, i) => {
+                isiTxt += `${i + 1}. ${t.nama}\n`;
+                isiTxt += `   Koordinat : ${t.lng}, ${t.lat}\n`;
+                isiTxt += `   Akurasi   : ±${t.acc}m\n`;
+                isiTxt += `   Waktu     : ${t.waktu}\n`;
+                isiTxt += `   Tanggal   : ${tglHariIni}\n\n`;
+            });
+
+            const namaBersih = nama !== "" ? nama.replace(/[^a-zA-Z0-9]/g, "_") : "Tanpa_Nama";
+            const tgl = new Date().toISOString().split('T')[0];
+            const namaFile = `Koordinat_${namaBersih}_${tgl}.txt`;
+
+            try {
+                const blob = new Blob([isiTxt], { type: "text/plain;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = namaFile;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                showAlert("Gagal menyimpan file TXT: " + err.message);
+            }
+        }
+
+        function bacaFileTxt(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const teks = e.target.result;
+
+                try {
+                    const ambilNilai = (label) => {
+                        const regex = new RegExp(`${label}\\s*:\\s*(.*)`, 'i');
+                        const match = teks.match(regex);
+                        return match && match[1] && match[1].trim() !== '-' ? match[1].trim() : '';
+                    };
+
+                    document.getElementById("pemohon-nama").value = ambilNilai("Nama Lengkap");
+                    document.getElementById("pemohon-pekerjaan").value = ambilNilai("Pekerjaan");
+                    document.getElementById("pemohon-alamat").value = ambilNilai("Alamat KTP");
+                    document.getElementById("pemohon-hp").value = ambilNilai("No. HP/WA");
+                    document.getElementById("pemohon-keperluan").value = ambilNilai("Keperluan");
+
+                    document.getElementById("lahan-jalan").value = ambilNilai("Jalan/Dusun");
+                    document.getElementById("lahan-desa-input").value = ambilNilai("Desa/Kel.");
+                    document.getElementById("lahan-kec").value = ambilNilai("Kecamatan");
+                    document.getElementById("lahan-kab").value = ambilNilai("Kab/Prov");
+
+                    daftarTitik = [];
+
+                    const regexTitik = /(\d+)\.\s*(.*?)\n\s*Koordinat\s*:\s*([\d.-]+),\s*([\d.-]+)\n\s*Akurasi\s*:\s*±?(\d+)m?\n\s*Waktu\s*:\s*(.*?)(?:\n\s*Tanggal\s*:\s*.*?)?(?=\n\n|\n*$)/g;
+                    let match;
+
+                    while ((match = regexTitik.exec(teks)) !== null) {
+                        daftarTitik.push({
+                            nama: match[2].trim(),
+                            lng: parseFloat(match[3]),
+                            lat: parseFloat(match[4]),
+                            acc: parseInt(match[5]),
+                            waktu: match[6].trim()
+                        });
+                    }
+
+                    updateTampilanLog();
+                    showAlert("File TXT berhasil dimuat ke dalam form!");
+
+                } catch (err) {
+                    showAlert("Format file TXT tidak sesuai atau rusak!");
+                }
+
+                event.target.value = '';
+            };
+
+            reader.readAsText(file);
+        }
+
+        function toggleForm() {
+            const formBody = document.getElementById('formBody');
+            const toggleIcon = document.getElementById('toggleIcon');
+
+            formBody.classList.toggle('collapsed');
+            toggleIcon.classList.toggle('rotated');
+
+            const isCollapsed = formBody.classList.contains('collapsed');
+            localStorage.setItem('formCollapsed', isCollapsed);
+        }
+
+        function loadFormState() {
+            const formBody = document.getElementById('formBody');
+            const toggleIcon = document.getElementById('toggleIcon');
+
+            const savedState = localStorage.getItem('formCollapsed');
+
+            if (savedState === null) {
+                formBody.classList.add('collapsed');
+                toggleIcon.classList.add('rotated');
+                localStorage.setItem('formCollapsed', 'true');
+            } else if (savedState === 'true') {
+                formBody.classList.add('collapsed');
+                toggleIcon.classList.add('rotated');
+            }
+        }
+
+        window.onload = function() {
+            startGPS();
+            loadFormState();
+        };
     </script>
+
 </body>
 </html>
