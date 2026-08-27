@@ -11,11 +11,11 @@
     <link rel="preload" href="/surat_permohonan_telaah/lib/jspdf.plugin.autotable.min.js" as="script">
     <link rel="preload" href="/surat_permohonan_telaah/font/Roboto/roboto.css" as="style">
     <link rel="preload" href="/surat_permohonan_telaah/assets/Mlogo.png" as="image">
-    
+
     <!-- ===== LIBRARY (LOKAL) ===== -->
     <script src="/surat_permohonan_telaah/lib/jspdf.umd.min.js"></script>
     <script src="/surat_permohonan_telaah/lib/jspdf.plugin.autotable.min.js"></script>
-    
+
     <!-- ===== FONT ROBOTO (LOKAL) ===== -->
     <link href="/surat_permohonan_telaah/font/Roboto/roboto.css" rel="stylesheet">
     <style>
@@ -34,31 +34,30 @@
             --slate-800: #1e293b;
         }
         html, body {
-    /* Memastikan gesture pinch-to-zoom aktif penuh pada layar */
-        touch-action: manipulation;
+            touch-action: manipulation;
         }
 
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif; }
         body { 
-            padding: 6px 4px; /* Mengurangi jarak pinggir luar body */
+            padding: 6px 4px;
             background-color: #f8fafc; 
             margin: 0; 
             color: #334155; 
-            }
+        }
         .container { 
-            max-width: 1000px; /* Diperlebar agar memuat lebih banyak ruang di layar lebar */
+            max-width: 1000px;
             margin: 0 auto; 
-            padding: 0 2px; /* Mengurangi batas kosong samping kiri-kanan */
-            }
-        
+            padding: 0 2px;
+        }
+
         .card { 
             background: white; 
-            padding: 10px 12px; /* Padding dalam kartu diperketat/dipadatkan */
+            padding: 10px 12px;
             border-radius: 6px; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.06); 
-            margin-bottom: 12px; /* Mengurangi jarak antarkartu */
+            margin-bottom: 12px;
             border: 1px solid var(--slate-200);
-            }
+        }
 
         .header { 
             display: flex; 
@@ -69,7 +68,6 @@
             margin-bottom: 20px; 
         }
 
-        /* ===== Toggle Form ===== */
         .form-toggle-header {
             display: flex;
             align-items: center;
@@ -114,7 +112,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Header Brand */
         .header-brand {
             display: flex;
             align-items: center;
@@ -125,13 +122,12 @@
             letter-spacing: -0.2px;
         }
         .brand-title {
-            color: #727579; /* Warna teks "GPS Point" (sesuai warna asal Anda) */
+            color: #727579;
         }
 
-        /* Styling khusus untuk huruf 'm' */
         .brand-m {
-        color: #b41414; /* Warna merah */
-        font-weight: 700;
+            color: #b41414;
+            font-weight: 700;
         }
 
         .brand-logo {
@@ -197,12 +193,12 @@
             word-break: break-all; 
             font-family: 'Roboto', monospace; 
         }
-        
+
         .grid-coords { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         @media (max-width: 500px) { .grid-coords { grid-template-columns: 1fr; } }
 
         .info-status { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-        
+
         .badge { 
             padding: 6px 14px; 
             border-radius: 20px; 
@@ -308,7 +304,6 @@
         }
         .log-item:last-child { border-bottom: none; }
 
-        /* Form Input Styling */
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
         .form-group { margin-bottom: 14px; }
@@ -325,7 +320,6 @@
         .form-control:focus { border-color: var(--primary); }
         .required-tag { color: var(--danger); }
 
-        /* Modal custom UI */
         .custom-modal-overlay {
             display: none;
             position: fixed;
@@ -357,7 +351,6 @@
             margin-bottom: 4px;
         }
 
-        /* Styling Galeri Preview Foto */
         .photo-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -393,40 +386,39 @@
             align-items: center;
             justify-content: center;
         }
-		/* Styling untuk Modal Tanda Tangan */
-#modal-ttd .custom-modal-box {
-    max-width: 420px;
-    padding: 20px;
-}
 
-#canvas-ttd {
-    background: white;
-    border-radius: 6px;
-    touch-action: none;
-    cursor: crosshair;
-    min-height: 150px;
-    width: 100%;
-}
+        /* Styling untuk Modal Tanda Tangan */
+        #modal-ttd .custom-modal-box {
+            max-width: 420px;
+            padding: 20px;
+        }
 
-/* Tombol Tanda Tangan */
-.btn-ttd {
-    background: #4A6FA5;
-    color: white;
-}
+        #canvas-ttd {
+            background: white;
+            border-radius: 6px;
+            touch-action: none;
+            cursor: crosshair;
+            min-height: 150px;
+            width: 100%;
+        }
 
-.btn-ttd:hover {
-    background: #3d5f8a;
-}
+        .btn-ttd {
+            background: #4A6FA5;
+            color: white;
+        }
 
-/* Preview Tanda Tangan */
-#preview-ttd img {
-    max-height: 80px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 5px;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+        .btn-ttd:hover {
+            background: #3d5f8a;
+        }
+
+        #preview-ttd img {
+            max-height: 80px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 5px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -576,55 +568,58 @@
                     <label>Kabupaten & Provinsi Lahan (Opsional)</label>
                     <input type="text" id="lahan-kab" class="form-control" value="Mamuju, Provinsi Sulawesi Barat">
                 </div>
-<!-- TOMBOL TANDA TANGAN -->
-<div class="form-group" style="margin-top: 20px;">
-    <button class="btn btn-blue" onclick="bukaModalTandaTangan()" style="padding: 14px; font-size: 15px; background: #4A6FA5;">
-        ✍️ TANDA TANGAN
-    </button>
-    <div id="preview-ttd" style="margin-top: 10px; display: none; text-align: center;">
-        <div class="label" style="margin-bottom: 5px;">Tanda Tangan Terpasang:</div>
-        <img id="img-preview-ttd" style="max-height: 80px; border: 1px solid #ddd; border-radius: 8px; padding: 5px; background: white;">
-        <button onclick="hapusTandaTangan()" style="display: block; margin: 5px auto; background: #dc2626; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">✕ Hapus Tanda Tangan</button>
-    </div>
-</div>
-<!-- MODAL TANDA TANGAN -->
-<div id="modal-ttd" class="custom-modal-overlay">
-    <div class="custom-modal-box" style="max-width: 400px; max-height: 90vh; overflow-y: auto;">
-        <h3 style="margin-top: 0; color: var(--slate-800); text-align: center;">✍️ Tanda Tangan</h3>
-        <p style="font-size: 13px; color: var(--slate-600); text-align: center; margin-bottom: 15px;">
-            Silakan tanda tangan di kotak di bawah, atau ambil dari kamera/galeri
-        </p>
-        
-        <!-- Kanvas Tanda Tangan -->
-        <div style="border: 2px dashed var(--slate-200); border-radius: 8px; background: white; margin-bottom: 12px; touch-action: none;">
-            <canvas id="canvas-ttd" style="width: 100%; height: 150px; display: block; touch-action: none; cursor: crosshair;"></canvas>
-        </div>
-        
-        <!-- Tombol Aksi Kanvas -->
-        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
-            <button onclick="hapusKanvas()" style="flex: 1; padding: 8px; background: #f1f5f9; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">🗑️ Hapus</button>
-            <button onclick="simpanDariKanvas()" style="flex: 1; padding: 8px; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer;">✅ Simpan</button>
-        </div>
-        
-        <!-- Divider -->
-        <div style="text-align: center; margin: 10px 0; color: var(--slate-600); font-size: 12px;">— ATAU —</div>
-        
-        <!-- Tombol Opsi Kamera & Galeri -->
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button onclick="ambilFotoTtdDariKamera()" style="flex: 1; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
-                📷 Ambil Foto
-            </button>
-            <button onclick="ambilFotoTtdDariGaleri()" style="flex: 1; padding: 10px; background: var(--slate-600); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
-                🖼️ Pilih dari Galeri
-            </button>
-        </div>
-        
-        <!-- Tombol Batal -->
-        <button onclick="tutupModalTtd()" style="width: 100%; margin-top: 12px; padding: 10px; background: transparent; color: var(--slate-600); border: 1px solid var(--slate-200); border-radius: 6px; cursor: pointer; font-size: 14px;">
-            Batal
-        </button>
-    </div>
-</div>
+
+                <!-- ===== TOMBOL TANDA TANGAN ===== -->
+                <div class="form-group" style="margin-top: 20px;">
+                    <button class="btn btn-blue" onclick="bukaModalTandaTangan()" style="padding: 14px; font-size: 15px; background: #4A6FA5;">
+                        ✍️ TANDA TANGAN
+                    </button>
+                    <div id="preview-ttd" style="margin-top: 10px; display: none; text-align: center;">
+                        <div class="label" style="margin-bottom: 5px;">Tanda Tangan Terpasang:</div>
+                        <img id="img-preview-ttd" style="max-height: 80px; border: 1px solid #ddd; border-radius: 8px; padding: 5px; background: white;">
+                        <button onclick="hapusTandaTangan()" style="display: block; margin: 5px auto; background: #dc2626; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">✕ Hapus Tanda Tangan</button>
+                    </div>
+                </div>
+
+                <!-- ===== MODAL TANDA TANGAN ===== -->
+                <div id="modal-ttd" class="custom-modal-overlay">
+                    <div class="custom-modal-box" style="max-width: 400px; max-height: 90vh; overflow-y: auto;">
+                        <h3 style="margin-top: 0; color: var(--slate-800); text-align: center;">✍️ Tanda Tangan</h3>
+                        <p style="font-size: 13px; color: var(--slate-600); text-align: center; margin-bottom: 15px;">
+                            Silakan tanda tangan di kotak di bawah, atau ambil dari kamera/galeri
+                        </p>
+
+                        <!-- Kanvas Tanda Tangan -->
+                        <div style="border: 2px dashed var(--slate-200); border-radius: 8px; background: white; margin-bottom: 12px; touch-action: none;">
+                            <canvas id="canvas-ttd" style="width: 100%; height: 150px; display: block; touch-action: none; cursor: crosshair;"></canvas>
+                        </div>
+
+                        <!-- Tombol Aksi Kanvas -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <button onclick="hapusKanvas()" style="flex: 1; padding: 8px; background: #f1f5f9; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">🗑️ Hapus</button>
+                            <button onclick="simpanDariKanvas()" style="flex: 1; padding: 8px; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer;">✅ Simpan</button>
+                        </div>
+
+                        <!-- Divider -->
+                        <div style="text-align: center; margin: 10px 0; color: var(--slate-600); font-size: 12px;">— ATAU —</div>
+
+                        <!-- Tombol Opsi Kamera & Galeri -->
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="ambilFotoTtdDariKamera()" style="flex: 1; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                                📷 Ambil Foto
+                            </button>
+                            <button onclick="ambilFotoTtdDariGaleri()" style="flex: 1; padding: 10px; background: var(--slate-600); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                                🖼️ Pilih dari Galeri
+                            </button>
+                        </div>
+
+                        <!-- Tombol Batal -->
+                        <button onclick="tutupModalTtd()" style="width: 100%; margin-top: 12px; padding: 10px; background: transparent; color: var(--slate-600); border: 1px solid var(--slate-200); border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            Batal
+                        </button>
+                    </div>
+                </div>
+
                 <!-- ===== FITUR KAMERA/GALERI (MULTI-FOTO) ===== -->
                 <div class="form-group">
                     <label>Foto KTP / Dokumentasi Lahan (Bisa Lebih dari 1 Foto)</label>
@@ -656,44 +651,6 @@
 
     <!-- MODAL PILIHAN FOTO -->
     <div id="modal-pilih-foto" class="custom-modal-overlay">
-	<!-- MODAL TANDA TANGAN -->
-<div id="modal-ttd" class="custom-modal-overlay">
-    <div class="custom-modal-box" style="max-width: 400px; max-height: 90vh; overflow-y: auto;">
-        <h3 style="margin-top: 0; color: var(--slate-800); text-align: center;">✍️ Tanda Tangan</h3>
-        <p style="font-size: 13px; color: var(--slate-600); text-align: center; margin-bottom: 15px;">
-            Silakan tanda tangan di kotak di bawah, atau ambil dari kamera/galeri
-        </p>
-        
-        <!-- Kanvas Tanda Tangan -->
-        <div style="border: 2px dashed var(--slate-200); border-radius: 8px; background: white; margin-bottom: 12px; touch-action: none;">
-            <canvas id="canvas-ttd" style="width: 100%; height: 150px; display: block; touch-action: none; cursor: crosshair;"></canvas>
-        </div>
-        
-        <!-- Tombol Aksi Kanvas -->
-        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
-            <button onclick="hapusKanvas()" style="flex: 1; padding: 8px; background: #f1f5f9; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">🗑️ Hapus</button>
-            <button onclick="simpanDariKanvas()" style="flex: 1; padding: 8px; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer;">✅ Simpan</button>
-        </div>
-        
-        <!-- Divider -->
-        <div style="text-align: center; margin: 10px 0; color: var(--slate-600); font-size: 12px;">— ATAU —</div>
-        
-        <!-- Tombol Opsi Kamera & Galeri -->
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button onclick="ambilFotoTtdDariKamera()" style="flex: 1; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
-                📷 Ambil Foto
-            </button>
-            <button onclick="ambilFotoTtdDariGaleri()" style="flex: 1; padding: 10px; background: var(--slate-600); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
-                🖼️ Pilih dari Galeri
-            </button>
-        </div>
-        
-        <!-- Tombol Batal -->
-        <button onclick="tutupModalTtd()" style="width: 100%; margin-top: 12px; padding: 10px; background: transparent; color: var(--slate-600); border: 1px solid var(--slate-200); border-radius: 6px; cursor: pointer; font-size: 14px;">
-            Batal
-        </button>
-    </div>
-</div>
         <div class="custom-modal-box" style="max-width: 320px; text-align: center;">
             <h3 style="margin-top: 0; color: var(--slate-800);">📸 Pilih Sumber Foto</h3>
             <p style="font-size: 14px; color: var(--slate-600); margin-bottom: 20px;">
@@ -744,7 +701,12 @@
         </div>
     </div>
 
+    <input type="file" id="file-input-txt" accept=".txt" style="display:none;" onchange="bacaFileTxt(event)">
+
     <script>
+        // ============================================
+        // DATABASE WILAYAH
+        // ============================================
         const databaseWilayah = [
             { kec: "Bonehau", tipe: "Desa", nama: "Banua Ada" }, { kec: "Bonehau", tipe: "Desa", nama: "Bonehau" },
             { kec: "Bonehau", tipe: "Desa", nama: "Buttu Ada" }, { kec: "Bonehau", tipe: "Desa", nama: "Hinua" },
@@ -799,10 +761,18 @@
             { kec: "Tommo", tipe: "Desa", nama: "Tamemongga" }, { kec: "Tommo", tipe: "Desa", nama: "Tommo" }
         ];
 
+        // ============================================
+        // VARIABEL GLOBAL
+        // ============================================
         let currentLat = null, currentLng = null, currentAcc = null, watchID = null;
         let daftarTitik = [];
         let matchedTipe = null;
+        let ttdData = null; // <-- VARIABEL TANDA TANGAN
+        let daftarFoto = [];
 
+        // ============================================
+        // FUNGSI UTILITY
+        // ============================================
         function showAlert(msg) {
             document.getElementById('custom-alert-msg').innerText = msg;
             document.getElementById('custom-alert-modal').style.display = 'flex';
@@ -873,6 +843,14 @@
             }
         }
 
+        function formatOptionalVal(id) {
+            const val = document.getElementById(id).value.trim();
+            return val !== "" ? val : "....";
+        }
+
+        // ============================================
+        // FUNGSI GPS
+        // ============================================
         const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
 
         function startGPS() {
@@ -921,6 +899,9 @@
             document.getElementById("sat-status").innerText = "Terputus";
         }
 
+        // ============================================
+        // FUNGSI MANAJEMEN TITIK
+        // ============================================
         function copyKoordinat() {
             if (daftarTitik.length === 0) {
                 return showAlert("Belum ada titik tersimpan di dalam log!");
@@ -976,7 +957,7 @@
 
         function copyKoordinatAktif() {
             if (!currentLng || !currentLat) return showAlert("Tunggu hingga sinyal GPS terunci!");
-            
+
             const teksAktif = `${currentLng}, ${currentLat}`;
 
             if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1026,16 +1007,16 @@
 
         function editTitikSatu(index) {
             const t = daftarTitik[index];
-            
+
             showPrompt("Edit Nama Titik:", t.nama, function (namaBaru) {
                 if (!namaBaru || namaBaru.trim() === "") return;
-                
+
                 const nilaiAwal = `${t.lng}, ${t.lat}`;
                 showPrompt("Edit Koordinat (Format: Longitude, Latitude):", nilaiAwal, function (koordinatBaru) {
                     if (!koordinatBaru || !koordinatBaru.includes(",")) {
                         return showAlert("Format salah! Gunakan pemisah koma.\nContoh: 118.848438, -2.672878");
                     }
-                    
+
                     const parts = koordinatBaru.split(",");
                     const lngBaru = parts[0].trim();
                     const latBaru = parts[1].trim();
@@ -1089,13 +1070,334 @@
             });
         }
 
-        function formatOptionalVal(id) {
-            const val = document.getElementById(id).value.trim();
-            return val !== "" ? val : "....";
+        // ============================================
+        // FUNGSI TANDA TANGAN
+        // ============================================
+        let isDrawing = false;
+        let lastX = 0, lastY = 0;
+        let canvas, ctx;
+
+        function bukaModalTandaTangan() {
+            const modal = document.getElementById('modal-ttd');
+            modal.style.display = 'flex';
+            setTimeout(() => initCanvas(), 100);
+        }
+
+        function tutupModalTtd() {
+            document.getElementById('modal-ttd').style.display = 'none';
+        }
+
+        function initCanvas() {
+            canvas = document.getElementById('canvas-ttd');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * (window.devicePixelRatio || 1);
+            canvas.height = rect.height * (window.devicePixelRatio || 1);
+            ctx = canvas.getContext('2d');
+            ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, rect.width, rect.height);
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', stopDrawing, { passive: false });
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getCanvasPosition(e);
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getCanvasPosition(e);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function stopDrawing() { isDrawing = false; }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const pos = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+            isDrawing = true;
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const pos = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function getCanvasPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        }
+
+        function hapusKanvas() {
+            const rect = canvas.getBoundingClientRect();
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, rect.width, rect.height);
+        }
+
+        function simpanDariKanvas() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            let isEmpty = true;
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i] < 250 || data[i+1] < 250 || data[i+2] < 250) {
+                    isEmpty = false;
+                    break;
+                }
+            }
+            if (isEmpty) {
+                showAlert('Harap tulis tanda tangan terlebih dahulu!');
+                return;
+            }
+
+            const dataUrl = canvas.toDataURL('image/png');
+            const img = new Image();
+            img.onload = function() {
+                const compressedCanvas = document.createElement('canvas');
+                const maxWidth = 400, maxHeight = 150;
+                let width = img.width, height = img.height;
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round(height * maxWidth / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round(width * maxHeight / height);
+                        height = maxHeight;
+                    }
+                }
+                compressedCanvas.width = width;
+                compressedCanvas.height = height;
+                const compressedCtx = compressedCanvas.getContext('2d');
+                compressedCtx.fillStyle = 'white';
+                compressedCtx.fillRect(0, 0, width, height);
+                compressedCtx.drawImage(img, 0, 0, width, height);
+                ttdData = compressedCanvas.toDataURL('image/jpeg', 0.9);
+                tampilkanPreviewTtd();
+                tutupModalTtd();
+                showAlert('✅ Tanda tangan berhasil disimpan!');
+            };
+            img.src = dataUrl;
+        }
+
+        function ambilFotoTtdDariKamera() {
+            tutupModalTtd();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.setAttribute('capture', 'environment');
+            input.onchange = function(event) { prosesFotoTtd(event); };
+            input.click();
+        }
+
+        function ambilFotoTtdDariGaleri() {
+            tutupModalTtd();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/png, image/jpeg, image/jpg';
+            input.removeAttribute('capture');
+            input.onchange = function(event) { prosesFotoTtd(event); };
+            input.click();
+        }
+
+        function prosesFotoTtd(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            kompresFoto(file, 400, 300, 0.8)
+                .then(dataUrl => {
+                    ttdData = dataUrl;
+                    tampilkanPreviewTtd();
+                    showAlert('✅ Tanda tangan dari foto berhasil disimpan!');
+                })
+                .catch(err => showAlert('Gagal memproses foto: ' + err.message));
+        }
+
+        function tampilkanPreviewTtd() {
+            const container = document.getElementById('preview-ttd');
+            const imgPreview = document.getElementById('img-preview-ttd');
+            if (ttdData) {
+                imgPreview.src = ttdData;
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        function hapusTandaTangan() {
+            showConfirm('Apakah Anda yakin ingin menghapus tanda tangan?', function() {
+                ttdData = null;
+                document.getElementById('preview-ttd').style.display = 'none';
+                showAlert('Tanda tangan telah dihapus.');
+            });
+        }
+
+        function kompresFoto(file, maxWidth, maxHeight, quality) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        let width = img.width, height = img.height;
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height = Math.round(height * maxWidth / width);
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width = Math.round(width * maxHeight / height);
+                                height = maxHeight;
+                            }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, 0, width, height);
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = function() { reject(new Error('Gagal memuat gambar')); };
+                    img.src = e.target.result;
+                };
+                reader.onerror = function() { reject(new Error('Gagal membaca file')); };
+                reader.readAsDataURL(file);
+            });
         }
 
         // ============================================
-        // FUNGSI CETAK PDF (HALAMAN 1 UTAMA, HALAMAN 2+ FOTO)
+        // FUNGSI FOTO
+        // ============================================
+        function tampilkanPilihanFoto() {
+            document.getElementById('modal-pilih-foto').style.display = 'flex';
+        }
+
+        function tutupPilihanFoto() {
+            document.getElementById('modal-pilih-foto').style.display = 'none';
+        }
+
+        function ambilDariKamera() {
+            tutupPilihanFoto();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.setAttribute('capture', 'environment');
+            input.onchange = function(event) { prosesFileFoto(event); };
+            input.click();
+        }
+
+        function ambilDariGaleri() {
+            tutupPilihanFoto();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/png, image/jpeg, image/jpg, image/webp';
+            input.multiple = true;
+            input.removeAttribute('capture');
+            input.onchange = function(event) { prosesFileFoto(event); };
+            input.click();
+        }
+
+        function prosesFileFoto(event) {
+            const files = Array.from(event.target.files);
+            if (!files || files.length === 0) return;
+
+            let promises = files.map(file => {
+                if (file.size > 2 * 1024 * 1024) {
+                    return kompresFoto(file, 1200, 1200, 0.8);
+                } else {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
+                }
+            });
+
+            Promise.all(promises)
+                .then(results => {
+                    daftarFoto = daftarFoto.concat(results);
+                    renderGaleriFoto();
+                    showAlert(`✅ Berhasil menambahkan ${results.length} foto.`);
+                })
+                .catch(err => {
+                    showAlert("Gagal memproses foto: " + err.message);
+                });
+        }
+
+        function renderGaleriFoto() {
+            const container = document.getElementById('preview-foto-container');
+            const grid = document.getElementById('photo-grid');
+            const counter = document.getElementById('jumlah-foto');
+
+            if (daftarFoto.length === 0) {
+                container.style.display = 'none';
+                grid.innerHTML = '';
+                counter.textContent = '0';
+                return;
+            }
+
+            container.style.display = 'block';
+            counter.textContent = daftarFoto.length;
+
+            let html = '';
+            daftarFoto.forEach((foto, index) => {
+                html += `
+                    <div class="photo-item">
+                        <img src="${foto}" alt="Foto ${index + 1}">
+                        <button type="button" class="btn-remove-photo" onclick="hapusFotoSatu(${index})" title="Hapus foto ini">✕</button>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+
+        function hapusFotoSatu(index) {
+            daftarFoto.splice(index, 1);
+            renderGaleriFoto();
+        }
+
+        function hapusSemuaFoto() {
+            if (daftarFoto.length === 0) return showAlert("Belum ada foto yang dilampirkan.");
+            showConfirm("Apakah Anda yakin ingin menghapus SELURUH foto?", function() {
+                daftarFoto = [];
+                renderGaleriFoto();
+            });
+        }
+
+        // ============================================
+        // FUNGSI CETAK PDF
         // ============================================
         function cetakSurat() {
             try {
@@ -1131,22 +1433,18 @@
                 doc.setFont("helvetica", "normal");
 
                 // --- HALAMAN 1: SURAT PERMOHONAN ---
-                // 1. Tanggal Header
                 doc.setFontSize(10);
                 doc.text(`Mamuju, ${tglHariIni}`, marginRight, 20, { align: 'right' });
 
-                // 2. Tujuan Surat
                 let y = 30;
                 doc.text("Yth. Kepala Dinas Lingkungan Hidup dan Kehutanan", marginLeft, y); y += 5;
                 doc.text("Prov. Sulawesi Barat", marginLeft, y); y += 5;
                 doc.text("Di -", marginLeft, y); y += 5;
                 doc.text("      Mamuju", marginLeft, y); y += 10;
 
-                // 3. Perihal
                 doc.setFont("helvetica", "bold");
                 doc.text("Perihal: Permohonan Keterangan Status Kawasan Hutan", marginLeft, y); y += 8;
 
-                // 4. Data Pemohon
                 doc.setFont("helvetica", "normal");
                 doc.text("Yang bertanda tangan di bawah ini:", marginLeft, y); y += 6;
 
@@ -1164,10 +1462,9 @@
                     y += 5;
                 });
 
-                // 5. Paragraf Lahan
                 y += 2;
-                const narasi = `Dengan ini mengajukan Permohonan Kepada Bapak Kepala Dinas Lingkungan Hidup dan Kehutanan atas Status Lahan / Kawasan Hutan atas lokasi kami yang terletak di  ${jalan} ${labelWilayah}, ${toProperCase(desaVal)}, Kecamatan ${kec}, Kabupaten ${kab}.`;
-                
+                const narasi = `Dengan ini mengajukan Permohonan Kepada Bapak Kepala Dinas Lingkungan Hidup dan Kehutanan atas Status Lahan / Kawasan Hutan atas lokasi kami yang terletak di ${jalan} ${labelWilayah}, ${toProperCase(desaVal)}, Kecamatan ${kec}, Kabupaten ${kab}.`;
+
                 const splitText = doc.splitTextToSize(narasi, textWidthLimit);
                 doc.text(splitText, marginLeft, y);
                 y += (splitText.length * 5) + 3;
@@ -1175,7 +1472,6 @@
                 doc.text("Dengan titik koordinat lokasi yang dimohonkan sebagai berikut:", marginLeft, y);
                 y += 4;
 
-                // 6. Tabel Titik Koordinat
                 const tableRows = daftarTitik.map((t, index) => [
                     index + 1,
                     `${t.lng}, ${t.lat}`
@@ -1197,63 +1493,47 @@
 
                 y = doc.lastAutoTable.finalY + 6;
 
-                // 7. Penutup & Tanda Tangan
-doc.text("Demikian permohonan ini saya buat, atas perkenannya kami ucapkan terimakasih.", marginLeft, y);
-y += 12;
+                // --- PENUTUP & TANDA TANGAN (VERSI CENTER) ---
+                doc.text("Demikian permohonan ini saya buat, atas perkenannya kami ucapkan terimakasih.", marginLeft, y);
+                y += 12;
 
-const posXTTD = 130;
-doc.text("Yang bermohon,", posXTTD, y);
-y += 6;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const posXCenter = pageWidth / 2;
 
-// === TAMBAHKAN KODE TANDA TANGAN DI SINI ===
-// Cek apakah ada tanda tangan
-if (ttdData) {
-    try {
-        const imgProps = doc.getImageProperties(ttdData);
-        let imgW = imgProps.width;
-        let imgH = imgProps.height;
-        
-        // Ukuran maksimal tanda tangan di PDF
-        const maxTtdWidth = 60; // mm
-        const maxTtdHeight = 30; // mm
-        
-        let ttdW = imgW;
-        let ttdH = imgH;
-        
-        if (ttdW > ttdH) {
-            if (ttdW > maxTtdWidth) {
-                ttdH = Math.round(ttdH * maxTtdWidth / ttdW);
-                ttdW = maxTtdWidth;
-            }
-        } else {
-            if (ttdH > maxTtdHeight) {
-                ttdW = Math.round(ttdW * maxTtdHeight / ttdH);
-                ttdH = maxTtdHeight;
-            }
-        }
-        
-        // Posisi tanda tangan (di bawah teks "Yang bermohon,")
-        const posXTTD_img = posXTTD;
-        const posYTTD_img = y + 2;
-        
-        // Gambar tanda tangan
-        doc.addImage(ttdData, 'JPEG', posXTTD_img, posYTTD_img, ttdW, ttdH);
-        
-        // Geser posisi nama ke bawah dari tanda tangan
-        y = posYTTD_img + ttdH + 5;
-        
-    } catch (err) {
-        console.warn('Gagal menambahkan tanda tangan:', err);
-        y += 20; // Jika gagal, beri jarak kosong
-    }
-} else {
-    // Jika tidak ada tanda tangan, beri jarak kosong untuk tanda tangan manual
-    y += 20;
-}
+                doc.text("Yang bermohon,", posXCenter, y, { align: 'center' });
+                y += 6;
 
-// Tulis nama di bawah tanda tangan (atau di posisi default jika tidak ada TTD)
-doc.setFont("helvetica", "bold");
-doc.text(nama, posXTTD, y);
+                if (ttdData) {
+                    try {
+                        const imgProps = doc.getImageProperties(ttdData);
+                        let imgW = imgProps.width, imgH = imgProps.height;
+                        const maxTtdWidth = 60, maxTtdHeight = 30;
+                        let ttdW = imgW, ttdH = imgH;
+                        if (ttdW > ttdH) {
+                            if (ttdW > maxTtdWidth) {
+                                ttdH = Math.round(ttdH * maxTtdWidth / ttdW);
+                                ttdW = maxTtdWidth;
+                            }
+                        } else {
+                            if (ttdH > maxTtdHeight) {
+                                ttdW = Math.round(ttdW * maxTtdHeight / ttdH);
+                                ttdH = maxTtdHeight;
+                            }
+                        }
+                        const posXTTD_img = posXCenter - (ttdW / 2);
+                        const posYTTD_img = y + 2;
+                        doc.addImage(ttdData, 'JPEG', posXTTD_img, posYTTD_img, ttdW, ttdH);
+                        y = posYTTD_img + ttdH + 5;
+                    } catch (err) {
+                        console.warn('Gagal menambahkan tanda tangan:', err);
+                        y += 20;
+                    }
+                } else {
+                    y += 20;
+                }
+
+                doc.setFont("helvetica", "bold");
+                doc.text(nama, posXCenter, y, { align: 'center' });
 
                 // Catatan NB
                 y += 10;
@@ -1264,57 +1544,48 @@ doc.text(nama, posXTTD, y);
                 doc.text("1. Melampirkan Foto copy KTP Pemohon", marginLeft, y); y += 4;
                 doc.text("2. Alas Hak Berupa Fotocopy SHM/Sporadik", marginLeft, y);
 
-                // --- HALAMAN 2 DAN SETERUSNYA: FOTO LAMPIRAN ---
+                // --- HALAMAN FOTO LAMPIRAN ---
                 if (daftarFoto.length > 0) {
-                    const pageWidth = doc.internal.pageSize.getWidth(); // 210 mm
-                    const pageHeight = doc.internal.pageSize.getHeight(); // 297 mm
+                    const pageWidth2 = doc.internal.pageSize.getWidth();
+                    const pageHeight = doc.internal.pageSize.getHeight();
                     const margin = 20;
-                    const maxImgW = pageWidth - (margin * 2); // 170 mm
-                    const maxImgH = pageHeight - (margin * 2) - 25; // Sisa tinggi halaman untuk foto
+                    const maxImgW = pageWidth2 - (margin * 2);
+                    const maxImgH = pageHeight - (margin * 2) - 25;
 
                     daftarFoto.forEach((fotoBase64, index) => {
                         doc.addPage();
 
-                        // Header Lampiran Foto
                         doc.setFont("helvetica", "bold");
                         doc.setFontSize(12);
-                        doc.text(`LAMPIRAN ${index + 1}`, pageWidth / 2, 20, { align: 'center' });
+                        doc.text(`LAMPIRAN ${index + 1}`, pageWidth2 / 2, 20, { align: 'center' });
                         doc.setFont("helvetica", "normal");
                         doc.setFontSize(10);
-                        doc.text(`Pemohon: ${nama}`, pageWidth / 2, 26, { align: 'center' });
+                        doc.text(`Pemohon: ${nama}`, pageWidth2 / 2, 26, { align: 'center' });
                         doc.setLineWidth(0.2);
-                        doc.line(margin, 29, pageWidth - margin, 29);
+                        doc.line(margin, 29, pageWidth2 - margin, 29);
 
-                        // Ambil dimensi asli image untuk menghitung rasio proporsional
                         const imgProperties = doc.getImageProperties(fotoBase64);
                         let imgW = imgProperties.width;
                         let imgH = imgProperties.height;
 
-                        // Hitung Skala Gambar agar pas 1 Halaman
                         const ratio = Math.min(maxImgW / imgW, maxImgH / imgH);
                         const finalW = imgW * ratio;
                         const finalH = imgH * ratio;
 
-                        // Posisikan foto tepat di tengah halaman (Center)
-                        const posX = (pageWidth - finalW) / 2;
+                        const posX = (pageWidth2 - finalW) / 2;
                         const posY = 35 + ((maxImgH - finalH) / 2);
 
-                        // Gambar Foto ke PDF
                         doc.addImage(fotoBase64, 'JPEG', posX, posY, finalW, finalH);
-
-                        // Bingkai Gambar
                         doc.setDrawColor(200, 200, 200);
                         doc.rect(posX, posY, finalW, finalH);
 
-                        // Footer Halaman
                         doc.setFontSize(9);
                         doc.setTextColor(100);
-                        doc.text(`Halaman ${index + 2}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                        doc.text(`Halaman ${index + 2}`, pageWidth2 / 2, pageHeight - 10, { align: 'center' });
                         doc.setTextColor(0);
                     });
                 }
 
-                // Simpan Dokumen PDF
                 doc.save(`Surat_Permohonan_${nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
 
             } catch (err) {
@@ -1322,11 +1593,9 @@ doc.text(nama, posXTTD, y);
             }
         }
 
-        window.onload = function() {
-            startGPS();
-            loadFormState();
-        };
-
+        // ============================================
+        // FUNGSI LAINNYA
+        // ============================================
         function simpanTxt() {
             if (daftarTitik.length === 0) {
                 return showAlert("Belum ada titik tersimpan untuk disimpan ke file TXT!");
@@ -1398,7 +1667,7 @@ doc.text(nama, posXTTD, y);
             const reader = new FileReader();
             reader.onload = function(e) {
                 const teks = e.target.result;
-                
+
                 try {
                     const ambilNilai = (label) => {
                         const regex = new RegExp(`${label}\\s*:\\s*(.*)`, 'i');
@@ -1418,7 +1687,7 @@ doc.text(nama, posXTTD, y);
                     document.getElementById("lahan-kab").value = ambilNilai("Kab/Prov");
 
                     daftarTitik = [];
-                    
+
                     const regexTitik = /(\d+)\.\s*(.*?)\n\s*Koordinat\s*:\s*([\d.-]+),\s*([\d.-]+)\n\s*Akurasi\s*:\s*±?(\d+)m?\n\s*Waktu\s*:\s*(.*?)(?:\n\s*Tanggal\s*:\s*.*?)?(?=\n\n|\n*$)/g;
                     let match;
 
@@ -1448,10 +1717,10 @@ doc.text(nama, posXTTD, y);
         function toggleForm() {
             const formBody = document.getElementById('formBody');
             const toggleIcon = document.getElementById('toggleIcon');
-            
+
             formBody.classList.toggle('collapsed');
             toggleIcon.classList.toggle('rotated');
-            
+
             const isCollapsed = formBody.classList.contains('collapsed');
             localStorage.setItem('formCollapsed', isCollapsed);
         }
@@ -1459,9 +1728,9 @@ doc.text(nama, posXTTD, y);
         function loadFormState() {
             const formBody = document.getElementById('formBody');
             const toggleIcon = document.getElementById('toggleIcon');
-            
+
             const savedState = localStorage.getItem('formCollapsed');
-            
+
             if (savedState === null) {
                 formBody.classList.add('collapsed');
                 toggleIcon.classList.add('rotated');
@@ -1471,528 +1740,12 @@ doc.text(nama, posXTTD, y);
                 toggleIcon.classList.add('rotated');
             }
         }
+
+        window.onload = function() {
+            startGPS();
+            loadFormState();
+        };
     </script>
 
-    <script>
-        // ============================================
-        // FITUR PENGELOLAAN FOTO MULTIPLE (KAMERA & GALERI)
-        // ============================================
-
-        let daftarFoto = []; // Array menampung banyak data foto Base64
-
-        function tampilkanPilihanFoto() {
-            document.getElementById('modal-pilih-foto').style.display = 'flex';
-        }
-
-        function tutupPilihanFoto() {
-            document.getElementById('modal-pilih-foto').style.display = 'none';
-        }
-
-        function ambilDariKamera() {
-            tutupPilihanFoto();
-            
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.setAttribute('capture', 'environment');
-            
-            input.onchange = function(event) {
-                prosesFileFoto(event);
-            };
-            
-            input.click();
-        }
-
-        function ambilDariGaleri() {
-            tutupPilihanFoto();
-            
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/png, image/jpeg, image/jpg, image/webp';
-            input.multiple = true; // Bisa memilih banyak foto sekaligus di galeri
-            input.removeAttribute('capture');
-            
-            input.onchange = function(event) {
-                prosesFileFoto(event);
-            };
-            
-            input.click();
-        }
-
-        function prosesFileFoto(event) {
-            const files = Array.from(event.target.files);
-            if (!files || files.length === 0) return;
-            
-            let kompresiPromises = files.map(file => {
-                if (file.size > 2 * 1024 * 1024) {
-                    return kompresFoto(file, 1200, 1200, 0.8);
-                } else {
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => resolve(e.target.result);
-                        reader.readAsDataURL(file);
-                    });
-                }
-            });
-
-            Promise.all(kompresiPromises)
-                .then(results => {
-                    daftarFoto = daftarFoto.concat(results);
-                    renderGaleriFoto();
-                    showAlert(`✅ Berhasil menambahkan ${results.length} foto.`);
-                })
-                .catch(err => {
-                    showAlert("Gagal memproses foto: " + err.message);
-                });
-        }
-
-        function kompresFoto(file, maxWidth, maxHeight, quality) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        if (width > height) {
-                            if (width > maxWidth) {
-                                height = Math.round(height * maxWidth / width);
-                                width = maxWidth;
-                            }
-                        } else {
-                            if (height > maxHeight) {
-                                width = Math.round(width * maxHeight / height);
-                                height = maxHeight;
-                            }
-                        }
-                        
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-                        resolve(compressedDataUrl);
-                    };
-                    img.onerror = function() {
-                        reject(new Error('Gagal memuat gambar'));
-                    };
-                    img.src = e.target.result;
-                };
-                reader.onerror = function() {
-                    reject(new Error('Gagal membaca file'));
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function renderGaleriFoto() {
-            const container = document.getElementById('preview-foto-container');
-            const grid = document.getElementById('photo-grid');
-            const counter = document.getElementById('jumlah-foto');
-
-            if (daftarFoto.length === 0) {
-                container.style.display = 'none';
-                grid.innerHTML = '';
-                counter.textContent = '0';
-                return;
-            }
-
-            container.style.display = 'block';
-            counter.textContent = daftarFoto.length;
-
-            let html = '';
-            daftarFoto.forEach((foto, index) => {
-                html += `
-                    <div class="photo-item">
-                        <img src="${foto}" alt="Foto ${index + 1}">
-                        <button type="button" class="btn-remove-photo" onclick="hapusFotoSatu(${index})" title="Hapus foto ini">✕</button>
-                    </div>
-                `;
-            });
-            grid.innerHTML = html;
-        }
-
-        function hapusFotoSatu(index) {
-            daftarFoto.splice(index, 1);
-            renderGaleriFoto();
-        }
-
-        function hapusSemuaFoto() {
-            if (daftarFoto.length === 0) return showAlert("Belum ada foto yang dilampirkan.");
-            showConfirm("Apakah Anda yakin ingin menghapus SELURUH foto?", function() {
-                daftarFoto = [];
-                renderGaleriFoto();
-            });
-        }
-    </script>
-    <script>
-	// ============================================
-// FITUR TANDA TANGAN (Layar, Kamera, Galeri)
-// ============================================
-
-let ttdData = null; // Menyimpan data tanda tangan (Base64)
-let isDrawing = false;
-let lastX = 0, lastY = 0;
-let canvas, ctx;
-
-// --- BUKA MODAL TANDA TANGAN ---
-function bukaModalTandaTangan() {
-    const modal = document.getElementById('modal-ttd');
-    modal.style.display = 'flex';
-    
-    // Inisialisasi kanvas setelah modal terbuka
-    setTimeout(() => {
-        initCanvas();
-    }, 100);
-}
-
-// --- TUTUP MODAL TANDA TANGAN ---
-function tutupModalTtd() {
-    document.getElementById('modal-ttd').style.display = 'none';
-}
-
-// --- INISIALISASI KANVAS ---
-function initCanvas() {
-    canvas = document.getElementById('canvas-ttd');
-    const rect = canvas.getBoundingClientRect();
-    
-    // Set ukuran canvas sesuai resolusi perangkat
-    canvas.width = rect.width * (window.devicePixelRatio || 1);
-    canvas.height = rect.height * (window.devicePixelRatio || 1);
-    
-    ctx = canvas.getContext('2d');
-    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
-    
-    // Isi background putih
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, rect.width, rect.height);
-    
-    // Atur gaya garis
-    ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    
-    // Event listener untuk mouse & touch
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseleave', stopDrawing);
-    
-    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-    canvas.addEventListener('touchend', stopDrawing, { passive: false });
-}
-
-// --- FUNGSI MENGGAMBAR (MOUSE) ---
-function startDrawing(e) {
-    isDrawing = true;
-    const pos = getCanvasPosition(e);
-    lastX = pos.x;
-    lastY = pos.y;
-}
-
-function draw(e) {
-    if (!isDrawing) return;
-    const pos = getCanvasPosition(e);
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    lastX = pos.x;
-    lastY = pos.y;
-}
-
-function stopDrawing() {
-    isDrawing = false;
-}
-
-// --- FUNGSI MENGGAMBAR (TOUCH) ---
-function handleTouchStart(e) {
-    e.preventDefault();
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const pos = {
-        x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top
-    };
-    isDrawing = true;
-    lastX = pos.x;
-    lastY = pos.y;
-}
-
-function handleTouchMove(e) {
-    e.preventDefault();
-    if (!isDrawing) return;
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const pos = {
-        x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top
-    };
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    lastX = pos.x;
-    lastY = pos.y;
-}
-
-// --- AMBIL POSISI KURSOR ---
-function getCanvasPosition(e) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-    };
-}
-
-// --- HAPUS KANVAS ---
-function hapusKanvas() {
-    const rect = canvas.getBoundingClientRect();
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, rect.width, rect.height);
-}
-
-// --- SIMPAN DARI KANVAS ---
-function simpanDariKanvas() {
-    const dataUrl = canvas.toDataURL('image/png');
-    if (dataUrl === canvas.toDataURL('image/png')) {
-        // Cek apakah kanvas kosong (hanya putih)
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        let isEmpty = true;
-        for (let i = 0; i < data.length; i += 4) {
-            if (data[i] < 250 || data[i+1] < 250 || data[i+2] < 250) {
-                isEmpty = false;
-                break;
-            }
-        }
-        if (isEmpty) {
-            showAlert('Harap tulis tanda tangan terlebih dahulu!');
-            return;
-        }
-    }
-    
-    // Konversi ke JPEG dengan kompresi
-    const img = new Image();
-    img.onload = function() {
-        const compressedCanvas = document.createElement('canvas');
-        const maxWidth = 400;
-        const maxHeight = 150;
-        let width = img.width;
-        let height = img.height;
-        
-        if (width > height) {
-            if (width > maxWidth) {
-                height = Math.round(height * maxWidth / width);
-                width = maxWidth;
-            }
-        } else {
-            if (height > maxHeight) {
-                width = Math.round(width * maxHeight / height);
-                height = maxHeight;
-            }
-        }
-        
-        compressedCanvas.width = width;
-        compressedCanvas.height = height;
-        const compressedCtx = compressedCanvas.getContext('2d');
-        compressedCtx.fillStyle = 'white';
-        compressedCtx.fillRect(0, 0, width, height);
-        compressedCtx.drawImage(img, 0, 0, width, height);
-        
-        ttdData = compressedCanvas.toDataURL('image/jpeg', 0.9);
-        tampilkanPreviewTtd();
-        tutupModalTtd();
-        showAlert('✅ Tanda tangan berhasil disimpan!');
-    };
-    img.src = dataUrl;
-}
-
-// --- AMBIL FOTO TTD DARI KAMERA ---
-function ambilFotoTtdDariKamera() {
-    tutupModalTtd();
-    
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.setAttribute('capture', 'environment');
-    
-    input.onchange = function(event) {
-        prosesFotoTtd(event);
-    };
-    
-    input.click();
-}
-
-// --- AMBIL FOTO TTD DARI GALERI ---
-function ambilFotoTtdDariGaleri() {
-    tutupModalTtd();
-    
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/png, image/jpeg, image/jpg';
-    input.removeAttribute('capture');
-    
-    input.onchange = function(event) {
-        prosesFotoTtd(event);
-    };
-    
-    input.click();
-}
-
-// --- PROSES FOTO TTD (KAMERA/GALERI) ---
-function prosesFotoTtd(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    // Kompresi foto
-    kompresFoto(file, 400, 300, 0.8)
-        .then(dataUrl => {
-            ttdData = dataUrl;
-            tampilkanPreviewTtd();
-            showAlert('✅ Tanda tangan dari foto berhasil disimpan!');
-        })
-        .catch(err => {
-            showAlert('Gagal memproses foto: ' + err.message);
-        });
-}
-
-// --- TAMPILKAN PREVIEW TANDA TANGAN ---
-function tampilkanPreviewTtd() {
-    const previewContainer = document.getElementById('preview-ttd');
-    const imgPreview = document.getElementById('img-preview-ttd');
-    
-    if (ttdData) {
-        imgPreview.src = ttdData;
-        previewContainer.style.display = 'block';
-    } else {
-        previewContainer.style.display = 'none';
-    }
-}
-
-// --- HAPUS TANDA TANGAN ---
-function hapusTandaTangan() {
-    showConfirm('Apakah Anda yakin ingin menghapus tanda tangan?', function() {
-        ttdData = null;
-        document.getElementById('preview-ttd').style.display = 'none';
-        showAlert('Tanda tangan telah dihapus.');
-    });
-}
-
-// --- FUNGSI KOMPRESI FOTO (untuk tanda tangan) ---
-function kompresFoto(file, maxWidth, maxHeight, quality) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                let width = img.width;
-                let height = img.height;
-                
-                if (width > height) {
-                    if (width > maxWidth) {
-                        height = Math.round(height * maxWidth / width);
-                        width = maxWidth;
-                    }
-                } else {
-                    if (height > maxHeight) {
-                        width = Math.round(width * maxHeight / height);
-                        height = maxHeight;
-                    }
-                }
-                
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, width, height);
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                resolve(canvas.toDataURL('image/jpeg', quality));
-            };
-            img.onerror = function() {
-                reject(new Error('Gagal memuat gambar'));
-            };
-            img.src = e.target.result;
-        };
-        reader.onerror = function() {
-            reject(new Error('Gagal membaca file'));
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-// ============================================
-// MODIFIKASI FUNGSI CETAK SURAT (TAMBAHKAN TTD)
-// ============================================
-
-// SIMPAN FUNGSI CETAK SURAT YANG LAMA, KITA TAMBAHKAN BAGIAN TTD
-// CARI FUNGSI `cetakSurat()` dan TAMBAHKAN KODE INI DI DALAMNYA
-
-// Di dalam fungsi cetakSurat(), TAMBAHKAN kode ini di bagian PENUTUP & TANDA TANGAN
-// (Setelah baris: doc.text("Yang bermohon,", posXTTD, y); dan sebelum doc.text(nama, posXTTD, y);)
-
-/*
-    // === TAMBAHKAN KODE INI DI DALAM FUNGSI cetakSurat() ===
-    // Letakkan di bagian penutup surat, sebelum menulis nama
-
-    // Cek apakah ada tanda tangan
-    if (ttdData) {
-        try {
-            const imgProps = doc.getImageProperties(ttdData);
-            let imgW = imgProps.width;
-            let imgH = imgProps.height;
-            
-            // Ukuran maksimal tanda tangan di PDF
-            const maxTtdWidth = 60; // mm
-            const maxTtdHeight = 30; // mm
-            
-            let ttdW = imgW;
-            let ttdH = imgH;
-            
-            if (ttdW > ttdH) {
-                if (ttdW > maxTtdWidth) {
-                    ttdH = Math.round(ttdH * maxTtdWidth / ttdW);
-                    ttdW = maxTtdWidth;
-                }
-            } else {
-                if (ttdH > maxTtdHeight) {
-                    ttdW = Math.round(ttdW * maxTtdHeight / ttdH);
-                    ttdH = maxTtdHeight;
-                }
-            }
-            
-            // Posisi tanda tangan (di bawah teks "Yang bermohon,")
-            const posXTTD_img = posXTTD;
-            const posYTTD_img = y + 4; // Sedikit di bawah teks
-            
-            // Gambar tanda tangan
-            doc.addImage(ttdData, 'JPEG', posXTTD_img, posYTTD_img, ttdW, ttdH);
-            
-            // Geser posisi nama ke bawah dari tanda tangan
-            y = posYTTD_img + ttdH + 5;
-            
-        } catch (err) {
-            console.warn('Gagal menambahkan tanda tangan:', err);
-            // Lanjutkan tanpa tanda tangan
-        }
-    } else {
-        // Jika tidak ada tanda tangan, beri jarak kosong untuk tanda tangan manual
-        y += 20;
-    }
-    
-    // Kemudian lanjutkan menulis nama (dengan posisi y yang sudah disesuaikan)
-    doc.setFont("helvetica", "bold");
-    doc.text(nama, posXTTD, y);
-*/
-	</script>
-    <input type="file" id="file-input-txt" accept=".txt" style="display: none;" onchange="bacaFileTxt(event)">
 </body>
 </html>
-
