@@ -1,4 +1,34 @@
 // ============================================
+// LOGGING & ERROR HANDLING
+// ============================================
+console.log('🚀 main.js mulai diload...');
+
+// Tangkap semua error global
+window.onerror = function(msg, url, line, col, error) {
+    console.error('❌ Global Error:', msg, 'di', url, 'baris', line);
+    // Tampilkan di UI jika ada
+    var logDiv = document.getElementById('log');
+    if (logDiv) {
+        logDiv.innerHTML = '⚠️ Error: ' + msg + ' (baris ' + line + ')' + '<br>' + logDiv.innerHTML;
+    }
+    return true;
+};
+
+// ============================================
+// VARIABEL GLOBAL (DEFINISIKAN DI AWAL)
+// ============================================
+// PASTIKAN SEMUA VARIABEL GLOBAL DIDEKLARASIKAN
+var currentLat = null;
+var currentLng = null;
+var currentAcc = null;
+var watchID = null;
+var daftarTitik = [];
+var matchedTipe = null;
+var ttdData = null;
+var daftarFoto = [];
+
+console.log('📦 Variabel global dideklarasikan');
+// ============================================
 // DATABASE WILAYAH
 // ============================================
 const databaseWilayah = [
