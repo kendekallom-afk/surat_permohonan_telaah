@@ -1537,48 +1537,56 @@
         }
 
         function enhanceFoto() {
+    // Validasi: pastikan editorCanvas dan editorCtx tersedia
     if (!editorCanvas || !editorCtx) {
         alert('Silakan unggah foto terlebih dahulu!');
         return;
     }
 
     try {
+        // Ambil data gambar dari canvas editor
         let imgData = editorCtx.getImageData(0, 0, editorCanvas.width, editorCanvas.height);
         let data = imgData.data;
 
-        // Parameter agresif untuk efek scan dokumen
-        const threshold = 170;      // Lebih tinggi = lebih putih
-        const contrast = 2.0;       // Kontras sangat tinggi
-        const brightness = 1.2;     // Cerah
+        // Parameter untuk efek scan dokumen
+        let threshold = 140;      // Batas hitam-putih (0-255)
+        let contrast = 1.8;       // Kontras tinggi
+        let brightness = 1.1;     // Kecerahan
 
+        // Proses setiap piksel
         for (let i = 0; i < data.length; i += 4) {
-            // Grayscale dengan bobot yang lebih baik
+            // Konversi ke grayscale
             let gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
             
-            // Normalisasi dan kontras
+            // Terapkan kontras dan kecerahan
             gray = ((gray / 255 - 0.5) * contrast + 0.5) * 255;
             gray = Math.min(255, Math.max(0, gray * brightness));
             
-            // Binarization agresif
+            // Thresholding: jadi hitam atau putih murni
             if (gray > threshold) {
-                data[i] = 255;     // R
-                data[i + 1] = 255; // G
-                data[i + 2] = 255; // B
+                // Putih (background)
+                data[i] = 255;
+                data[i + 1] = 255;
+                data[i + 2] = 255;
             } else {
+                // Hitam (teks/garis)
                 data[i] = 0;
                 data[i + 1] = 0;
                 data[i + 2] = 0;
             }
         }
 
+        // Tulis ulang data yang sudah diproses ke canvas
         editorCtx.putImageData(imgData, 0, 0);
+
+        // Simpan hasil ke fotoSementara
         fotoSementara = editorCanvas.toDataURL('image/jpeg', 0.95);
         
-        alert('✅ Enhance berhasil! Foto sekarang seperti scan dokumen.');
+        alert('✅ Enhance berhasil! Foto menjadi hitam-putih kontras seperti scan dokumen.');
 
     } catch (error) {
         console.error('Gagal memproses gambar:', error);
-        alert('Terjadi kesalahan: ' + error.message);
+        alert('Terjadi kesalahan saat memproses gambar: ' + error.message);
     }
 }
 
