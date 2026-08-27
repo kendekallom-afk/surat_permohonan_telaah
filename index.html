@@ -695,9 +695,20 @@
 
                 <!-- TOMBOL CETAK SURAT -->
                 <div class="form-group" style="margin-top: 20px;">
-                    <button class="btn btn-purple-wide" onclick="cetakSurat()" style="padding: 14px; font-size: 15px;">
-                        🖨️ CETAK SURAT PERMOHONAN
-                    </button>
+                    <!-- Tag Surat Permohonan -->
+<div class="form-group" style="margin-top: 15px;">
+    <label style="display: block; font-size: 14px; color: #555555; margin-bottom: 8px;">Surat Permohonan</label>
+    <div style="display: flex; gap: 12px;">
+        <!-- Tombol LIHAT -->
+        <button type="button" onclick="prosesSurat('preview')" style="flex: 1; background-color: #1d6ed8; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>👁️</span> LIHAT
+        </button>
+        <!-- Tombol CETAK -->
+        <button type="button" onclick="prosesSurat('cetak')" style="flex: 1; background-color: #7c3aed; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>🖨️</span> CETAK
+        </button>
+    </div>
+</div>
                 </div>
             </div>
         </div>
@@ -1526,55 +1537,56 @@
         }
 
         function enhanceFoto() {
-    if (!fotoSementara) return;
-    
-    const img = new Image();
-    img.onload = function() {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        
-        // Ambil data pixel
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
-        // Parameter untuk efek "scan dokumen"
-        const threshold = 180; // Ambang batas untuk hitam/putih (180-220)
-        const contrast = 1.8; // Kontras tinggi (1.5-2.0)
-        const brightness = 1.2; // Kecerahan (1.0-1.3)
-        
+    // 1. Validasi: pastikan canvas dan context (ctx) sudah tersedia
+    if (!ctx || !canvas) {
+        alert('Silakan unggah dan sesuaikan foto terlebih dahulu!');
+        return;
+    }
+
+    try {
+        // 2. Ambil data piksel dari seluruh area canvas
+        let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let data = imgData.data;
+
+        // 3. Parameter pengolahan (dapat disesuaikan nilainya)
+        let threshold = 140; // Batas pemisah hitam dan putih (0 - 255)
+        let contrast = 1.8;   // Pengali kontras
+        let brightness = 1.1; // Pengali kecerahan
+
+        // 4. Perulangan (looping) untuk setiap piksel (RGAA: Red, Green, Blue, Alpha)
         for (let i = 0; i < data.length; i += 4) {
-            // Ubah ke grayscale terlebih dahulu
-            let gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
-            
-            // Terapkan kontras
+            // Formula konversi RGB ke skala abu-abu (Grayscale)
+            let gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+
+            // Penyesuaian kontras & kecerahan
             gray = ((gray / 255 - 0.5) * contrast + 0.5) * 255;
-            
-            // Terapkan kecerahan
             gray = Math.min(255, gray * brightness);
-            
-            // Threshold: jika di atas threshold -> putih, jika di bawah -> hitam
+
+            // Binarization: Thresholding menjadi Hitam Pekat atau Putih Bersih
             if (gray > threshold) {
-                // Putih (latar)
-                data[i] = 255;
-                data[i+1] = 255;
-                data[i+2] = 255;
+                // Latar belakang / area terang -> Putih
+                data[i]     = 255; // Red
+                data[i + 1] = 255; // Green
+                data[i + 2] = 255; // Blue
             } else {
-                // Hitam (tulisan)
-                data[i] = 0;
-                data[i+1] = 0;
-                data[i+2] = 0;
+                // Teks / garis / area gelap -> Hitam
+                data[i]     = 0;   // Red
+                data[i + 1] = 0;   // Green
+                data[i + 2] = 0;   // Blue
             }
+            // Catatan: data[i + 3] adalah Nilai Alpha (Transparansi), dibiarkan tetap (tidak diubah)
         }
-        
-        ctx.putImageData(imageData, 0, 0);
-        fotoSementara = canvas.toDataURL('image/jpeg', 0.95);
-        initEditorCanvas();
-        showAlert('✨ Enhance berhasil! Foto menjadi hitam-putih kontras seperti scan.');
-    };
-    img.src = fotoSementara;
+
+        // 5. Tulis ulang data piksel yang telah diproses kembali ke Canvas
+        ctx.putImageData(imgData, 0, 0);
+
+        // 6. Tampilkan notifikasi keberhasilan
+        alert('✨ Enhance berhasil! Foto menjadi hitam-putih kontras seperti scan.');
+
+    } catch (error) {
+        console.error('Gagal memproses gambar:', error);
+        alert('Terjadi kesalahan saat memproses gambar. Pastikan gambar dimuat dari sumber lokal atau domain yang sama (CORS).');
+    }
 }
 
         function resetEditor() {
@@ -2110,6 +2122,24 @@
             startGPS();
             loadFormState();
         };
+		function prosesSurat(mode) {
+    // Panggil fungsi pembuat doc PDF Anda yang sudah ada
+    // Contoh: const doc = buatPDF();
+
+    if (mode === 'preview') {
+        // LIHAT: Buka PDF di Tab Baru (Preview)
+        const pdfBlob = doc.output('blob');
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        window.open(blobUrl, '_blank');
+    } else if (mode === 'cetak') {
+        // CETAK: Download / Simpan file
+        const nama = document.getElementById('nama') ? document.getElementById('nama').value : 'Pemohon';
+        const fileName = `Surat_Permohonan_${nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
+        
+        // Pilihan pengunduhan bawaan
+        doc.save(fileName);
+    }
+}
     </script>
 
 </body>
