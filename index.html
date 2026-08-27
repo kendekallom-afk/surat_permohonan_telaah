@@ -316,63 +316,47 @@
     <input type="file" id="file-input-txt" accept=".txt" style="display:none;" onchange="bacaFileTxt(event)">
 
     <!-- ===== LIBRARY JS (LOAD DI AKHIR BODY) ===== -->
+        <!-- ===== JAVASCRIPT ===== -->
     <!-- 1. Library dari CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     
-    <!-- 2. Fallback ke lokal jika CDN gagal -->
-    <script>
-        // Cek apakah library berhasil diload
-        setTimeout(function() {
-            if (typeof window.jspdf === 'undefined') {
-                console.warn('⚠️ CDN gagal, fallback ke lokal...');
-                var s1 = document.createElement('script');
-                s1.src = '/surat_permohonan_telaah/lib/jspdf.umd.min.js';
-                document.head.appendChild(s1);
-                
-                var s2 = document.createElement('script');
-                s2.src = '/surat_permohonan_telaah/lib/jspdf.plugin.autotable.min.js';
-                document.head.appendChild(s2);
-            }
-        }, 2000);
-    </script>
-    
-    <!-- 3. MAIN JS (LOAD TERAKHIR) -->
+    <!-- 2. Main JS -->
     <script src="js/main.js"></script>
     
-    <!-- 4. INLINE SCRIPT UNTUK MEMASTIKAN GPS JALAN -->
+    <!-- 3. Safety Net - Jika main.js gagal -->
     <script>
-        // Ini adalah safety net - jika main.js gagal, GPS tetap bisa jalan
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔄 DOM siap, mengecek GPS...');
+        (function() {
+            console.log('🛡️ Safety net aktif');
             
-            // Cek apakah fungsi startGPS tersedia
-            if (typeof startGPS === 'function') {
-                console.log('✅ startGPS tersedia, memulai...');
-                // Jangan langsung start, beri waktu main.js selesai
-                setTimeout(startGPS, 1000);
-            } else {
-                console.warn('⚠️ startGPS tidak tersedia, mencoba define ulang...');
-                // Define ulang fungsi GPS dasar
-                window.startGPS = function() {
-                    if ("geolocation" in navigator) {
+            // Cek apakah GPS sudah jalan setelah 3 detik
+            setTimeout(function() {
+                if (!window.currentLat || !window.currentLng) {
+                    console.warn('⚠️ GPS belum aktif, mencoba fallback...');
+                    
+                    // Coba jalankan GPS langsung
+                    if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(
                             function(pos) {
-                                document.getElementById("lat").innerText = pos.coords.latitude.toFixed(6);
-                                document.getElementById("lng").innerText = pos.coords.longitude.toFixed(6);
-                                document.getElementById("acc").innerText = Math.round(pos.coords.accuracy);
-                                document.getElementById("sat-status").innerText = "✅ Terkunci";
+                                console.log('✅ Fallback GPS berhasil!');
+                                window.currentLat = pos.coords.latitude.toFixed(6);
+                                window.currentLng = pos.coords.longitude.toFixed(6);
+                                window.currentAcc = Math.round(pos.coords.accuracy);
+                                
+                                document.getElementById("lat").innerText = window.currentLat;
+                                document.getElementById("lng").innerText = window.currentLng;
+                                document.getElementById("acc").innerText = window.currentAcc;
+                                document.getElementById("sat-status").innerText = "✅ Terkunci (Fallback)";
                             },
                             function(err) {
-                                document.getElementById("sat-status").innerText = "❌ Error: " + err.message;
-                            }
+                                console.error('❌ Fallback GPS gagal:', err.message);
+                            },
+                            { enableHighAccuracy: true, timeout: 10000 }
                         );
                     }
-                };
-                // Jalankan GPS
-                setTimeout(startGPS, 1500);
-            }
-        });
+                }
+            }, 3000);
+        })();
     </script>
 </body>
 </html>
