@@ -1509,32 +1509,73 @@
         }
 
         function terapkanCrop() {
-            if (!fotoSementara) return;
-            
-            const img = new Image();
-            img.onload = function() {
-                const scaleX = img.width / editorCanvas.width;
-                const scaleY = img.height / editorCanvas.height;
-                
-                const cropCanvas = document.createElement('canvas');
-                const cropWidth = cropW * scaleX;
-                const cropHeight = cropH * scaleY;
-                cropCanvas.width = cropWidth;
-                cropCanvas.height = cropHeight;
-                
-                const cropCtx = cropCanvas.getContext('2d');
-                cropCtx.drawImage(
-                    img,
-                    cropX * scaleX, cropY * scaleY, cropWidth, cropHeight,
-                    0, 0, cropWidth, cropHeight
-                );
-                
-                fotoSementara = cropCanvas.toDataURL('image/jpeg', 0.9);
-                initEditorCanvas();
-                showAlert('✅ Crop berhasil diterapkan!');
-            };
-            img.src = fotoSementara;
-        }
+    if (!fotoSementara) return;
+    
+    const img = new Image();
+    img.onload = function() {
+        const scaleX = img.width / editorCanvas.width;
+        const scaleY = img.height / editorCanvas.height;
+        
+        // Buat canvas baru untuk hasil crop
+        const cropCanvas = document.createElement('canvas');
+        const cropWidth = cropW * scaleX;
+        const cropHeight = cropH * scaleY;
+        cropCanvas.width = cropWidth;
+        cropCanvas.height = cropHeight;
+        
+        const cropCtx = cropCanvas.getContext('2d');
+        // Gambar hanya area crop
+        cropCtx.drawImage(
+            img,
+            cropX * scaleX, cropY * scaleY, cropWidth, cropHeight,
+            0, 0, cropWidth, cropHeight
+        );
+        
+        // Simpan hasil crop ke fotoSementara
+        fotoSementara = cropCanvas.toDataURL('image/jpeg', 0.95);
+        
+        // Reset crop area ke ukuran penuh (agar tidak ada garis putus-putus)
+        cropX = 0;
+        cropY = 0;
+        cropW = 1;
+        cropH = 1;
+        
+        // Inisialisasi ulang editor dengan hasil crop (tanpa garis crop)
+        initEditorCanvasTanpaCrop();
+        
+        showAlert('✅ Crop berhasil diterapkan!');
+    };
+    img.src = fotoSementara;
+}
+
+// Fungsi baru: inisialisasi editor TANPA garis crop
+function initEditorCanvasTanpaCrop() {
+    editorCanvas = document.getElementById('canvas-editor-ttd');
+    const container = editorCanvas.parentElement;
+    const maxWidth = container.clientWidth - 4;
+    const maxHeight = 350;
+    
+    const img = new Image();
+    img.onload = function() {
+        let width = img.width;
+        let height = img.height;
+        
+        const scale = Math.min(maxWidth / width, maxHeight / height);
+        const displayW = width * scale;
+        const displayH = height * scale;
+        
+        editorCanvas.width = displayW;
+        editorCanvas.height = displayH;
+        
+        editorCtx = editorCanvas.getContext('2d');
+        // Gambar foto full tanpa overlay crop
+        editorCtx.drawImage(img, 0, 0, displayW, displayH);
+        
+        // Simpan fotoSementara yang sudah di-crop
+        fotoSementara = editorCanvas.toDataURL('image/jpeg', 0.95);
+    };
+    img.src = fotoSementara;
+}
 
         function enhanceFoto() {
     // Validasi: pastikan editorCanvas dan editorCtx tersedia
@@ -1549,11 +1590,11 @@
         let data = imgData.data;
 
         // Parameter untuk efek scan dokumen
-        let threshold = 140;      // Batas hitam-putih (0-255)
-        let contrast = 1.8;       // Kontras tinggi
-        let brightness = 1.1;     // Kecerahan
+        const threshold = 170;
+        const contrast = 2.0;
+        const brightness = 1.2;
 
-        // Proses setiap piksel
+        // Proses setiap piksel (hanya area dalam canvas, tidak ada overlay)
         for (let i = 0; i < data.length; i += 4) {
             // Konversi ke grayscale
             let gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
