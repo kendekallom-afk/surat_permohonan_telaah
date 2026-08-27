@@ -1295,275 +1295,296 @@
         }
 
         // ============================================
-        // FUNGSI EDITOR FOTO (CROP & ENHANCE)
-        // ============================================
-        function bukaEditorFoto(dataUrl) {
-            fotoAsli = dataUrl;
-            fotoSementara = dataUrl;
-            
-            const modal = document.getElementById('modal-editor-ttd');
-            modal.style.display = 'flex';
-            
-            setTimeout(() => {
-                initEditorCanvas();
-            }, 100);
-        }
+// EDITOR FOTO TANDA TANGAN (CROP & ENHANCE) - VERSI DIPERBAIKI
+// ============================================
 
-        function tutupEditor() {
-            document.getElementById('modal-editor-ttd').style.display = 'none';
-            fotoAsli = null;
-            fotoSementara = null;
-        }
+let fotoAsli = null;
+let fotoSementara = null;
+let cropX = 0, cropY = 0, cropW = 0, cropH = 0;
+let editorCanvas, editorCtx;
+let isDragging = false;
+let dragStartX = 0, dragStartY = 0;
+let dragType = 'move';
 
-        function initEditorCanvas() {
-            editorCanvas = document.getElementById('canvas-editor-ttd');
-            const container = editorCanvas.parentElement;
-            const maxWidth = container.clientWidth - 4;
-            const maxHeight = 350;
+function bukaEditorFoto(dataUrl) {
+    fotoAsli = dataUrl;
+    fotoSementara = dataUrl;
+    
+    const modal = document.getElementById('modal-editor-ttd');
+    modal.style.display = 'flex';
+    
+    setTimeout(() => {
+        initEditorCanvas();
+    }, 100);
+}
+
+function tutupEditor() {
+    document.getElementById('modal-editor-ttd').style.display = 'none';
+    fotoAsli = null;
+    fotoSementara = null;
+}
+
+function initEditorCanvas() {
+    editorCanvas = document.getElementById('canvas-editor-ttd');
+    const container = editorCanvas.parentElement;
+    const maxWidth = container.clientWidth - 4;
+    const maxHeight = 350;
+    
+    const img = new Image();
+    img.onload = function() {
+        let width = img.width;
+        let height = img.height;
+        
+        const scale = Math.min(maxWidth / width, maxHeight / height);
+        const displayW = width * scale;
+        const displayH = height * scale;
+        
+        editorCanvas.width = displayW;
+        editorCanvas.height = displayH;
+        
+        editorCtx = editorCanvas.getContext('2d');
+        editorCtx.drawImage(img, 0, 0, displayW, displayH);
+        
+        // Inisialisasi crop area (default: 80% dari gambar, di tengah)
+        cropX = displayW * 0.1;
+        cropY = displayH * 0.1;
+        cropW = displayW * 0.8;
+        cropH = displayH * 0.8;
+        
+        gambarCropArea();
+        
+        // Event untuk drag
+        editorCanvas.addEventListener('mousedown', mulaiDrag);
+        editorCanvas.addEventListener('mousemove', drag);
+        editorCanvas.addEventListener('mouseup', stopDrag);
+        editorCanvas.addEventListener('mouseleave', stopDrag);
+        editorCanvas.addEventListener('touchstart', touchMulaiDrag, { passive: false });
+        editorCanvas.addEventListener('touchmove', touchDrag, { passive: false });
+        editorCanvas.addEventListener('touchend', stopDrag, { passive: false });
+    };
+    img.src = fotoSementara;
+}
+
+function gambarCropArea() {
+    const img = new Image();
+    img.onload = function() {
+        // Bersihkan canvas
+        editorCtx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
+        
+        // Gambar foto
+        editorCtx.drawImage(img, 0, 0, editorCanvas.width, editorCanvas.height);
+        
+        // Buat overlay gelap di LUAR area crop
+        editorCtx.save();
+        editorCtx.beginPath();
+        // Buat path persegi panjang untuk area crop
+        editorCtx.rect(cropX, cropY, cropW, cropH);
+        // Gunakan evenodd rule untuk membuat lubang
+        editorCtx.rect(0, 0, editorCanvas.width, editorCanvas.height);
+        editorCtx.clip('evenodd');
+        
+        // Isi overlay gelap di luar crop
+        editorCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        editorCtx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
+        editorCtx.restore();
+        
+        // Gambar border crop (garis hijau putus-putus)
+        editorCtx.strokeStyle = '#00ff00';
+        editorCtx.lineWidth = 2;
+        editorCtx.setLineDash([5, 5]);
+        editorCtx.strokeRect(cropX, cropY, cropW, cropH);
+        editorCtx.setLineDash([]);
+        
+        // Gambar handle di sudut
+        const handles = [
+            [cropX, cropY],
+            [cropX + cropW, cropY],
+            [cropX, cropY + cropH],
+            [cropX + cropW, cropY + cropH]
+        ];
+        handles.forEach(([x, y]) => {
+            editorCtx.fillStyle = '#00ff00';
+            editorCtx.beginPath();
+            editorCtx.arc(x, y, 6, 0, Math.PI * 2);
+            editorCtx.fill();
+            editorCtx.strokeStyle = 'white';
+            editorCtx.lineWidth = 2;
+            editorCtx.stroke();
+        });
+    };
+    img.src = fotoSementara;
+}
+
+function mulaiDrag(e) {
+    const rect = editorCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const scaleX = editorCanvas.width / rect.width;
+    const scaleY = editorCanvas.height / rect.height;
+    const canvasX = x * scaleX;
+    const canvasY = y * scaleY;
+    
+    const handles = [
+        { x: cropX, y: cropY, type: 'nw' },
+        { x: cropX + cropW, y: cropY, type: 'ne' },
+        { x: cropX, y: cropY + cropH, type: 'sw' },
+        { x: cropX + cropW, y: cropY + cropH, type: 'se' }
+    ];
+    
+    let found = false;
+    for (let h of handles) {
+        if (Math.abs(canvasX - h.x) < 15 && Math.abs(canvasY - h.y) < 15) {
+            dragType = 'resize';
+            dragStartX = canvasX;
+            dragStartY = canvasY;
+            found = true;
+            break;
+        }
+    }
+    
+    if (!found && canvasX >= cropX && canvasX <= cropX + cropW &&
+        canvasY >= cropY && canvasY <= cropY + cropH) {
+        dragType = 'move';
+        dragStartX = canvasX - cropX;
+        dragStartY = canvasY - cropY;
+        found = true;
+    }
+    
+    isDragging = found;
+}
+
+function drag(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    
+    const rect = editorCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const scaleX = editorCanvas.width / rect.width;
+    const scaleY = editorCanvas.height / rect.height;
+    const canvasX = x * scaleX;
+    const canvasY = y * scaleY;
+    
+    if (dragType === 'move') {
+        let newX = canvasX - dragStartX;
+        let newY = canvasY - dragStartY;
+        newX = Math.max(0, Math.min(newX, editorCanvas.width - cropW));
+        newY = Math.max(0, Math.min(newY, editorCanvas.height - cropH));
+        cropX = newX;
+        cropY = newY;
+    } else if (dragType === 'resize') {
+        const newW = Math.max(20, canvasX - cropX);
+        const newH = Math.max(20, canvasY - cropY);
+        cropW = Math.min(newW, editorCanvas.width - cropX);
+        cropH = Math.min(newH, editorCanvas.height - cropY);
+    }
+    
+    gambarCropArea();
+}
+
+function stopDrag() {
+    isDragging = false;
+}
+
+function touchMulaiDrag(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent('mousedown', {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    mulaiDrag(mouseEvent);
+}
+
+function touchDrag(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent('mousemove', {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    drag(mouseEvent);
+}
+
+function terapkanCrop() {
+    if (!fotoSementara) return;
+    
+    const img = new Image();
+    img.onload = function() {
+        const scaleX = img.width / editorCanvas.width;
+        const scaleY = img.height / editorCanvas.height;
+        
+        const cropCanvas = document.createElement('canvas');
+        const cropWidth = cropW * scaleX;
+        const cropHeight = cropH * scaleY;
+        cropCanvas.width = cropWidth;
+        cropCanvas.height = cropHeight;
+        
+        const cropCtx = cropCanvas.getContext('2d');
+        cropCtx.drawImage(
+            img,
+            cropX * scaleX, cropY * scaleY, cropWidth, cropHeight,
+            0, 0, cropWidth, cropHeight
+        );
+        
+        fotoSementara = cropCanvas.toDataURL('image/jpeg', 0.9);
+        initEditorCanvas();
+        showAlert('✅ Crop berhasil diterapkan!');
+    };
+    img.src = fotoSementara;
+}
+
+function enhanceFoto() {
+    if (!fotoSementara) return;
+    
+    const img = new Image();
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        const contrast = 1.4;
+        const brightness = 1.1;
+        
+        for (let i = 0; i < data.length; i += 4) {
+            data[i] = Math.min(255, Math.max(0, ((data[i] / 255 - 0.5) * contrast + 0.5) * 255));
+            data[i+1] = Math.min(255, Math.max(0, ((data[i+1] / 255 - 0.5) * contrast + 0.5) * 255));
+            data[i+2] = Math.min(255, Math.max(0, ((data[i+2] / 255 - 0.5) * contrast + 0.5) * 255));
             
-            const img = new Image();
-            img.onload = function() {
-                let width = img.width;
-                let height = img.height;
-                
-                const scale = Math.min(maxWidth / width, maxHeight / height);
-                const displayW = width * scale;
-                const displayH = height * scale;
-                
-                editorCanvas.width = displayW;
-                editorCanvas.height = displayH;
-                
-                editorCtx = editorCanvas.getContext('2d');
-                editorCtx.drawImage(img, 0, 0, displayW, displayH);
-                
-                // Inisialisasi crop area (default: 80% dari gambar, di tengah)
-                cropX = displayW * 0.1;
-                cropY = displayH * 0.1;
-                cropW = displayW * 0.8;
-                cropH = displayH * 0.8;
-                
-                gambarCropArea();
-                
-                // Event untuk drag
-                editorCanvas.addEventListener('mousedown', mulaiDrag);
-                editorCanvas.addEventListener('mousemove', drag);
-                editorCanvas.addEventListener('mouseup', stopDrag);
-                editorCanvas.addEventListener('mouseleave', stopDrag);
-                editorCanvas.addEventListener('touchstart', touchMulaiDrag, { passive: false });
-                editorCanvas.addEventListener('touchmove', touchDrag, { passive: false });
-                editorCanvas.addEventListener('touchend', stopDrag, { passive: false });
-            };
-            img.src = fotoSementara;
+            data[i] = Math.min(255, data[i] * brightness);
+            data[i+1] = Math.min(255, data[i+1] * brightness);
+            data[i+2] = Math.min(255, data[i+2] * brightness);
         }
+        
+        ctx.putImageData(imageData, 0, 0);
+        fotoSementara = canvas.toDataURL('image/jpeg', 0.9);
+        initEditorCanvas();
+        showAlert('✨ Enhance berhasil diterapkan!');
+    };
+    img.src = fotoSementara;
+}
 
-        function gambarCropArea() {
-            const img = new Image();
-            img.onload = function() {
-                editorCtx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
-                editorCtx.drawImage(img, 0, 0, editorCanvas.width, editorCanvas.height);
-                
-                // Overlay gelap di luar crop
-                editorCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                editorCtx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
-                editorCtx.clearRect(cropX, cropY, cropW, cropH);
-                
-                // Border crop
-                editorCtx.strokeStyle = '#00ff00';
-                editorCtx.lineWidth = 2;
-                editorCtx.setLineDash([5, 5]);
-                editorCtx.strokeRect(cropX, cropY, cropW, cropH);
-                editorCtx.setLineDash([]);
-                
-                // Handle di sudut
-                const handles = [
-                    [cropX, cropY],
-                    [cropX + cropW, cropY],
-                    [cropX, cropY + cropH],
-                    [cropX + cropW, cropY + cropH]
-                ];
-                handles.forEach(([x, y]) => {
-                    editorCtx.fillStyle = '#00ff00';
-                    editorCtx.beginPath();
-                    editorCtx.arc(x, y, 6, 0, Math.PI * 2);
-                    editorCtx.fill();
-                    editorCtx.strokeStyle = 'white';
-                    editorCtx.lineWidth = 2;
-                    editorCtx.stroke();
-                });
-            };
-            img.src = fotoSementara;
-        }
+function resetEditor() {
+    if (fotoAsli) {
+        fotoSementara = fotoAsli;
+        initEditorCanvas();
+        showAlert('↺ Foto direset ke semula');
+    }
+}
 
-        function mulaiDrag(e) {
-            const rect = editorCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const scaleX = editorCanvas.width / rect.width;
-            const scaleY = editorCanvas.height / rect.height;
-            const canvasX = x * scaleX;
-            const canvasY = y * scaleY;
-            
-            const handles = [
-                { x: cropX, y: cropY, type: 'nw' },
-                { x: cropX + cropW, y: cropY, type: 'ne' },
-                { x: cropX, y: cropY + cropH, type: 'sw' },
-                { x: cropX + cropW, y: cropY + cropH, type: 'se' }
-            ];
-            
-            let found = false;
-            for (let h of handles) {
-                if (Math.abs(canvasX - h.x) < 15 && Math.abs(canvasY - h.y) < 15) {
-                    dragType = 'resize';
-                    dragStartX = canvasX;
-                    dragStartY = canvasY;
-                    found = true;
-                    break;
-                }
-            }
-            
-            if (!found && canvasX >= cropX && canvasX <= cropX + cropW &&
-                canvasY >= cropY && canvasY <= cropY + cropH) {
-                dragType = 'move';
-                dragStartX = canvasX - cropX;
-                dragStartY = canvasY - cropY;
-                found = true;
-            }
-            
-            isDragging = found;
-        }
-
-        function drag(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            
-            const rect = editorCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const scaleX = editorCanvas.width / rect.width;
-            const scaleY = editorCanvas.height / rect.height;
-            const canvasX = x * scaleX;
-            const canvasY = y * scaleY;
-            
-            if (dragType === 'move') {
-                let newX = canvasX - dragStartX;
-                let newY = canvasY - dragStartY;
-                newX = Math.max(0, Math.min(newX, editorCanvas.width - cropW));
-                newY = Math.max(0, Math.min(newY, editorCanvas.height - cropH));
-                cropX = newX;
-                cropY = newY;
-            } else if (dragType === 'resize') {
-                const newW = Math.max(20, canvasX - cropX);
-                const newH = Math.max(20, canvasY - cropY);
-                cropW = Math.min(newW, editorCanvas.width - cropX);
-                cropH = Math.min(newH, editorCanvas.height - cropY);
-            }
-            
-            gambarCropArea();
-        }
-
-        function stopDrag() {
-            isDragging = false;
-        }
-
-        function touchMulaiDrag(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousedown', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            mulaiDrag(mouseEvent);
-        }
-
-        function touchDrag(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousemove', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            drag(mouseEvent);
-        }
-
-        function terapkanCrop() {
-            if (!fotoSementara) return;
-            
-            const img = new Image();
-            img.onload = function() {
-                const scaleX = img.width / editorCanvas.width;
-                const scaleY = img.height / editorCanvas.height;
-                
-                const cropCanvas = document.createElement('canvas');
-                const cropWidth = cropW * scaleX;
-                const cropHeight = cropH * scaleY;
-                cropCanvas.width = cropWidth;
-                cropCanvas.height = cropHeight;
-                
-                const cropCtx = cropCanvas.getContext('2d');
-                cropCtx.drawImage(
-                    img,
-                    cropX * scaleX, cropY * scaleY, cropWidth, cropHeight,
-                    0, 0, cropWidth, cropHeight
-                );
-                
-                fotoSementara = cropCanvas.toDataURL('image/jpeg', 0.9);
-                initEditorCanvas();
-                showAlert('✅ Crop berhasil diterapkan!');
-            };
-            img.src = fotoSementara;
-        }
-
-        function enhanceFoto() {
-            if (!fotoSementara) return;
-            
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imageData.data;
-                
-                const contrast = 1.4;
-                const brightness = 1.1;
-                
-                for (let i = 0; i < data.length; i += 4) {
-                    data[i] = Math.min(255, Math.max(0, ((data[i] / 255 - 0.5) * contrast + 0.5) * 255));
-                    data[i+1] = Math.min(255, Math.max(0, ((data[i+1] / 255 - 0.5) * contrast + 0.5) * 255));
-                    data[i+2] = Math.min(255, Math.max(0, ((data[i+2] / 255 - 0.5) * contrast + 0.5) * 255));
-                    
-                    data[i] = Math.min(255, data[i] * brightness);
-                    data[i+1] = Math.min(255, data[i+1] * brightness);
-                    data[i+2] = Math.min(255, data[i+2] * brightness);
-                }
-                
-                ctx.putImageData(imageData, 0, 0);
-                fotoSementara = canvas.toDataURL('image/jpeg', 0.9);
-                initEditorCanvas();
-                showAlert('✨ Enhance berhasil diterapkan!');
-            };
-            img.src = fotoSementara;
-        }
-
-        function resetEditor() {
-            if (fotoAsli) {
-                fotoSementara = fotoAsli;
-                initEditorCanvas();
-                showAlert('↺ Foto direset ke semula');
-            }
-        }
-
-        function simpanDariEditor() {
-            if (fotoSementara) {
-                ttdData = fotoSementara;
-                tampilkanPreviewTtd();
-                tutupEditor();
-                showAlert('✅ Tanda tangan hasil edit berhasil disimpan!');
-            }
-        }
+function simpanDariEditor() {
+    if (fotoSementara) {
+        ttdData = fotoSementara;
+        tampilkanPreviewTtd();
+        tutupEditor();
+        showAlert('✅ Tanda tangan hasil edit berhasil disimpan!');
+    }
+}
 
         // ============================================
         // FUNGSI PROSES FOTO TTD (DIEDIT)
