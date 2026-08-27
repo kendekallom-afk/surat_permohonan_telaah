@@ -4,19 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>mGPS Point - Surat Permohonan</title>
-    
-    <!-- ===== FAVICON ===== -->
+    <!-- ===== FAVORITE ICON / TAB ICON ===== -->
     <link rel="icon" type="image/png" href="assets/M.png">
-    
-    <!-- ===== CSS EKSTERNAL ===== -->
-    <link rel="stylesheet" href="css/style.css">
-    
-    <!-- ===== FONT ROBOTO ===== -->
+    <!-- ===== PRELOAD RESOURCE LOKAL ===== -->
+    <link rel="preload" href="/surat_permohonan_telaah/lib/jspdf.umd.min.js" as="script">
+    <link rel="preload" href="/surat_permohonan_telaah/lib/jspdf.plugin.autotable.min.js" as="script">
+    <link rel="preload" href="/surat_permohonan_telaah/font/Roboto/roboto.css" as="style">
+    <link rel="preload" href="/surat_permohonan_telaah/assets/Mlogo.png" as="image">
+	
+	<!-- ===== FONT ROBOTO (LOKAL) ===== -->
     <link href="/surat_permohonan_telaah/font/Roboto/roboto.css" rel="stylesheet">
-    
-    <!-- ===== LIBRARY JS ===== -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- ===== LIBRARY JS (PRIORITAS CDN) ===== -->
+	<!-- 1. Load dari CDN (lebih cepat dan selalu update) -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+	<!-- 2. Fallback ke lokal jika CDN gagal -->
+	<script>
+		// Tunggu sebentar, cek apakah library sudah terload
+		setTimeout(function() {
+			if (typeof window.jspdf === 'undefined') {
+				console.warn('⚠️ CDN gagal, fallback ke lokal...');
+				var s1 = document.createElement('script');
+				s1.src = '/surat_permohonan_telaah/lib/jspdf.umd.min.js';
+				document.head.appendChild(s1);
+            
+				var s2 = document.createElement('script');
+				s2.src = '/surat_permohonan_telaah/lib/jspdf.plugin.autotable.min.js';
+				document.head.appendChild(s2);
+			} else {
+				console.log('✅ Library dari CDN berhasil diload');
+			}
+		}, 2000);
+	</script>
 </head>
 <body>
 
