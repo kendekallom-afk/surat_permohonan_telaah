@@ -1056,60 +1056,61 @@
         }
 
         function simpanTitik() {
-            if (!currentLat) return showAlert("Tunggu sinyal GPS terunci terlebih dahulu!");
-            showPrompt("Masukkan nama/label titik:", `Titik-${daftarTitik.length + 1}`, function (namaTitik) {
-                if (!namaTitik || namaTitik.trim() === "") return;
+    if (!currentLat || !currentLng) {
+        showAlert("Tunggu GPS mendapat sinyal terlebih dahulu!");
+        return;
+    }
 
-                const titik = {
-                    id: daftarTitik.length + 1,
-                    nama: namaTitik.replace(/,/g, " "),
-                    lat: currentLat,
-                    lng: currentLng,
-                    acc: currentAcc,
-                    waktu: new Date().toLocaleTimeString()
-                };
+    const titik = {
+        nama: `Titik ${daftarTitik.length + 1}`,  // ✅ Tambah nama default
+        lat: currentLat,
+        lng: currentLng,
+        acc: currentAcc,
+        waktu: new Date().toLocaleTimeString()
+    };
 
-                daftarTitik.push(titik);
-                updateTampilanLog();
-            });
-        }
+    daftarTitik.push(titik);
+    autoSaveData();  // ✅ Simpan ke localStorage
+    updateTampilanLog();  // ✅ Update display
+}
 
         function editTitikSatu(index) {
-            const t = daftarTitik[index];
+    const t = daftarTitik[index];
 
-            showPrompt("Edit Nama Titik:", t.nama, function (namaBaru) {
-                if (!namaBaru || namaBaru.trim() === "") return;
+    showPrompt("Edit Nama Titik:", t.nama, function (namaBaru) {
+        if (!namaBaru || namaBaru.trim() === "") return;
 
-                const nilaiAwal = `${t.lng}, ${t.lat}`;
-                showPrompt("Edit Koordinat (Format: Longitude, Latitude):", nilaiAwal, function (koordinatBaru) {
-                    if (!koordinatBaru || !koordinatBaru.includes(",")) {
-                        return showAlert("Format salah! Gunakan pemisah koma.\nContoh: 118.848438, -2.672878");
-                    }
+        const nilaiAwal = `${t.lng}, ${t.lat}`;
+        showPrompt("Edit Koordinat (Format: Longitude, Latitude):", nilaiAwal, function (koordinatBaru) {
+            if (!koordinatBaru || !koordinatBaru.includes(",")) {
+                return showAlert("Format salah! Gunakan pemisah koma.\nContoh: 118.848438, -2.672878");
+            }
 
-                    const parts = koordinatBaru.split(",");
-                    const lngBaru = parts[0].trim();
-                    const latBaru = parts[1].trim();
+            const parts = koordinatBaru.split(",");
+            const lngBaru = parts[0].trim();
+            const latBaru = parts[1].trim();
 
-                    if (isNaN(lngBaru) || isNaN(latBaru)) {
-                        return showAlert("Angka Longitude atau Latitude tidak valid!");
-                    }
+            if (isNaN(lngBaru) || isNaN(latBaru)) {
+                return showAlert("Angka Longitude atau Latitude tidak valid!");
+            }
 
-                    daftarTitik[index].nama = namaBaru.replace(/,/g, " ");
-                    daftarTitik[index].lng = lngBaru;
-                    daftarTitik[index].lat = latBaru;
+            daftarTitik[index].nama = namaBaru.replace(/,/g, " ");
+            daftarTitik[index].lng = lngBaru;
+            daftarTitik[index].lat = latBaru;
 
-                    updateTampilanLog();
-                });
-            });
-        }
-
+            autoSaveData();  // ✅ Simpan ke localStorage
+            updateTampilanLog();  // ✅ Gunakan nama fungsi yang benar
+        });
+    });
+}
         function hapusTitikSatu(index) {
-            const t = daftarTitik[index];
-            showConfirm(`Apakah Anda yakin ingin menghapus "${t.nama}"?`, function () {
-                daftarTitik.splice(index, 1);
-                updateTampilanLog();
-            });
-        }
+    const t = daftarTitik[index];
+    showConfirm(`Apakah Anda yakin ingin menghapus "${t.nama}"?`, function () {
+        daftarTitik.splice(index, 1);
+        autoSaveData();  // ✅ Simpan ke localStorage
+        updateTampilanLog();  // ✅ Update display
+    });
+}
 
         function updateTampilanLog() {
             const logDiv = document.getElementById("log");
@@ -1132,13 +1133,12 @@
         }
 
         function hapusSemuaTitik() {
-            if (daftarTitik.length === 0) return showAlert("Tidak ada titik tersimpan untuk dihapus.");
-            showConfirm("Apakah Anda yakin ingin menghapus SELURUH titik?", function () {
-                daftarTitik = [];
-                updateTampilanLog();
-            });
-        }
-
+    showConfirm("Yakin ingin menghapus semua titik?", function() {
+        daftarTitik = [];
+        localStorage.removeItem('daftarTitik');
+        updateTampilanLog();  // ✅ Update display
+    });
+}
         // ============================================
         // FUNGSI TANDA TANGAN (KANVAS, KAMERA, GALERI)
         // ============================================
@@ -2173,6 +2173,63 @@
             loadFormState();
         };
     </script>
-
+<script>
+    // ============================================
+    // LOAD DATA DARI LOCALSTORAGE
+    // ============================================
+    
+    function loadDataFromLocalStorage() {
+        try {
+            const saved = localStorage.getItem('daftarTitik');
+            if (saved) {
+                daftarTitik = JSON.parse(saved);
+                updateTampilanLog();  // ✅ Gunakan nama fungsi yang benar
+                console.log('✅ Data dimuat dari localStorage');
+            }
+        } catch (error) {
+            console.error('Error loading data:', error);
+        }
+    }
+    
+    // ============================================
+    // AUTO-SAVE DATA
+    // ============================================
+    
+    function autoSaveData() {
+        localStorage.setItem('daftarTitik', JSON.stringify(daftarTitik));
+    }
+    
+    // ============================================
+    // INIT SAAT PAGE LOAD
+    // ============================================
+    
+    window.addEventListener('load', function() {
+        loadDataFromLocalStorage();
+        startGPS();
+        
+        // Auto-save setiap 10 detik
+        setInterval(autoSaveData, 10000);
+    });
+    
+    // ============================================
+    // DISABLE PULL-TO-REFRESH
+    // ============================================
+    
+    document.addEventListener('touchmove', function(e) {
+        if (window.scrollY === 0) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    // ============================================
+    // DISABLE F5 REFRESH
+    // ============================================
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'r')) {
+            e.preventDefault();
+        }
+    });
+</script>
 </body>
 </html>
