@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>mGPS Point - Surat Permohonan</title>
+    <!-- PDF image fix: seluruh foto dikonversi ke JPEG dan divalidasi sebelum jsPDF.addImage -->
     <!-- ===== FAVORITE ICON / TAB ICON ===== -->
     <link rel="icon" type="image/png" href="assets/M.png">
 
-    <!-- ===== CDN LIBRARIES ===== --
+    <!-- ===== CDN LIBRARIES ===== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>-->
     <link rel="preload" href="/surat_permohonan_telaah/mgps_v1.0_beta/lib/jspdf.umd.min.js" as="script">
@@ -21,7 +22,7 @@
 
     <!-- ===== FONT ROBOTO (LOKAL) ===== -->
     <link href="/surat_permohonan_telaah/mgps_v1.0_beta/font/Roboto/roboto.css" rel="stylesheet">
-    <!-- ===== FONT ROBOTO (Google Fonts) ===== --
+    <!-- ===== FONT ROBOTO (Google Fonts) ===== -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">-->
 
     <style>
@@ -1668,7 +1669,14 @@
                 reader.onload = function(e) {
                     const img = new Image();
                     img.onload = function() {
-                        let width = img.width, height = img.height;
+                        let width = Number(img.naturalWidth || img.width);
+                        let height = Number(img.naturalHeight || img.height);
+
+                        if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+                            reject(new Error('Ukuran gambar tidak valid'));
+                            return;
+                        }
+
                         if (width > height) {
                             if (width > maxWidth) {
                                 height = Math.round(height * maxWidth / width);
@@ -1684,10 +1692,22 @@
                         canvas.width = width;
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
+                        if (!ctx) {
+                            reject(new Error('Canvas 2D tidak tersedia pada perangkat ini'));
+                            return;
+                        }
+
                         ctx.fillStyle = 'white';
                         ctx.fillRect(0, 0, width, height);
                         ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', quality));
+
+                        const jpegData = canvas.toDataURL('image/jpeg', quality);
+                        if (!jpegData || !jpegData.startsWith('data:image/jpeg;base64,')) {
+                            reject(new Error('Gagal mengubah gambar menjadi JPEG'));
+                            return;
+                        }
+
+                        resolve(jpegData);
                     };
                     img.onerror = function() { reject(new Error('Gagal memuat gambar')); };
                     img.src = e.target.result;
@@ -1730,30 +1750,74 @@
         }
 
         function prosesFileFoto(event) {
-            const files = Array.from(event.target.files);
-            if (!files || files.length === 0) return;
+            const files = Array.from(event.target.files || []);
+            if (files.length === 0) return;
 
-            let promises = files.map(file => {
-                if (file.size > 2 * 1024 * 1024) {
-                    return kompresFoto(file, 1200, 1200, 0.8);
-                } else {
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => resolve(e.target.result);
-                        reader.readAsDataURL(file);
-                    });
-                }
-            });
+            // SEMUA foto dokumentasi dikonversi menjadi JPEG terlebih dahulu.
+            // Ini mencegah PNG/WebP/format lain dikirim ke jsPDF sebagai JPEG
+            // dan mencegah ukuran gambar menjadi NaN/0 pada WebView/APK.
+            const promises = files.map(file =>
+                kompresFoto(file, 1200, 1200, 0.8)
+            );
 
             Promise.all(promises)
                 .then(results => {
-                    daftarFoto = daftarFoto.concat(results);
+                    const validResults = results.filter(dataUrl =>
+                        typeof dataUrl === 'string' && dataUrl.startsWith('data:image/jpeg;base64,')
+                    );
+
+                    daftarFoto = daftarFoto.concat(validResults);
                     renderGaleriFoto();
-                    showAlert(`✅ Berhasil menambahkan ${results.length} foto.`);
+
+                    if (validResults.length === results.length) {
+                        showAlert(`✅ Berhasil menambahkan ${validResults.length} foto.`);
+                    } else {
+                        showAlert(`⚠️ ${validResults.length} dari ${results.length} foto berhasil diproses.`);
+                    }
                 })
                 .catch(err => {
+                    console.error('Gagal memproses foto dokumentasi:', err);
                     showAlert("Gagal memproses foto: " + err.message);
                 });
+
+            // Reset input agar file yang sama dapat dipilih lagi.
+            event.target.value = '';
+        }
+
+        // ============================================
+        // VALIDASI GAMBAR SEBELUM DIBERIKAN KE jsPDF
+        // ============================================
+        function getSafeImageSize(doc, imageData) {
+            if (typeof imageData !== 'string' || !imageData.startsWith('data:image/')) {
+                throw new Error('Data gambar tidak valid.');
+            }
+
+            const props = doc.getImageProperties(imageData);
+            const width = Number(props.width);
+            const height = Number(props.height);
+
+            if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+                throw new Error('Ukuran gambar tidak valid.');
+            }
+
+            return { width, height };
+        }
+
+        function addSafeImage(doc, imageData, format, x, y, width, height) {
+            const values = [x, y, width, height];
+
+            if (values.some(v => !Number.isFinite(Number(v))) || width <= 0 || height <= 0) {
+                throw new Error('Koordinat atau ukuran gambar tidak valid.');
+            }
+
+            doc.addImage(
+                imageData,
+                format,
+                Number(x),
+                Number(y),
+                Number(width),
+                Number(height)
+            );
         }
 
         function renderGaleriFoto() {
@@ -1897,7 +1961,7 @@
 
             if (ttdData) {
                 try {
-                    const imgProps = doc.getImageProperties(ttdData);
+                    const imgProps = getSafeImageSize(doc, ttdData);
                     let imgW = imgProps.width, imgH = imgProps.height;
                     const maxTtdWidth = 60, maxTtdHeight = 30;
                     let ttdW = imgW, ttdH = imgH;
@@ -1914,7 +1978,7 @@
                     }
                     const posXTTD_img = posXCenter - (ttdW / 2);
                     const posYTTD_img = y - 2;
-                    doc.addImage(ttdData, 'JPEG', posXTTD_img, posYTTD_img, ttdW, ttdH);
+                    addSafeImage(doc, ttdData, 'JPEG', posXTTD_img, posYTTD_img, ttdW, ttdH);
                     y = posYTTD_img + ttdH + 1;
                 } catch (err) {
                     console.warn('Gagal menambahkan tanda tangan:', err);
@@ -1956,18 +2020,23 @@
                     doc.setLineWidth(0.2);
                     doc.line(margin, 29, pageWidth2 - margin, 29);
 
-                    const imgProperties = doc.getImageProperties(fotoBase64);
-                    let imgW = imgProperties.width;
-                    let imgH = imgProperties.height;
+                    const imgProperties = getSafeImageSize(doc, fotoBase64);
+                    const imgW = imgProperties.width;
+                    const imgH = imgProperties.height;
 
                     const ratio = Math.min(maxImgW / imgW, maxImgH / imgH);
+
+                    if (!Number.isFinite(ratio) || ratio <= 0) {
+                        throw new Error(`Ukuran foto lampiran ${index + 1} tidak valid.`);
+                    }
+
                     const finalW = imgW * ratio;
                     const finalH = imgH * ratio;
 
                     const posX = (pageWidth2 - finalW) / 2;
                     const posY = 35 + ((maxImgH - finalH) / 2);
 
-                    doc.addImage(fotoBase64, 'JPEG', posX, posY, finalW, finalH);
+                    addSafeImage(doc, fotoBase64, 'JPEG', posX, posY, finalW, finalH);
                     doc.setDrawColor(200, 200, 200);
                     doc.rect(posX, posY, finalW, finalH);
 
