@@ -10,7 +10,7 @@
 
     <!-- ===== CDN LIBRARIES ===== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <link rel="preload" href="/surat_permohonan_telaah/mgps_v1.0_beta/lib/jspdf.umd.min.js" as="script">
     <link rel="preload" href="/surat_permohonan_telaah/mgps_v1.0_beta/lib/jspdf.plugin.autotable.min.js" as="script">
     <link rel="preload" href="/surat_permohonan_telaah/mgps_v1.0_beta/font/Roboto/roboto.css" as="style">
@@ -23,7 +23,7 @@
     <!-- ===== FONT ROBOTO (LOKAL) ===== -->
     <link href="/surat_permohonan_telaah/mgps_v1.0_beta/font/Roboto/roboto.css" rel="stylesheet">
     <!-- ===== FONT ROBOTO (Google Fonts) ===== -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">-->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -1951,45 +1951,58 @@
 
             // --- PENUTUP & TANDA TANGAN ---
             doc.text("Demikian permohonan ini saya buat, atas perkenannya kami ucapkan terimakasih.", marginLeft, y);
-            y += 8;
+y += 8;
 
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const posXCenter = pageWidth - 50;
+const pageWidth = doc.internal.pageSize.getWidth();
+const posXCenter = pageWidth - 50;
 
-            doc.text("Yang bermohon,", posXCenter, y, { align: 'center' });
-            y += 2;
+// Simpan posisi y awal untuk teks "Yang bermohon," nanti
+const posY_YangBermohon = y; 
 
-            if (ttdData) {
-                try {
-                    const imgProps = getSafeImageSize(doc, ttdData);
-                    let imgW = imgProps.width, imgH = imgProps.height;
-                    const maxTtdWidth = 60, maxTtdHeight = 30;
-                    let ttdW = imgW, ttdH = imgH;
-                    if (ttdW > ttdH) {
-                        if (ttdW > maxTtdWidth) {
-                            ttdH = Math.round(ttdH * maxTtdWidth / ttdW);
-                            ttdW = maxTtdWidth;
-                        }
-                    } else {
-                        if (ttdH > maxTtdHeight) {
-                            ttdW = Math.round(ttdW * maxTtdHeight / ttdH);
-                            ttdH = maxTtdHeight;
-                        }
-                    }
-                    const posXTTD_img = posXCenter - (ttdW / 2);
-                    const posYTTD_img = y - 2;
-                    addSafeImage(doc, ttdData, 'JPEG', posXTTD_img, posYTTD_img, ttdW, ttdH);
-                    y = posYTTD_img + ttdH + 1;
-                } catch (err) {
-                    console.warn('Gagal menambahkan tanda tangan:', err);
-                    y += 6;
-                }
-            } else {
-                y += 6;
+// Naikkan y sedikit untuk ancang-ancang posisi tanda tangan
+y += 2; 
+
+if (ttdData) {
+    try {
+        const imgProps = getSafeImageSize(doc, ttdData);
+        let imgW = imgProps.width, imgH = imgProps.height;
+        const maxTtdWidth = 60, maxTtdHeight = 30;
+        let ttdW = imgW, ttdH = imgH;
+        if (ttdW > ttdH) {
+            if (ttdW > maxTtdWidth) {
+                ttdH = Math.round(ttdH * maxTtdWidth / ttdW);
+                ttdW = maxTtdWidth;
             }
+        } else {
+            if (ttdH > maxTtdHeight) {
+                ttdW = Math.round(ttdW * maxTtdHeight / ttdH);
+                ttdH = maxTtdHeight;
+            }
+        }
+        const posXTTD_img = posXCenter - (ttdW / 2);
+        
+        // Tetap kurangi 2 agar gambar ttd naik dan overlay ke atas
+        const posYTTD_img = y - 2; 
+        
+        // 1. CETAK GAMBAR TTD TERLEBIH DAHULU (berada di layer bawah)
+        addSafeImage(doc, ttdData, 'JPEG', posXTTD_img, posYTTD_img, ttdW, ttdH);
+        
+        y = posYTTD_img + ttdH + 1;
+    } catch (err) {
+        console.warn('Gagal menambahkan tanda tangan:', err);
+        y += 6;
+    }
+} else {
+    y += 6;
+}
 
-            doc.setFont("helvetica", "bold");
-            doc.text(nama, posXCenter, y, { align: 'center' });
+// 2. CETAK TEKS "Yang bermohon," DI SINI (Layer Atas / Menimpa gambar)
+// Menggunakan koordinat posY_YangBermohon yang sudah disimpan di awal
+doc.text("Yang bermohon,", posXCenter, posY_YangBermohon, { align: 'center' });
+
+// 3. CETAK NAMA (Paling bawah)
+doc.setFont("helvetica", "bold");
+doc.text(nama, posXCenter, y, { align: 'center' });
 
             // Catatan NB
             y += 10;
