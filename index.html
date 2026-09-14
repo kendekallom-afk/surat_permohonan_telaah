@@ -24,6 +24,8 @@
     <link href="/surat_permohonan_telaah/mgps_v1.0_beta/font/Roboto/roboto.css" rel="stylesheet">
     <!-- ===== FONT ROBOTO (Google Fonts) ===== -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
     <style>
         :root {
@@ -442,13 +444,141 @@
             max-height: 350px;
             display: block;
         }
+
+        .view-hidden { display: none !important; }
+        .view-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .map-title { font-size: 15px; font-weight: 700; color: var(--slate-800); }
+        .btn-map {
+            width: auto;
+            padding: 5px 9px;
+            border-radius: 7px;
+            font-size: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .map-wrap {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--slate-200);
+            border-radius: 8px;
+        }
+        #map { height: min(68vh, 560px); min-height: 340px; width: 100%; }
+        .map-overlay-actions {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: auto;
+            z-index: 1000;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .map-search {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            display: flex;
+            width: min(290px, calc(100% - 20px));
+            gap: 5px;
+            padding: 4px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+        }
+        .map-search input {
+            min-width: 0;
+            flex: 1;
+            border: 1px solid var(--slate-200);
+            border-radius: 5px;
+            padding: 7px 8px;
+            outline: none;
+            font-size: 12px;
+        }
+        .map-search input:focus { border-color: var(--primary); }
+        .map-search button {
+            flex: 0 0 auto;
+            border: none;
+            border-radius: 5px;
+            padding: 0 9px;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+        }
+        .map-overlay-actions .btn {
+            width: auto;
+            padding: 8px 10px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+            pointer-events: auto;
+        }
+        .map-crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 900;
+            width: 34px;
+            height: 34px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .map-crosshair::before,
+        .map-crosshair::after {
+            content: '';
+            position: absolute;
+            background: #dc2626;
+            box-shadow: 0 0 2px #fff;
+        }
+        .map-crosshair::before { top: 16px; left: 0; right: 0; height: 2px; }
+        .map-crosshair::after { top: 0; bottom: 0; left: 16px; width: 2px; }
+        .map-crosshair-dot {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 10px;
+            height: 10px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            background: #dc2626;
+            box-shadow: 0 0 2px #0f172a;
+        }
+        .map-point-label {
+            border: 1px solid #1e3a8a;
+            border-radius: 4px;
+            padding: 2px 5px;
+            color: #1e3a8a;
+            background: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .map-status {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 500px) {
+            #map { min-height: 360px; }
+            .map-search { top: 10px; left: auto; right: 10px; width: 70%; }
+            .map-overlay-actions .btn { width: auto; }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <!-- GPS Card -->
-        <div class="card">
+        <div id="gps-view" class="card">
             <div class="header">
                 <div class="header-brand">
                     <img src="assets/Mlogo.png" alt="mGPS Point Logo" class="brand-logo">
@@ -528,12 +658,39 @@
                 </button>
             </div>
 
-            <div class="label" style="font-weight: 500;">Daftar Titik Tersimpan</div>
+            <div class="view-header">
+                <div class="label" style="font-weight: 500;">Daftar Titik Tersimpan</div>
+                <button type="button" class="btn-map" onclick="tampilkanView('map')" title="Buka peta">🗺️ Peta</button>
+            </div>
             <div id="log">Belum ada titik tersimpan.</div>
         </div>
 
+        <!-- View Peta -->
+        <div id="map-view" class="card view-hidden">
+            <div class="view-header">
+                <div class="map-title">🗺️ Peta Lokasi GPS</div>
+                <button type="button" class="btn-map" onclick="tampilkanView('gps')" title="Kembali ke daftar titik">← Daftar</button>
+            </div>
+            <div class="map-status">
+                <div class="badge acc-warn">Akurasi: <span id="map-acc">-</span> m</div>
+                <div class="badge sat-info">🛰️ Sinyal: <span id="map-sat-status">Mencari...</span></div>
+            </div>
+            <div class="map-wrap">
+                <div id="map" aria-label="Peta Google Hybrid"></div>
+                <div class="map-crosshair" aria-hidden="true"><span class="map-crosshair-dot"></span></div>
+                <form class="map-search" onsubmit="cariAlamat(event)">
+                    <input id="map-search-input" type="search" placeholder="Cari alamat..." autocomplete="off" aria-label="Cari alamat">
+                    <button type="submit" title="Cari alamat">🔍</button>
+                </form>
+                <div class="map-overlay-actions">
+                    <button type="button" class="btn btn-blue" onclick="pusatkanPetaKeGPS()">🎯 Lokasi Saya</button>
+                    <button type="button" class="btn btn-green" onclick="simpanTitikDariPeta()">📍 Ambil Titik</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Form Pemohon dengan Toggle -->
-        <div class="card card-form">
+        <div id="form-view" class="card card-form">
             <div class="form-toggle-header" onclick="toggleForm()">
                 <div style="font-size: 15px; font-weight: 700; color: var(--slate-800);">
                     📄 Data Pemohon & Lokasi
@@ -837,6 +994,8 @@
         // ============================================
         let currentLat = null, currentLng = null, currentAcc = null, watchID = null;
         let daftarTitik = [];
+        let mapInstance = null, currentMarker = null, savedPointsLayer = null, mapHasCentered = false;
+        let searchMarker = null;
         let matchedTipe = null;
         let ttdData = null;
         let daftarFoto = [];
@@ -971,12 +1130,131 @@
                 accBox.className = "badge acc-warn";
                 satStatus.innerText = "Lemah (Proses Kunci)";
             }
+
+            updateMapPosition();
         }
 
         function handleError(err) {
             document.getElementById("lat").innerText = "Error Akses GPS";
             document.getElementById("lng").innerText = "Cek Akses Lokasi";
             document.getElementById("sat-status").innerText = "Terputus";
+            document.getElementById("map-sat-status").innerText = "Terputus";
+        }
+
+        function tampilkanView(view) {
+            const gpsView = document.getElementById('gps-view');
+            const mapView = document.getElementById('map-view');
+            const formView = document.getElementById('form-view');
+            const isMap = view === 'map';
+
+            gpsView.classList.toggle('view-hidden', isMap);
+            mapView.classList.toggle('view-hidden', !isMap);
+            formView.classList.toggle('view-hidden', isMap);
+
+            if (isMap) {
+                initMap();
+                setTimeout(() => mapInstance.invalidateSize(), 0);
+            }
+        }
+
+        function initMap() {
+            if (mapInstance) return;
+
+            mapInstance = L.map('map', { zoomControl: true }).setView([-2.672878, 118.848438], 13);
+            L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                maxZoom: 21,
+                attribution: '&copy; Google'
+            }).addTo(mapInstance);
+            savedPointsLayer = L.layerGroup().addTo(mapInstance);
+            updateMapPosition();
+            renderSavedPointsOnMap();
+        }
+
+        function updateMapPosition() {
+            const mapAcc = document.getElementById('map-acc');
+            const mapSatStatus = document.getElementById('map-sat-status');
+            if (mapAcc) mapAcc.innerText = currentAcc || '-';
+            if (mapSatStatus) mapSatStatus.innerText = document.getElementById('sat-status').innerText;
+            if (!mapInstance || !currentLat || !currentLng) return;
+
+            const position = [Number(currentLat), Number(currentLng)];
+            if (!currentMarker) {
+                currentMarker = L.circleMarker(position, {
+                    radius: 8,
+                    color: '#ffffff',
+                    weight: 3,
+                    fillColor: '#2563eb',
+                    fillOpacity: 1
+                }).addTo(mapInstance).bindPopup('Lokasi GPS aktif');
+            } else {
+                currentMarker.setLatLng(position);
+            }
+
+            if (!mapHasCentered) {
+                mapInstance.setView(position, 18);
+                mapHasCentered = true;
+            }
+        }
+
+        function pusatkanPetaKeGPS() {
+            if (!currentLat || !currentLng) return showAlert('Tunggu hingga sinyal GPS terunci!');
+            initMap();
+            mapInstance.setView([Number(currentLat), Number(currentLng)], 18);
+            if (currentMarker) currentMarker.openPopup();
+        }
+
+        async function cariAlamat(event) {
+            event.preventDefault();
+            const input = document.getElementById('map-search-input');
+            const query = input.value.trim();
+            if (!query) return showAlert('Masukkan alamat yang ingin dicari.');
+
+            const searchButton = event.submitter;
+            if (searchButton) searchButton.disabled = true;
+
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=id&q=${encodeURIComponent(query)}`;
+                const response = await fetch(url, { headers: { Accept: 'application/json' } });
+                if (!response.ok) throw new Error('Layanan pencarian tidak tersedia.');
+                const results = await response.json();
+                if (!results.length) return showAlert('Alamat tidak ditemukan. Coba gunakan nama wilayah yang lebih lengkap.');
+
+                const result = results[0];
+                const position = [Number(result.lat), Number(result.lon)];
+                initMap();
+                mapInstance.setView(position, 17);
+
+                if (searchMarker) searchMarker.remove();
+                searchMarker = L.marker(position).addTo(mapInstance).bindPopup(
+                    `<b>Hasil Pencarian</b><br>${result.display_name}`
+                ).openPopup();
+            } catch (error) {
+                showAlert('Pencarian alamat gagal. Periksa koneksi internet lalu coba lagi.');
+            } finally {
+                if (searchButton) searchButton.disabled = false;
+            }
+        }
+
+        function renderSavedPointsOnMap() {
+            if (!savedPointsLayer) return;
+            savedPointsLayer.clearLayers();
+            daftarTitik.forEach((t, index) => {
+                const marker = L.marker([Number(t.lat), Number(t.lng)])
+                    .bindTooltip(t.nama || `Titik ${index + 1}`, {
+                        permanent: true,
+                        direction: 'top',
+                        offset: [0, -28],
+                        className: 'map-point-label'
+                    })
+                    .bindPopup(`<b>${t.nama}</b><br>${t.lng}, ${t.lat}<br>Akurasi: ${t.acc} m`);
+                marker.addTo(savedPointsLayer);
+            });
+        }
+
+        function simpanTitikDariPeta() {
+            if (!mapInstance) return showAlert('Peta belum siap.');
+            const center = mapInstance.getCenter();
+            simpanTitikDenganKoordinat(center.lat, center.lng, currentAcc || '-');
         }
 
         // ============================================
@@ -1069,20 +1347,39 @@
         function simpanTitik() {
     if (!currentLat || !currentLng) {
         showAlert("Tunggu GPS mendapat sinyal terlebih dahulu!");
-        return;
+        return false;
+    }
+
+    return simpanTitikDenganKoordinat(currentLat, currentLng, currentAcc);
+}
+
+        function simpanTitikDenganKoordinat(lat, lng, acc) {
+    if (!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) {
+        showAlert("Koordinat titik tidak valid!");
+        return false;
     }
 
     const titik = {
-        nama: `Titik ${daftarTitik.length + 1}`,  // ✅ Tambah nama default
-        lat: currentLat,
-        lng: currentLng,
-        acc: currentAcc,
+        nama: `Titik ${nomorTitikBerikutnya()}`,
+        lat: Number(lat).toFixed(6),
+        lng: Number(lng).toFixed(6),
+        acc: acc,
         waktu: new Date().toLocaleTimeString()
     };
 
     daftarTitik.push(titik);
     autoSaveData();  // ✅ Simpan ke localStorage
     updateTampilanLog();  // ✅ Update display
+    renderSavedPointsOnMap();
+    return true;
+}
+
+        function nomorTitikBerikutnya() {
+    const nomorTerbesar = daftarTitik.reduce((terbesar, titik) => {
+        const cocok = String(titik.nama || '').match(/^Titik\s+(\d+)$/i);
+        return cocok ? Math.max(terbesar, Number(cocok[1])) : terbesar;
+    }, 0);
+    return nomorTerbesar + 1;
 }
 
         function editTitikSatu(index) {
@@ -1141,6 +1438,7 @@
                 </div>`;
             });
             logDiv.innerHTML = html;
+            renderSavedPointsOnMap();
         }
 
         function hapusSemuaTitik() {
