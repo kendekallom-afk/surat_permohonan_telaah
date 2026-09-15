@@ -1,0 +1,52 @@
+/* ===== ROBOTO FONT (Lokal) ===== */
+/* Menggunakan Variable Font jika didukung, fallback ke static jika tidak */
+
+/* 1. VARIABLE FONT (Modern Browser) */
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 100 900;
+    src: url('Roboto-VariableFont_wdth,wght.ttf') format('truetype-variations');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: italic;
+    font-weight: 100 900;
+    src: url('Roboto-Italic-VariableFont_wdth,wght.ttf') format('truetype-variations');
+    font-display: swap;
+}
+
+/* 2. STATIC FONT (Fallback untuk browser lama) */
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    src: url('static/Roboto-Regular.ttf') format('truetype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: italic;
+    font-weight: 400;
+    src: url('static/Roboto-Italic.ttf') format('truetype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 500;
+    src: url('static/Roboto-Medium.ttf') format('truetype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 700;
+    src: url('static/Roboto-Bold.ttf') format('truetype');
+    font-display: swap;
+}
