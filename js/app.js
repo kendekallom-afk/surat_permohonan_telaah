@@ -1,4 +1,4 @@
-﻿// ============================================
+// ============================================
         // DATABASE WILAYAH
         // ============================================
         const databaseWilayah = [
@@ -62,6 +62,10 @@
         let daftarTitik = [];
         let mapInstance = null, currentMarker = null, savedPointsLayer = null, mapHasCentered = false;
         let searchMarker = null;
+        let mapRotation = 0;
+        let mapTouchStartAngle = null;
+        let mapTouchStartRotation = 0;
+        let mapIsRotating = false;
         let matchedTipe = null;
         let ttdData = null;
         let daftarFoto = [];
@@ -232,8 +236,56 @@
                 attribution: '&copy; Google'
             }).addTo(mapInstance);
             savedPointsLayer = L.layerGroup().addTo(mapInstance);
+            initMapRotation();
             updateMapPosition();
             renderSavedPointsOnMap();
+        }
+
+        function initMapRotation() {
+            const mapElement = document.getElementById('map');
+            if (!mapElement || mapElement.dataset.rotationReady === 'true') return;
+
+            mapElement.dataset.rotationReady = 'true';
+            mapElement.addEventListener('touchstart', handleMapTouchStart, { passive: false });
+            mapElement.addEventListener('touchmove', handleMapTouchMove, { passive: false });
+            mapElement.addEventListener('touchend', handleMapTouchEnd, { passive: false });
+            mapElement.addEventListener('touchcancel', handleMapTouchEnd, { passive: false });
+        }
+
+        function getMapTouchAngle(touches) {
+            const first = touches[0];
+            const second = touches[1];
+            return Math.atan2(second.clientY - first.clientY, second.clientX - first.clientX) * 180 / Math.PI;
+        }
+
+        function handleMapTouchStart(event) {
+            if (event.touches.length !== 2 || !mapInstance) return;
+
+            mapIsRotating = true;
+            mapTouchStartAngle = getMapTouchAngle(event.touches);
+            mapTouchStartRotation = mapRotation;
+            mapInstance.dragging.disable();
+            event.preventDefault();
+        }
+
+        function handleMapTouchMove(event) {
+            if (!mapIsRotating || event.touches.length < 2) return;
+
+            const angle = getMapTouchAngle(event.touches);
+            mapRotation = mapTouchStartRotation + angle - mapTouchStartAngle;
+            document.getElementById('map').style.transform = `rotate(${mapRotation}deg)`;
+            event.preventDefault();
+        }
+
+        function handleMapTouchEnd(event) {
+            if (!mapIsRotating) return;
+
+            if (event.touches.length < 2) {
+                mapIsRotating = false;
+                mapTouchStartAngle = null;
+                mapInstance.dragging.enable();
+            }
+            event.preventDefault();
         }
 
         function updateMapPosition() {
