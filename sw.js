@@ -2,21 +2,18 @@
  * Service Worker - mGPS Point
  * Strategi: Network First (update cache saat online) → Cache Fallback (offline)
  */
-const CACHE_NAME = 'mgps-point-v1';
+const CACHE_NAME = 'mgps-point-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './sw.js',
+  './css/style.css',
+  './js/app.js',
   './assets/M.png',
   './assets/Mlogo.png',
-  // CDN resources (akan di-cache saat pertama kali online)
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js',
-  'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap',
-  'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2',
-  'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmEU9fBBc4.woff2',
-  'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfBBc4.woff2',
-  'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmYUtfBBc4.woff2'
+  './mgps_v1.0_beta/lib/jspdf.umd.min.js',
+  './mgps_v1.0_beta/lib/jspdf.plugin.autotable.min.js',
+  './mgps_v1.0_beta/font/Roboto/roboto.css'
 ];
 
 // Install: precache core assets
