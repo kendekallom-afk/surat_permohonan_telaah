@@ -1424,6 +1424,7 @@
             const logDiv = document.getElementById("log");
             if (daftarTitik.length === 0) {
                 logDiv.innerHTML = "Belum ada titik tersimpan.";
+                renderSavedPointsOnMap();
                 return;
             }
             let html = "";
