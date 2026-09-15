@@ -62,10 +62,6 @@
         let daftarTitik = [];
         let mapInstance = null, currentMarker = null, savedPointsLayer = null, mapHasCentered = false;
         let searchMarker = null;
-        let mapRotation = 0;
-        let mapTouchStartAngle = null;
-        let mapTouchStartRotation = 0;
-        let mapIsRotating = false;
         let matchedTipe = null;
         let ttdData = null;
         let daftarFoto = [];
@@ -230,70 +226,19 @@
         function initMap() {
             if (mapInstance) return;
 
-            mapInstance = L.map('map', { zoomControl: true }).setView([-2.672878, 118.848438], 13);
+            mapInstance = L.map('map', {
+                zoomControl: true,
+                rotate: true,
+                touchRotate: true,
+                rotateControl: false
+            }).setView([-2.672878, 118.848438], 13);
             L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
                 maxZoom: 21,
                 attribution: '&copy; Google'
             }).addTo(mapInstance);
             savedPointsLayer = L.layerGroup().addTo(mapInstance);
-            initMapRotation();
             updateMapPosition();
             renderSavedPointsOnMap();
-        }
-
-        function initMapRotation() {
-            const mapElement = document.getElementById('map');
-            if (!mapElement || mapElement.dataset.rotationReady === 'true') return;
-
-            mapElement.dataset.rotationReady = 'true';
-            mapElement.addEventListener('touchstart', handleMapTouchStart, { passive: false });
-            mapElement.addEventListener('touchmove', handleMapTouchMove, { passive: false });
-            mapElement.addEventListener('touchend', handleMapTouchEnd, { passive: false });
-            mapElement.addEventListener('touchcancel', handleMapTouchEnd, { passive: false });
-        }
-
-        function getMapTouchAngle(touches) {
-            const first = touches[0];
-            const second = touches[1];
-            return Math.atan2(second.clientY - first.clientY, second.clientX - first.clientX) * 180 / Math.PI;
-        }
-
-        function handleMapTouchStart(event) {
-            if (event.touches.length !== 2 || !mapInstance) return;
-
-            mapIsRotating = true;
-            mapTouchStartAngle = getMapTouchAngle(event.touches);
-            mapTouchStartRotation = mapRotation;
-            mapInstance.dragging.disable();
-            event.preventDefault();
-        }
-
-        function handleMapTouchMove(event) {
-            if (!mapIsRotating || event.touches.length < 2) return;
-
-            const angle = getMapTouchAngle(event.touches);
-            mapRotation = mapTouchStartRotation + angle - mapTouchStartAngle;
-            document.getElementById('map').style.setProperty('--map-rotation', `${mapRotation}deg`);
-            event.preventDefault();
-        }
-
-        function handleMapTouchEnd(event) {
-            if (!mapIsRotating) return;
-
-            if (event.touches.length < 2) {
-                mapIsRotating = false;
-                mapTouchStartAngle = null;
-                mapInstance.dragging.enable();
-            }
-            event.preventDefault();
-        }
-
-        function resetMapRotation() {
-            mapRotation = 0;
-            mapTouchStartAngle = null;
-            mapTouchStartRotation = 0;
-            const mapElement = document.getElementById('map');
-            if (mapElement) mapElement.style.setProperty('--map-rotation', '0deg');
         }
 
         function updateMapPosition() {
@@ -325,7 +270,7 @@
         function pusatkanPetaKeGPS() {
             if (!currentLat || !currentLng) return showAlert('Tunggu hingga sinyal GPS terunci!');
             initMap();
-            resetMapRotation();
+            mapInstance.setBearing(0);
             mapInstance.setView([Number(currentLat), Number(currentLng)], 18);
             if (currentMarker) currentMarker.openPopup();
         }
