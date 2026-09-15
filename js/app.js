@@ -255,7 +255,8 @@
                     color: '#ffffff',
                     weight: 3,
                     fillColor: '#2563eb',
-                    fillOpacity: 1
+                    fillOpacity: 1,
+                    pane: 'overlayPane'
                 }).addTo(mapInstance).bindPopup('Lokasi GPS aktif');
             } else {
                 currentMarker.setLatLng(position);
@@ -297,7 +298,7 @@
                 mapInstance.setView(position, 17);
 
                 if (searchMarker) searchMarker.remove();
-                searchMarker = L.marker(position).addTo(mapInstance).bindPopup(
+                searchMarker = L.marker(position, { rotateWithView: true }).addTo(mapInstance).bindPopup(
                     `<b>Hasil Pencarian</b><br>${result.display_name}`
                 ).openPopup();
             } catch (error) {
@@ -311,7 +312,9 @@
             if (!savedPointsLayer) return;
             savedPointsLayer.clearLayers();
             daftarTitik.forEach((t, index) => {
-                const marker = L.marker([Number(t.lat), Number(t.lng)])
+                const marker = L.marker([Number(t.lat), Number(t.lng)], {
+                    rotateWithView: true
+                })
                     .bindTooltip(t.nama || `Titik ${index + 1}`, {
                         permanent: true,
                         direction: 'top',
