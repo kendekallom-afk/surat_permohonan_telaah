@@ -1,4 +1,4 @@
-﻿:root {
+:root {
             --primary: #4A6FA5;
             --primary-hover: #1d4ed8;
             --success: #16a34a;
@@ -440,7 +440,25 @@
             border: 1px solid var(--slate-200);
             border-radius: 8px;
         }
-        #map { height: min(68vh, 560px); min-height: 340px; width: 100%; }
+        #map-view {
+            width: 100vw;
+            margin-left: calc(50% - 50vw);
+            padding-left: 0;
+            padding-right: 0;
+            border-left: none;
+            border-right: none;
+            border-radius: 0;
+        }
+        #map-view .view-header,
+        #map-view .map-status {
+            margin-left: 12px;
+            margin-right: 12px;
+        }
+        #map {
+            height: min(68vh, 560px);
+            min-height: 340px;
+            width: 100%;
+        }
         .map-overlay-actions {
             position: absolute;
             bottom: 10px;
@@ -538,7 +556,11 @@
             margin-bottom: 10px;
         }
         @media (max-width: 500px) {
-            #map { min-height: 360px; }
+            #map-view .view-header,
+            #map-view .map-status {
+                margin-left: 10px;
+                margin-right: 10px;
+            }
             .map-search { top: 10px; left: auto; right: 10px; width: 70%; }
             .map-overlay-actions .btn { width: auto; }
         }
