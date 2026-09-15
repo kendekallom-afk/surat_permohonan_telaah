@@ -458,11 +458,6 @@
             height: min(68vh, 560px);
             min-height: 340px;
             width: 100%;
-            touch-action: none;
-        }
-        #map .leaflet-tile-pane {
-            transform: rotate(var(--map-rotation, 0deg));
-            transform-origin: center center;
         }
         .map-overlay-actions {
             position: absolute;
