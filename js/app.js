@@ -273,7 +273,7 @@
 
             const angle = getMapTouchAngle(event.touches);
             mapRotation = mapTouchStartRotation + angle - mapTouchStartAngle;
-            document.getElementById('map').style.transform = `rotate(${mapRotation}deg)`;
+            document.getElementById('map').style.setProperty('--map-rotation', `${mapRotation}deg`);
             event.preventDefault();
         }
 
@@ -286,6 +286,14 @@
                 mapInstance.dragging.enable();
             }
             event.preventDefault();
+        }
+
+        function resetMapRotation() {
+            mapRotation = 0;
+            mapTouchStartAngle = null;
+            mapTouchStartRotation = 0;
+            const mapElement = document.getElementById('map');
+            if (mapElement) mapElement.style.setProperty('--map-rotation', '0deg');
         }
 
         function updateMapPosition() {
@@ -317,6 +325,7 @@
         function pusatkanPetaKeGPS() {
             if (!currentLat || !currentLng) return showAlert('Tunggu hingga sinyal GPS terunci!');
             initMap();
+            resetMapRotation();
             mapInstance.setView([Number(currentLat), Number(currentLng)], 18);
             if (currentMarker) currentMarker.openPopup();
         }
