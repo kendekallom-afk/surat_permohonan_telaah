@@ -351,10 +351,7 @@
             const kec = document.getElementById("lahan-kec").value.trim();
             const kab = document.getElementById("lahan-kab").value.trim();
 
-            let teksSalinan = "========================================\n";
-            teksSalinan += "       DATA PERMOHONAN & KOORDINAT      \n";
-            teksSalinan += "========================================\n\n";
-
+            let teksSalinan = "SURAT PERMOHONAN TELAAH\n";
             teksSalinan += "[DATA PEMOHON]\n";
             teksSalinan += `Nama Lengkap : ${nama || "-"}\n`;
             teksSalinan += `Pekerjaan    : ${pekerjaan || "-"}\n`;
@@ -367,11 +364,8 @@
             teksSalinan += `Desa/Kel.    : ${desa ? toProperCase(desa) : "-"}\n`;
             teksSalinan += `Kecamatan    : ${kec || "-"}\n`;
             teksSalinan += `Kab/Prov     : ${kab || "-"}\n\n`;
-
-            teksSalinan += "----------------------------------------\n";
-            teksSalinan += "DAFTAR TITIK KOORDINAT\n";
-            teksSalinan += "----------------------------------------\n";
-
+           
+            teksSalinan += "[DAFTAR TITIK KOORDINAT]\n";
             daftarTitik.forEach((t, i) => {
                 teksSalinan += `${i + 1}. ${t.nama}\n`;
                 teksSalinan += `   Koordinat : ${t.lng}, ${t.lat}\n`;
