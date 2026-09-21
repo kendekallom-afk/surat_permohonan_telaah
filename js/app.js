@@ -485,6 +485,7 @@
     showConfirm(`Apakah Anda yakin ingin menghapus "${t.nama}"?`, function () {
         daftarTitik.splice(index, 1);
         autoSaveData();  // ✅ Simpan ke localStorage
+        showToast("Titik dihapus")
         updateTampilanLog();  // ✅ Update display
     });
 }
