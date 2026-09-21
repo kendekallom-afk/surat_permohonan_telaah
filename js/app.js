@@ -2121,6 +2121,168 @@ function hapusSemuaData() {
     });
 }
 /* ============================================================
+   EXPORT XLS — backup data terpilih
+   ============================================================ */
+
+/**
+ * Dipanggil dari tombol "⬇️ Export" di popup.
+ * Ambil ID yang dicentang → ambil record → bikin XLS → unduh.
+ */
+function exportDataTerpilih() {
+    const idTerpilih = ambilIdTerpilih();
+
+    if (idTerpilih.length === 0) {
+        showAlert('Pilih dulu data yang mau di-export.');
+        return;
+    }
+
+    // Ambil semua record yang dicentang
+    const janji = idTerpilih.map((id) => dbAmbilSurat(id));
+
+    Promise.all(janji).then((daftarSurat) => {
+        // Buang yang null (kalau ada ID yang tidak ditemukan)
+        const valid = daftarSurat.filter((s) => s !== null && s !== undefined);
+
+        if (valid.length === 0) {
+            showAlert('Tidak ada data yang bisa di-export.');
+            return;
+        }
+
+        // Urutkan berdasarkan ID_Surat supaya rapi
+        valid.sort((a, b) => (a.id_surat || '').localeCompare(b.id_surat || ''));
+
+        const konten = buatKontenXls(valid);
+        const namaFile = buatNamaFileXls();
+
+        unduhFile(konten, namaFile, 'application/vnd.ms-excel');
+        showAlert(`✅ ${valid.length} data berhasil di-export.`);
+    }).catch((err) => {
+        console.error('Gagal export:', err);
+        showAlert('Gagal export data: ' + err.message);
+    });
+}
+
+/**
+ * Bikin konten XLS format HTML table.
+ * @param {Array} daftarSurat - array record surat dari IndexedDB
+ * @returns {string} HTML lengkap siap diunduh
+ */
+function buatKontenXls(daftarSurat) {
+    // Header kolom
+    const kolom = [
+        'ID_Surat', 'Tanggal_Dibuat', 'Nama_Pemohon', 'Pekerjaan',
+        'No_HP', 'Alamat_KTP', 'Keperluan', 'Jalan_Dusun_Lahan',
+        'Desa_Kelurahan', 'Kecamatan', 'Kabupaten_Provinsi', 'TTD_ID',
+        'No_Titik', 'Longitude', 'Latitude', 'Akurasi_m', 'Waktu_Ambil'
+    ];
+
+    let baris = '';
+
+    daftarSurat.forEach((s) => {
+        const titikArr = (s.titik && s.titik.length > 0) ? s.titik : [null];
+
+        titikArr.forEach((t) => {
+            const kolomNilai = [
+                s.id_surat || '',
+                s.tanggal_dibuat || '',
+                s.nama_pemohon || '',
+                s.pekerjaan || '',
+                s.no_hp || '',
+                s.alamat_ktp || '',
+                s.keperluan || '',
+                s.jalan_dusun || '',
+                s.desa || '',
+                s.kecamatan || '',
+                s.kabupaten || '',
+                s.ttd_id || '',
+                t ? t.no_titik : '',
+                t ? t.longitude : '',   // angka, biar Excel & ArcGIS baca sebagai number
+                t ? t.latitude : '',
+                t ? t.akurasi : '',
+                t ? t.waktu_ambil : ''
+            ];
+
+            baris += '<tr>';
+            kolomNilai.forEach((nilai) => {
+                // Kalau angka, jangan diapit tanda kutip → Excel baca sebagai number
+                // Kalau teks, escape HTML dan bungkus dengan mso-number-format agar tidak auto-convert
+                if (typeof nilai === 'number') {
+                    baris += `<td>${nilai}</td>`;
+                } else {
+                    baris += `<td style="mso-number-format:'\\@';">${escapeHtml(nilai)}</td>`;
+                }
+            });
+            baris += '</tr>';
+        });
+    });
+
+    const headerHtml = kolom.map((k) => `<th>${k}</th>`).join('');
+
+    return `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:x="urn:schemas-microsoft-com:office:excel"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta charset="UTF-8">
+    <!--[if gte mso 9]>
+    <xml>
+        <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+                <x:ExcelWorksheet>
+                    <x:Name>Data Surat</x:Name>
+                    <x:WorksheetOptions>
+                        <x:DisplayGridlines/>
+                    </x:WorksheetOptions>
+                </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+    </xml>
+    <![endif]-->
+    <style>
+        table { border-collapse: collapse; }
+        th, td { border: 1px solid #999; padding: 4px 8px; font-family: Arial; font-size: 11pt; }
+        th { background: #ddd; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <table>
+        <thead><tr>${headerHtml}</tr></thead>
+        <tbody>${baris}</tbody>
+    </table>
+</body>
+</html>`;
+}
+
+/**
+ * Bikin nama file: backup_surat_permohonan_YYYY-MM-DD.xls
+ */
+function buatNamaFileXls() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `backup_surat_permohonan_${y}-${m}-${d}.xls`;
+}
+
+/**
+ * Unduh string sebagai file.
+ */
+function unduhFile(konten, namaFile, mimeType) {
+    try {
+        const blob = new Blob([konten], { type: mimeType + ';charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = namaFile;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        showAlert('Gagal mengunduh file: ' + err.message);
+    }
+}
+/* ============================================================
    POPUP DATA TERSIMPAN
    ============================================================ */
 
