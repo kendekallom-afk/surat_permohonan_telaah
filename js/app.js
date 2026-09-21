@@ -2082,7 +2082,6 @@ function hapusDataTerpilih() {
         });
 
         rantai.then(() => {
-            showAlert(`✅ ${idTerpilih.length} data berhasil dihapus.`);
             muatDaftarData();
         }).catch((err) => {
             console.error('Gagal menghapus:', err);
