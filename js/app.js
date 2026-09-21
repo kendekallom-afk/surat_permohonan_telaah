@@ -1978,7 +1978,7 @@ function simpanKeDaftar() {
             return dbSimpanSurat(recordSurat);
         });
     }).then(() => {
-        showAlert('✅ Data berhasil disimpan ke daftar.');
+        showToast('✅ Data berhasil disimpan ke daftar', 'sukses');
     }).catch((err) => {
         console.error('Gagal menyimpan ke daftar:', err);
         showAlert('Gagal menyimpan data: ' + err.message);
@@ -2082,6 +2082,7 @@ function hapusDataTerpilih() {
         });
 
         rantai.then(() => {
+            showToast(`✅ ${idTerpilih.length} data berhasil dihapus`, 'sukses');
             muatDaftarData();
         }).catch((err) => {
             console.error('Gagal menghapus:', err);
@@ -2117,6 +2118,7 @@ function hapusSemuaData() {
                 dbHapusSemuaSurat(),
                 dbHapusSemuaTtd()
             ]).then(() => {
+                showToast('Data berhasil dihapus')
                 muatDaftarData();
             }).catch((err) => {
                 console.error('Gagal menghapus semua:', err);
