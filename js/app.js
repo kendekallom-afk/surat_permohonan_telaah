@@ -1717,3 +1717,351 @@ doc.text(nama, posXCenter, y, { align: 'center' });
             e.preventDefault();
         }
     });
+
+/* ============================================================
+   INDEXEDDB — LAPISAN DATABASE mGPS Point
+   ============================================================ */
+
+const DB_NAMA = 'mGPS_Point';
+const DB_VERSI = 1;
+const STORE_SURAT = 'surat';
+const STORE_TTD = 'ttd';
+
+let _db = null;
+
+/**
+ * Buka (atau buat) database IndexedDB.
+ * Dipanggil sekali saat aplikasi mulai; hasilnya disimpan di _db.
+ */
+function bukaDatabase() {
+    return new Promise((resolve, reject) => {
+        if (_db) return resolve(_db);
+
+        const permintaan = indexedDB.open(DB_NAMA, DB_VERSI);
+
+        permintaan.onupgradeneeded = (event) => {
+            const db = event.target.result;
+
+            // Store "surat" — key: id_surat
+            if (!db.objectStoreNames.contains(STORE_SURAT)) {
+                db.createObjectStore(STORE_SURAT, { keyPath: 'id_surat' });
+            }
+
+            // Store "ttd" — key: ttd_id
+            if (!db.objectStoreNames.contains(STORE_TTD)) {
+                db.createObjectStore(STORE_TTD, { keyPath: 'ttd_id' });
+            }
+        };
+
+        permintaan.onsuccess = (event) => {
+            _db = event.target.result;
+            resolve(_db);
+        };
+
+        permintaan.onerror = (event) => {
+            reject(event.target.error);
+        };
+    });
+}
+
+/**
+ * Helper umum: jalankan transaksi di satu store.
+ * @param {string} namaStore
+ * @param {'readonly'|'readwrite'} mode
+ * @param {(store) => void} aksi
+ */
+function denganStore(namaStore, mode, aksi) {
+    return bukaDatabase().then((db) => {
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(namaStore, mode);
+            const store = tx.objectStore(namaStore);
+            let hasil;
+
+            tx.oncomplete = () => resolve(hasil);
+            tx.onerror = () => reject(tx.error);
+            tx.onabort = () => reject(tx.error);
+
+            // Bungkus store + resolver supaya aksi bisa mengembalikan nilai
+            aksi(store, (nilai) => { hasil = nilai; });
+        });
+    });
+}
+
+/* ---------- Operasi dasar: SURAT ---------- */
+
+function dbAmbilSemuaSurat() {
+    return denganStore(STORE_SURAT, 'readonly', (store, setHasil) => {
+        const req = store.getAll();
+        req.onsuccess = () => setHasil(req.result || []);
+    });
+}
+
+function dbAmbilSurat(idSurat) {
+    return denganStore(STORE_SURAT, 'readonly', (store, setHasil) => {
+        const req = store.get(idSurat);
+        req.onsuccess = () => setHasil(req.result || null);
+    });
+}
+
+function dbSimpanSurat(recordSurat) {
+    return denganStore(STORE_SURAT, 'readwrite', (store) => {
+        store.put(recordSurat);
+    });
+}
+
+function dbHapusSurat(idSurat) {
+    return denganStore(STORE_SURAT, 'readwrite', (store) => {
+        store.delete(idSurat);
+    });
+}
+
+function dbHapusSemuaSurat() {
+    return denganStore(STORE_SURAT, 'readwrite', (store) => {
+        store.clear();
+    });
+}
+
+/* ---------- Operasi dasar: TTD ---------- */
+
+function dbAmbilTtd(ttdId) {
+    return denganStore(STORE_TTD, 'readonly', (store, setHasil) => {
+        const req = store.get(ttdId);
+        req.onsuccess = () => setHasil(req.result || null);
+    });
+}
+
+function dbSimpanTtd(recordTtd) {
+    return denganStore(STORE_TTD, 'readwrite', (store) => {
+        store.put(recordTtd);
+    });
+}
+
+function dbHapusTtd(ttdId) {
+    return denganStore(STORE_TTD, 'readwrite', (store) => {
+        store.delete(ttdId);
+    });
+}
+
+function dbHapusSemuaTtd() {
+    return denganStore(STORE_TTD, 'readwrite', (store) => {
+        store.clear();
+    });
+}
+
+/* ---------- Helper: ID unik ---------- */
+
+/**
+ * ID surat: SRT-YYYYMMDD-NNN
+ * NNN dihitung dari jumlah surat yang ada di tanggal itu + 1.
+ */
+function buatIdSurat() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const prefix = `SRT-${y}${m}${d}-`;
+
+    return dbAmbilSemuaSurat().then((semua) => {
+        let urut = 1;
+        semua.forEach((s) => {
+            if (s.id_surat && s.id_surat.startsWith(prefix)) {
+                const angka = parseInt(s.id_surat.slice(prefix.length), 10);
+                if (!isNaN(angka) && angka >= urut) urut = angka + 1;
+            }
+        });
+        return prefix + String(urut).padStart(3, '0');
+    });
+}
+
+/**
+ * ID TTD: TTD-XXXXXX (6 karakter acak huruf+angka besar)
+ */
+function buatIdTtd() {
+    const karakter = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // hindari 0/O, 1/I
+    let hasil = 'TTD-';
+    for (let i = 0; i < 6; i++) {
+        hasil += karakter.charAt(Math.floor(Math.random() * karakter.length));
+    }
+    return hasil;
+}
+
+/* ============================================================
+   POPUP DATA TERSIMPAN
+   ============================================================ */
+
+let _daftarSuratCache = []; // cache hasil getAll() untuk filter & render
+
+function bukaPopupData() {
+    const modal = document.getElementById('modal-data-tersimpan');
+    if (modal) modal.style.display = 'flex';
+    muatDaftarData();
+}
+
+function tutupPopupData() {
+    const modal = document.getElementById('modal-data-tersimpan');
+    if (modal) modal.style.display = 'none';
+}
+
+function muatDaftarData() {
+    dbAmbilSemuaSurat().then((semua) => {
+        // Urutkan: terbaru di atas
+        semua.sort((a, b) => (b.tanggal_dibuat || '').localeCompare(a.tanggal_dibuat || ''));
+        _daftarSuratCache = semua;
+        renderDaftarData(semua);
+    }).catch((err) => {
+        console.error('Gagal memuat daftar:', err);
+        tampilkanAlert('Gagal memuat data tersimpan.');
+    });
+}
+
+function renderDaftarData(daftar) {
+    const wadah = document.getElementById('daftar-data');
+    const kosong = document.getElementById('daftar-kosong');
+    const kontrol = document.getElementById('daftar-kontrol');
+    const cbInduk = document.getElementById('cb-pilih-semua');
+
+    if (!wadah) return;
+
+    // Reset checkbox induk
+    if (cbInduk) {
+        cbInduk.checked = false;
+        cbInduk.indeterminate = false;
+    }
+
+    if (!daftar || daftar.length === 0) {
+        wadah.innerHTML = '';
+        if (kosong) kosong.style.display = 'block';
+        if (kontrol) kontrol.style.display = 'none';
+        return;
+    }
+
+    if (kosong) kosong.style.display = 'none';
+    if (kontrol) kontrol.style.display = 'flex';
+
+    wadah.innerHTML = daftar.map((s) => {
+        const nama = escapeHtml(s.nama_pemohon || '(tanpa nama)');
+        const tgl = formatTanggalSingkat(s.tanggal_dibuat);
+        const desa = escapeHtml(s.desa || '-');
+        const jmlTitik = (s.titik && s.titik.length) ? s.titik.length : 0;
+
+        return `
+            <div class="item-data" data-id="${escapeHtml(s.id_surat)}">
+                <input type="checkbox" class="item-checkbox"
+                       onchange="perbaruiStatusPilihSemua()"
+                       onclick="event.stopPropagation();">
+                <div class="item-isi">
+                    <div class="item-nama">${nama}</div>
+                    <div class="item-meta">
+                        ${tgl}<span class="pemisah">·</span>${desa}
+                    </div>
+                </div>
+                <div class="item-titik">${jmlTitik} titik</div>
+            </div>
+        `;
+    }).join('');
+
+    // Pasang handler klik pada tiap baris (buka surat)
+    wadah.querySelectorAll('.item-data').forEach((el) => {
+        el.addEventListener('click', (ev) => {
+            // Abaikan klik pada checkbox
+            if (ev.target.classList.contains('item-checkbox')) return;
+            const id = el.getAttribute('data-id');
+            bukaSuratKeForm(id);
+        });
+    });
+}
+
+function filterDaftarData() {
+    const input = document.getElementById('cari-data-input');
+    const kata = (input ? input.value : '').trim().toLowerCase();
+
+    if (!kata) {
+        renderDaftarData(_daftarSuratCache);
+        return;
+    }
+
+    const hasil = _daftarSuratCache.filter((s) => {
+        const nama = (s.nama_pemohon || '').toLowerCase();
+        const desa = (s.desa || '').toLowerCase();
+        return nama.includes(kata) || desa.includes(kata);
+    });
+
+    renderDaftarData(hasil);
+}
+
+function togglePilihSemua(checked) {
+    document.querySelectorAll('#daftar-data .item-checkbox').forEach((cb) => {
+        cb.checked = checked;
+    });
+}
+
+function perbaruiStatusPilihSemua() {
+    const semua = document.querySelectorAll('#daftar-data .item-checkbox');
+    const dipilih = document.querySelectorAll('#daftar-data .item-checkbox:checked');
+    const induk = document.getElementById('cb-pilih-semua');
+    if (!induk) return;
+
+    if (dipilih.length === 0) {
+        induk.checked = false;
+        induk.indeterminate = false;
+    } else if (dipilih.length === semua.length) {
+        induk.checked = true;
+        induk.indeterminate = false;
+    } else {
+        induk.checked = false;
+        induk.indeterminate = true;
+    }
+}
+
+/** Ambil daftar ID surat yang dicentang */
+function ambilIdTerpilih() {
+    const hasil = [];
+    document.querySelectorAll('#daftar-data .item-checkbox:checked').forEach((cb) => {
+        const baris = cb.closest('.item-data');
+        if (baris) hasil.push(baris.getAttribute('data-id'));
+    });
+    return hasil;
+}
+
+/* ============================================================
+   HELPER UMUM
+   ============================================================ */
+
+function escapeHtml(teks) {
+    if (teks === null || teks === undefined) return '';
+    return String(teks)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function formatTanggalSingkat(iso) {
+    if (!iso) return '-';
+    try {
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return iso;
+        const bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
+    } catch (e) {
+        return iso;
+    }
+}
+
+/**
+ * Panggil saat aplikasi mulai — buka database sekali.
+ * Cek juga apakah browser mendukung IndexedDB.
+ */
+function inisialisasiDatabase() {
+    if (!window.indexedDB) {
+        alert('Browser Anda tidak mendukung IndexedDB. Aplikasi tidak dapat menyimpan data.');
+        return;
+    }
+    bukaDatabase()
+        .then(() => console.log('IndexedDB siap:', DB_NAMA))
+        .catch((err) => console.error('Gagal membuka IndexedDB:', err));
+}
+
+// Jalankan saat halaman siap
+document.addEventListener('DOMContentLoaded', inisialisasiDatabase);
