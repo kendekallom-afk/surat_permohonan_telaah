@@ -2056,8 +2056,7 @@ function kosongkanSemua() {
         if (gpsView) gpsView.classList.remove('view-hidden');
         if (formView) formView.classList.remove('view-hidden');
     }
-
-    showAlert('✅ Form dikosongkan. Siap isi data baru.');
+   
 }
 /* ============================================================
    HAPUS DATA DARI DAFTAR
