@@ -337,7 +337,7 @@
         // ============================================
         function copyKoordinat() {
             if (daftarTitik.length === 0) {
-                return showAlert("Belum ada titik tersimpan di dalam log!");
+                return showToast("Belum ada titik tersimpan di dalam log!");
             }
 
             const nama = document.getElementById("pemohon-nama").value.trim();
@@ -513,7 +513,7 @@
 
         function hapusSemuaTitik() {
     if (daftarTitik.length === 0) {
-        showAlert('Belum ada titik yang bisa dihapus.');
+        showToast('Belum ada titik yang bisa dihapus.');
         return;
     }
 
