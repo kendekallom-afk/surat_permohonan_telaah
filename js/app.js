@@ -2108,7 +2108,7 @@ function hapusSatuSurat(idSurat) {
 function hapusSemuaData() {
     dbAmbilSemuaSurat().then((semua) => {
         if (!semua || semua.length === 0) {
-            showAlert('Belum ada data yang bisa dihapus.');
+            showToast('Belum ada data yang bisa dihapus.');
             return;
         }
 
