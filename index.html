@@ -37,7 +37,7 @@
                 </div>
 
                 <div class="header-actions">
-                    <button class="btn-header" onclick="document.getElementById('file-input-txt').click()">📁 Buka</button>
+                    <button class="btn-header" onclick="bukaPopupData()">📂 Data Tersimpan</button>
                     <button class="btn-header" onclick="refreshGPS()">🔄 Refresh</button>
                 </div>
             </div>
@@ -93,7 +93,7 @@
                     </svg>
                     <span>Salin</span>
                 </button>
-                <button class="btn-square btn-grey" onclick="simpanTxt()" title="Simpan ke file txt">
+                <button class="btn-square btn-grey" onclick="simpanKeDaftar()" title="Simpan ke daftar">
                     <span class="icon">💾</span>
                     <span>Simpan</span>
                 </button>
@@ -379,10 +379,56 @@
             </div>
         </div>
     </div>
-
-    <input type="file" id="file-input-txt" accept=".txt" style="display:none;" onchange="bacaFileTxt(event)">
-
     
+<!-- ===== MODAL DATA TERSIMPAN ===== -->
+<div id="modal-data-tersimpan" class="custom-modal-overlay">
+    <div class="custom-modal-box" style="max-width: 560px; width: 92%; padding: 0; overflow: hidden;">
+
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid #e2e8f0;">
+            <div style="font-size: 16px; font-weight: 700; color: #1e293b;">📂 Data Tersimpan</div>
+            <button onclick="tutupPopupData()" style="background: transparent; border: none; font-size: 20px; cursor: pointer; color: #64748b; padding: 0 4px;">×</button>
+        </div>
+
+        <!-- Pencarian -->
+        <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
+            <input type="text" id="cari-data-input" placeholder="🔍 Cari nama pemohon / desa..." autocomplete="off"
+                   oninput="filterDaftarData()"
+                   style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+        </div>
+
+        <!-- Baris kontrol (checkbox induk + tombol) -->
+        <div id="daftar-kontrol" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #475569; font-weight: 600;">
+                <input type="checkbox" id="cb-pilih-semua" onchange="togglePilihSemua(this.checked)" style="width: 16px; height: 16px; cursor: pointer;">
+                Pilih Semua
+            </label>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="exportDataTerpilih()" style="padding: 6px 12px; background: #1d6ed8; color: white; border: none; border-radius: 6px; font-size: 13px; cursor: pointer;">⬇️ Export</button>
+                <button onclick="hapusDataTerpilih()" style="padding: 6px 12px; background: #dc2626; color: white; border: none; border-radius: 6px; font-size: 13px; cursor: pointer;">🗑️ Hapus</button>
+            </div>
+        </div>
+
+        <!-- Daftar data -->
+        <div id="daftar-data" style="max-height: 50vh; overflow-y: auto;">
+            <!-- Diisi oleh JS -->
+        </div>
+
+        <!-- Kondisi kosong -->
+        <div id="daftar-kosong" style="display: none; padding: 40px 20px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 12px;">📭</div>
+            <div style="font-size: 15px; color: #64748b; font-weight: 500;">Belum ada data tersimpan</div>
+            <div style="font-size: 13px; color: #94a3b8; margin-top: 6px;">Data yang Anda simpan akan muncul di sini</div>
+        </div>
+
+        <!-- Footer -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-top: 1px solid #e2e8f0; background: #f8fafc; gap: 8px;">
+            <button onclick="picuImportXls()" style="padding: 8px 14px; background: #059669; color: white; border: none; border-radius: 6px; font-size: 13px; cursor: pointer;">📥 Import XLS</button>
+            <button onclick="hapusSemuaData()" style="padding: 8px 14px; background: transparent; color: #dc2626; border: 1px solid #fecaca; border-radius: 6px; font-size: 13px; cursor: pointer;">Hapus Semua</button>
+        </div>
+    </div>
+</div>
+   <input type="file" id="file-input-xls" accept=".xls,.xlsx" style="display:none;" onchange="bacaFileXls(event)">    
 
     <script src="js/app.js" defer></script>
 </body>
