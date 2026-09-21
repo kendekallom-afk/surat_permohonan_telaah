@@ -716,7 +716,10 @@
     z-index: 9999999 !important;
 }
 
-/* Toast — notifikasi kecil di bawah */
+/* ============================================================
+   TOAST — notifikasi kecil di atas, satu baris
+   ============================================================ */
+
 #toast-container {
     position: fixed;
     top: 20px;
@@ -727,20 +730,28 @@
     flex-direction: column;
     gap: 8px;
     pointer-events: none;
+    width: auto;
+    max-width: 90vw;
 }
 
 .toast {
     background: #1e293b;
     color: white;
-    padding: 12px 20px;
+    padding: 10px 18px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 500;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(-20px);
     transition: opacity 0.3s ease, transform 0.3s ease;
+
+    /* Satu baris, tidak membungkus */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
     max-width: 90vw;
-    text-align: center;
 }
 
 .toast.tampil {
