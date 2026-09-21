@@ -2052,6 +2052,89 @@ function kosongkanSemua() {
     showAlert('✅ Form dikosongkan. Siap isi data baru.');
 }
 /* ============================================================
+   HAPUS DATA DARI DAFTAR
+   ============================================================ */
+
+/**
+ * Hapus surat yang dicentang di popup, sekaligus TTD-nya.
+ * Dipanggil dari tombol "🗑️ Hapus" di baris kontrol popup.
+ */
+function hapusDataTerpilih() {
+    const idTerpilih = ambilIdTerpilih();
+
+    if (idTerpilih.length === 0) {
+        showAlert('Pilih dulu data yang mau dihapus.');
+        return;
+    }
+
+    const pesan = idTerpilih.length === 1
+        ? 'Yakin hapus 1 data ini?'
+        : `Yakin hapus ${idTerpilih.length} data ini?`;
+
+    showConfirm(pesan, function () {
+        // Hapus tiap surat + TTD-nya secara berurutan
+        let rantai = Promise.resolve();
+
+        idTerpilih.forEach((idSurat) => {
+            rantai = rantai.then(() => hapusSatuSurat(idSurat));
+        });
+
+        rantai.then(() => {
+            showAlert(`✅ ${idTerpilih.length} data berhasil dihapus.`);
+            muatDaftarData(); // refresh popup
+        }).catch((err) => {
+            console.error('Gagal menghapus:', err);
+            showAlert('Gagal menghapus data: ' + err.message);
+        });
+    });
+}
+
+/**
+ * Hapus satu surat + TTD-nya (kalau ada).
+ */
+function hapusSatuSurat(idSurat) {
+    return dbAmbilSurat(idSurat).then((surat) => {
+        if (!surat) return;
+
+        // Hapus TTD dulu (kalau ada)
+        if (surat.ttd_id) {
+            return dbHapusTtd(surat.ttd_id).then(() => {
+                return dbHapusSurat(idSurat);
+            });
+        }
+
+        return dbHapusSurat(idSurat);
+    });
+}
+
+/**
+ * Hapus SEMUA data — kosongkan kedua store.
+ * Dipanggil dari tombol "Hapus Semua" di footer popup.
+ */
+function hapusSemuaData() {
+    // Cek dulu apakah ada data
+    dbAmbilSemuaSurat().then((semua) => {
+        if (!semua || semua.length === 0) {
+            showAlert('Belum ada data yang bisa dihapus.');
+            return;
+        }
+
+        const pesan = `Yakin hapus SEMUA data (${semua.length} surat)?`;
+        showConfirm(pesan, function () {
+            Promise.all([
+                dbHapusSemuaSurat(),
+                dbHapusSemuaTtd()
+            ]).then(() => {
+                showAlert('✅ Semua data berhasil dihapus.');
+                muatDaftarData(); // refresh popup
+            }).catch((err) => {
+                console.error('Gagal menghapus semua:', err);
+                showAlert('Gagal menghapus semua data: ' + err.message);
+            });
+        });
+    });
+}
+/* ============================================================
    POPUP DATA TERSIMPAN
    ============================================================ */
 
