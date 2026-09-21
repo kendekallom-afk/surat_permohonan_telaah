@@ -2283,6 +2283,215 @@ function unduhFile(konten, namaFile, mimeType) {
     }
 }
 /* ============================================================
+   IMPORT XLS — dari file ke IndexedDB
+   ============================================================ */
+
+/**
+ * Dipanggil dari tombol "📥 Import XLS" di popup.
+ * Buka dialog pilih file.
+ */
+function picuImportXls() {
+    const input = document.getElementById('file-input-xls');
+    if (input) input.click();
+}
+
+/**
+ * Dipanggil saat user memilih file XLS.
+ * Baca file sebagai teks → parse → group → simpan.
+ */
+function bacaFileXls(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        try {
+            const html = e.target.result;
+            const baris = parseXlsKeBaris(html);
+
+            if (baris.length === 0) {
+                showAlert('File tidak berisi data yang bisa dibaca.');
+                return;
+            }
+
+            const hasil = groupBarisKeSurat(baris);
+
+            if (hasil.surat.length === 0) {
+                showAlert('Tidak ada data valid yang bisa diimpor.');
+                return;
+            }
+
+            simpanHasilImport(hasil);
+        } catch (err) {
+            console.error('Gagal parse XLS:', err);
+            showAlert('Format file XLS tidak sesuai: ' + err.message);
+        }
+
+        event.target.value = '';
+    };
+
+    reader.onerror = function () {
+        showAlert('Gagal membaca file.');
+        event.target.value = '';
+    };
+
+    reader.readAsText(file);
+}
+
+/**
+ * Parse isi HTML (dari file .xls) menjadi array baris.
+ * Tiap baris = object dengan nama kolom sebagai key.
+ *
+ * @param {string} html
+ * @returns {Array<Object>}
+ */
+function parseXlsKeBaris(html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    const tabel = doc.querySelector('table');
+    if (!tabel) throw new Error('Tabel tidak ditemukan di file.');
+
+    const barisHtml = tabel.querySelectorAll('tr');
+    if (barisHtml.length < 2) return [];
+
+    // Baris pertama = header
+    const headerSel = barisHtml[0].querySelectorAll('th, td');
+    const header = [];
+    headerSel.forEach((sel) => {
+        header.push((sel.textContent || '').trim());
+    });
+
+    // Validasi kolom wajib
+    const kolomWajib = ['ID_Surat', 'Nama_Pemohon', 'Longitude', 'Latitude'];
+    for (const k of kolomWajib) {
+        if (!header.includes(k)) {
+            throw new Error(`Kolom "${k}" tidak ditemukan.`);
+        }
+    }
+
+    // Baris data
+    const hasil = [];
+    for (let i = 1; i < barisHtml.length; i++) {
+        const sel = barisHtml[i].querySelectorAll('td');
+        if (sel.length === 0) continue;
+
+        const obj = {};
+        header.forEach((namaKolom, idx) => {
+            const nilai = sel[idx] ? (sel[idx].textContent || '').trim() : '';
+            obj[namaKolom] = nilai;
+        });
+
+        hasil.push(obj);
+    }
+
+    return hasil;
+}
+
+/**
+ * Group baris berdasarkan ID_Surat.
+ * @param {Array<Object>} baris
+ * @returns {{ surat: Array<Object>, dilewati: number }}
+ */
+function groupBarisKeSurat(baris) {
+    const peta = new Map(); // id_surat → { dataSurat, titik[] }
+    let dilewati = 0;
+
+    baris.forEach((b) => {
+        const idSurat = (b.ID_Surat || '').trim();
+        const nama = (b.Nama_Pemohon || '').trim();
+
+        // Lewati baris tanpa ID atau tanpa nama
+        if (!idSurat || !nama) {
+            dilewati++;
+            return;
+        }
+
+        if (!peta.has(idSurat)) {
+            peta.set(idSurat, {
+                id_surat: idSurat,
+                tanggal_dibuat: b.Tanggal_Dibuat || '',
+                nama_pemohon: nama,
+                pekerjaan: b.Pekerjaan || '',
+                no_hp: b.No_HP || '',
+                alamat_ktp: b.Alamat_KTP || '',
+                keperluan: b.Keperluan || '',
+                jalan_dusun: b.Jalan_Dusun_Lahan || '',
+                desa: b.Desa_Kelurahan || '',
+                kecamatan: b.Kecamatan || '',
+                kabupaten: b.Kabupaten_Provinsi || '',
+                ttd_id: b.TTD_ID || '',
+                titik: []
+            });
+        }
+
+        // Tambah titik (kalau ada)
+        const lng = parseFloat(b.Longitude);
+        const lat = parseFloat(b.Latitude);
+
+        if (Number.isFinite(lng) && Number.isFinite(lat)) {
+            const grup = peta.get(idSurat);
+            grup.titik.push({
+                no_titik: parseInt(b.No_Titik, 10) || (grup.titik.length + 1),
+                longitude: lng,
+                latitude: lat,
+                akurasi: parseFloat(b.Akurasi_m) || 0,
+                waktu_ambil: b.Waktu_Ambil || ''
+            });
+        }
+    });
+
+    // Urutkan titik dalam tiap surat berdasarkan no_titik
+    const surat = Array.from(peta.values());
+    surat.forEach((s) => {
+        s.titik.sort((a, b) => (a.no_titik || 0) - (b.no_titik || 0));
+    });
+
+    return { surat, dilewati };
+}
+
+/**
+ * Simpan hasil import ke IndexedDB (mode: timpa kalau ID sama).
+ */
+function simpanHasilImport(hasil) {
+    const { surat, dilewati } = hasil;
+
+    let ditambah = 0;
+    let ditimpa = 0;
+    let rantai = Promise.resolve();
+
+    surat.forEach((s) => {
+        rantai = rantai.then(() => {
+            return dbAmbilSurat(s.id_surat).then((lama) => {
+                // Kalau sudah ada, hapus TTD lamanya (kalau ada dan beda)
+                if (lama && lama.ttd_id && lama.ttd_id !== s.ttd_id) {
+                    return dbHapusTtd(lama.ttd_id).then(() => {
+                        return dbSimpanSurat(s).then(() => { ditimpa++; });
+                    });
+                }
+                return dbSimpanSurat(s).then(() => {
+                    if (lama) ditimpa++;
+                    else ditambah++;
+                });
+            });
+        });
+    });
+
+    rantai.then(() => {
+        let pesan = `✅ Import selesai.\n\n`;
+        pesan += `• ${ditambah} surat ditambahkan\n`;
+        pesan += `• ${ditimpa} surat ditimpa\n`;
+        if (dilewati > 0) pesan += `• ${dilewati} baris dilewati (data tidak lengkap)`;
+
+        showAlert(pesan);
+        muatDaftarData(); // refresh popup
+    }).catch((err) => {
+        console.error('Gagal simpan hasil import:', err);
+        showAlert('Gagal menyimpan hasil import: ' + err.message);
+    });
+}
+/* ============================================================
    POPUP DATA TERSIMPAN
    ============================================================ */
 
