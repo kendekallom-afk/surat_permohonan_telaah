@@ -2785,7 +2785,7 @@ function simpanKeDaftar() {
             return dbSimpanSurat(recordSurat);
         });
     }).then(() => {
-        showAlert('✅ Data berhasil disimpan ke daftar.');
+        showToast('✅ Data berhasil disimpan ke daftar.');
     }).catch((err) => {
         console.error('Gagal menyimpan ke daftar:', err);
         showAlert('Gagal menyimpan data: ' + err.message);
