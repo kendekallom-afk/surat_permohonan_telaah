@@ -2397,3 +2397,40 @@ function muatTtdKePreview(ttdId) {
         if (preview) preview.style.display = 'none';
     });
 }
+/* ============================================================
+   MULAI SURAT BARU — kosongkan form, titik, dan TTD
+   ============================================================ */
+
+function mulaiSuratBaru() {
+    showConfirm('Kosongkan form dan mulai data baru?', function () {
+        // 1) Kosongkan field form
+        setNilai('pemohon-nama', '');
+        setNilai('pemohon-pekerjaan', '');
+        setNilai('pemohon-alamat', '');
+        setNilai('pemohon-hp', '');
+        setNilai('pemohon-keperluan', '');
+        setNilai('lahan-jalan', '');
+        setNilai('lahan-desa-input', '');
+        setNilai('lahan-kec', '');
+        setNilai('lahan-kab', 'Mamuju, Provinsi Sulawesi Barat');
+
+        // 2) Kosongkan titik
+        daftarTitik = [];
+        localStorage.removeItem('daftarTitik');
+        updateTampilanLog();
+
+        // 3) Kosongkan TTD
+        ttdData = null;
+        const previewTtd = document.getElementById('preview-ttd');
+        if (previewTtd) previewTtd.style.display = 'none';
+
+        // 4) Reset matchedTipe
+        matchedTipe = null;
+
+        // 5) Kosongkan foto dokumentasi
+        daftarFoto = [];
+        renderGaleriFoto();
+
+        showAlert('✅ Form dikosongkan. Siap isi data baru.');
+    });
+}
