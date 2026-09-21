@@ -512,10 +512,18 @@
         }
 
         function hapusSemuaTitik() {
+    if (daftarTitik.length === 0) {
+        showAlert('Belum ada titik yang bisa dihapus.');
+        return;
+    }
+
     showConfirm("Yakin ingin menghapus semua titik?", function() {
         daftarTitik = [];
         localStorage.removeItem('daftarTitik');
-        updateTampilanLog();  // ✅ Update display
+        updateTampilanLog();
+
+        // Panggil mulaiSuratBaru untuk tawarkan kosongkan form juga
+        mulaiSuratBaru();
     });
 }
         // ============================================
