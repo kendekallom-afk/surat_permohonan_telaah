@@ -709,3 +709,9 @@
         font-size: 13px !important;
     }
 }
+/* Modal konfirmasi, alert, prompt harus selalu di atas modal lain */
+#custom-confirm-modal,
+#custom-alert-modal,
+#custom-prompt-modal {
+    z-index: 99999 !important;
+}
