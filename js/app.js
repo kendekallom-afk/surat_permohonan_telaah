@@ -1884,7 +1884,98 @@ function buatIdTtd() {
     }
     return hasil;
 }
+/* ============================================================
+   SIMPAN KE DAFTAR — dari form ke IndexedDB
+   ============================================================ */
 
+function ambilNilaiForm() {
+    return {
+        nama_pemohon: (document.getElementById('pemohon-nama')?.value || '').trim(),
+        pekerjaan:    (document.getElementById('pemohon-pekerjaan')?.value || '').trim(),
+        alamat_ktp:   (document.getElementById('pemohon-alamat')?.value || '').trim(),
+        no_hp:        (document.getElementById('pemohon-hp')?.value || '').trim(),
+        keperluan:    (document.getElementById('pemohon-keperluan')?.value || '').trim(),
+        jalan_dusun:  (document.getElementById('lahan-jalan')?.value || '').trim(),
+        desa:         (document.getElementById('lahan-desa-input')?.value || '').trim(),
+        kecamatan:    (document.getElementById('lahan-kec')?.value || '').trim(),
+        kabupaten:    (document.getElementById('lahan-kab')?.value || '').trim()
+    };
+}
+
+function validasiForm(nilai) {
+    if (!nilai.nama_pemohon) return 'Nama pemohon wajib diisi.';
+    if (!nilai.no_hp)        return 'No. HP wajib diisi.';
+    if (!nilai.desa)         return 'Desa/Kelurahan wajib diisi.';
+    if (!daftarTitik || daftarTitik.length === 0) return 'Minimal satu titik GPS harus diambil.';
+    return null;
+}
+
+function ubahTitikKeSkema() {
+    return daftarTitik.map((t, i) => ({
+        no_titik: i + 1,
+        longitude: parseFloat(t.lng),
+        latitude:  parseFloat(t.lat),
+        akurasi:   Number(t.acc) || 0,
+        waktu_ambil: gabungTanggalJam(t.waktu)
+    }));
+}
+
+function gabungTanggalJam(jamLokal) {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}T${jamLokal || '00:00:00'}`;
+}
+
+function simpanTtdKeDb() {
+    if (!ttdData) return Promise.resolve(null);
+
+    const ttdId = buatIdTtd();
+    const recordTtd = {
+        ttd_id: ttdId,
+        gambar: ttdData,
+        tanggal_dibuat: new Date().toISOString(),
+        ukuran_byte: Math.round((ttdData.length * 3) / 4)
+    };
+
+    return dbSimpanTtd(recordTtd).then(() => ttdId);
+}
+
+function simpanKeDaftar() {
+    const nilai = ambilNilaiForm();
+    const pesanError = validasiForm(nilai);
+    if (pesanError) {
+        showAlert(pesanError);
+        return;
+    }
+
+    simpanTtdKeDb().then((ttdId) => {
+        return buatIdSurat().then((idSurat) => {
+            const recordSurat = {
+                id_surat: idSurat,
+                tanggal_dibuat: new Date().toISOString(),
+                nama_pemohon: nilai.nama_pemohon,
+                pekerjaan: nilai.pekerjaan,
+                no_hp: nilai.no_hp,
+                alamat_ktp: nilai.alamat_ktp,
+                keperluan: nilai.keperluan,
+                jalan_dusun: nilai.jalan_dusun,
+                desa: nilai.desa,
+                kecamatan: nilai.kecamatan,
+                kabupaten: nilai.kabupaten,
+                ttd_id: ttdId || '',
+                titik: ubahTitikKeSkema()
+            };
+            return dbSimpanSurat(recordSurat);
+        });
+    }).then(() => {
+        showAlert('✅ Data berhasil disimpan ke daftar.');
+    }).catch((err) => {
+        console.error('Gagal menyimpan ke daftar:', err);
+        showAlert('Gagal menyimpan data: ' + err.message);
+    });
+}
 /* ============================================================
    POPUP DATA TERSIMPAN
    ============================================================ */
