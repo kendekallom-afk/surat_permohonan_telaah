@@ -1978,7 +1978,7 @@ function simpanKeDaftar() {
             return dbSimpanSurat(recordSurat);
         });
     }).then(() => {
-        showToast('✅ Data berhasil disimpan ke daftar', 'sukses');
+        showToast('✅ Data berhasil disimpan ke daftar.');
     }).catch((err) => {
         console.error('Gagal menyimpan ke daftar:', err);
         showAlert('Gagal menyimpan data: ' + err.message);
@@ -2056,7 +2056,7 @@ function kosongkanSemua() {
         if (gpsView) gpsView.classList.remove('view-hidden');
         if (formView) formView.classList.remove('view-hidden');
     }
-   
+   showToast('✅ Form dikosongkan. Siap isi data baru.')
 }
 /* ============================================================
    HAPUS DATA DARI DAFTAR
@@ -2118,7 +2118,7 @@ function hapusSemuaData() {
                 dbHapusSemuaSurat(),
                 dbHapusSemuaTtd()
             ]).then(() => {
-                showToast('Data berhasil dihapus')
+                showToast('✅ Semua data berhasil dihapus.')
                 muatDaftarData();
             }).catch((err) => {
                 console.error('Gagal menghapus semua:', err);
@@ -2162,7 +2162,7 @@ function exportDataTerpilih() {
         const namaFile = buatNamaFileXls();
 
         unduhFile(konten, namaFile, 'application/vnd.ms-excel');
-        showAlert(`✅ ${valid.length} data berhasil di-export.`);
+        showToast(`✅ ${valid.length} data berhasil di-export.`);
     }).catch((err) => {
         console.error('Gagal export:', err);
         showAlert('Gagal export data: ' + err.message);
