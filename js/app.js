@@ -1909,9 +1909,9 @@ function muatDaftarData() {
         _daftarSuratCache = semua;
         renderDaftarData(semua);
     }).catch((err) => {
-        console.error('Gagal memuat daftar:', err);
-        tampilkanAlert('Gagal memuat data tersimpan.');
-    });
+    console.error('Gagal memuat daftar:', err);
+    showAlert('Gagal memuat data tersimpan.');
+});
 }
 
 function renderDaftarData(daftar) {
@@ -2065,3 +2065,244 @@ function inisialisasiDatabase() {
 
 // Jalankan saat halaman siap
 document.addEventListener('DOMContentLoaded', inisialisasiDatabase);
+
+/* ============================================================
+   SIMPAN KE DAFTAR — dari form ke IndexedDB
+   ============================================================ */
+
+function ambilNilaiForm() {
+    return {
+        nama_pemohon: (document.getElementById('pemohon-nama')?.value || '').trim(),
+        pekerjaan:    (document.getElementById('pemohon-pekerjaan')?.value || '').trim(),
+        alamat_ktp:   (document.getElementById('pemohon-alamat')?.value || '').trim(),
+        no_hp:        (document.getElementById('pemohon-hp')?.value || '').trim(),
+        keperluan:    (document.getElementById('pemohon-keperluan')?.value || '').trim(),
+        jalan_dusun:  (document.getElementById('lahan-jalan')?.value || '').trim(),
+        desa:         (document.getElementById('lahan-desa-input')?.value || '').trim(),
+        kecamatan:    (document.getElementById('lahan-kec')?.value || '').trim(),
+        kabupaten:    (document.getElementById('lahan-kab')?.value || '').trim()
+    };
+}
+
+function validasiForm(nilai) {
+    if (!nilai.nama_pemohon) return 'Nama pemohon wajib diisi.';
+    if (!nilai.no_hp)        return 'No. HP wajib diisi.';
+    if (!nilai.desa)         return 'Desa/Kelurahan wajib diisi.';
+    if (!daftarTitik || daftarTitik.length === 0) return 'Minimal satu titik GPS harus diambil.';
+    return null;
+}
+
+/**
+ * Ambil titik dari `daftarTitik` (format lama) → ubah ke format skema IndexedDB.
+ * Konversi string → angka untuk koordinat.
+ */
+function ubahTitikKeSkema() {
+    return daftarTitik.map((t, i) => ({
+        no_titik: i + 1,
+        longitude: parseFloat(t.lng),
+        latitude:  parseFloat(t.lat),
+        akurasi:   Number(t.acc) || 0,
+        waktu_ambil: gabungTanggalJam(t.waktu)
+    }));
+}
+
+/**
+ * "10:35:00" → "2026-09-20T10:35:00"
+ * Pakai tanggal hari ini (karena titik diambil saat ini juga).
+ */
+function gabungTanggalJam(jamLokal) {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}T${jamLokal || '00:00:00'}`;
+}
+
+/**
+ * Simpan TTD ke store "ttd", kembalikan ttd_id.
+ * Kalau ttdData kosong, kembalikan null.
+ */
+function simpanTtdKeDb() {
+    if (!ttdData) return Promise.resolve(null);
+
+    const ttdId = buatIdTtd();
+    const recordTtd = {
+        ttd_id: ttdId,
+        gambar: ttdData,                    // string data URL JPEG
+        tanggal_dibuat: new Date().toISOString(),
+        ukuran_byte: Math.round((ttdData.length * 3) / 4)  // estimasi dari base64
+    };
+
+    return dbSimpanTtd(recordTtd).then(() => ttdId);
+}
+
+/**
+ * Fungsi utama: simpan data form + titik + TTD ke IndexedDB.
+ * Dipanggil dari tombol "💾 Simpan ke Daftar".
+ */
+function simpanKeDaftar() {
+    const nilai = ambilNilaiForm();
+    const pesanError = validasiForm(nilai);
+    if (pesanError) {
+        showAlert(pesanError);
+        return;
+    }
+
+    // 1) Simpan TTD dulu (kalau ada), dapatkan ttd_id
+    simpanTtdKeDb().then((ttdId) => {
+        // 2) Buat ID surat
+        return buatIdSurat().then((idSurat) => {
+            const recordSurat = {
+                id_surat: idSurat,
+                tanggal_dibuat: new Date().toISOString(),
+                nama_pemohon: nilai.nama_pemohon,
+                pekerjaan: nilai.pekerjaan,
+                no_hp: nilai.no_hp,
+                alamat_ktp: nilai.alamat_ktp,
+                keperluan: nilai.keperluan,
+                jalan_dusun: nilai.jalan_dusun,
+                desa: nilai.desa,
+                kecamatan: nilai.kecamatan,
+                kabupaten: nilai.kabupaten,
+                ttd_id: ttdId || '',
+                titik: ubahTitikKeSkema()
+            };
+
+            // 3) Simpan surat
+            return dbSimpanSurat(recordSurat);
+        });
+    }).then(() => {
+        showAlert('✅ Data berhasil disimpan ke daftar.');
+    }).catch((err) => {
+        console.error('Gagal menyimpan ke daftar:', err);
+        showAlert('Gagal menyimpan data: ' + err.message);
+    });
+}
+/* ============================================================
+   BUKA SURAT DARI DAFTAR → muat ke form
+   ============================================================ */
+
+/**
+ * Dipanggil saat user klik baris di popup "Data Tersimpan".
+ * @param {string} idSurat
+ */
+function bukaSuratKeForm(idSurat) {
+    if (!idSurat) return;
+
+    dbAmbilSurat(idSurat).then((surat) => {
+        if (!surat) {
+            showAlert('Data tidak ditemukan.');
+            return;
+        }
+
+        // 1) Isi field form
+        isiFormDariSurat(surat);
+
+        // 2) Muat titik GPS ke daftarTitik (konversi angka → string)
+        daftarTitik = (surat.titik || []).map((t) => ({
+            nama: `Titik ${t.no_titik}`,
+            lat: Number(t.latitude).toFixed(6),
+            lng: Number(t.longitude).toFixed(6),
+            acc: t.akurasi,
+            waktu: ambilJamDariIso(t.waktu_ambil)
+        }));
+        updateTampilanLog();
+
+        // 3) Muat TTD (kalau ada)
+        if (surat.ttd_id) {
+            muatTtdKePreview(surat.ttd_id);
+        } else {
+            // Tidak ada TTD — pastikan preview kosong
+            ttdData = null;
+            const preview = document.getElementById('preview-ttd');
+            if (preview) preview.style.display = 'none';
+        }
+
+        // 4) Set matchedTipe untuk label Desa/Kelurahan di PDF
+        perbaruiMatchedTipe(surat.desa);
+
+        // 5) Tutup popup
+        tutupPopupData();
+
+        // 6) Scroll ke form supaya user langsung lihat
+        const formView = document.getElementById('form-view');
+        if (formView) {
+            formView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        showAlert(`✅ Data "${surat.nama_pemohon}" berhasil dimuat.`);
+    }).catch((err) => {
+        console.error('Gagal membuka surat:', err);
+        showAlert('Gagal membuka data: ' + err.message);
+    });
+}
+
+/**
+ * Isi field form dari record surat.
+ */
+function isiFormDariSurat(surat) {
+    setNilai('pemohon-nama',       surat.nama_pemohon);
+    setNilai('pemohon-pekerjaan',  surat.pekerjaan);
+    setNilai('pemohon-alamat',     surat.alamat_ktp);
+    setNilai('pemohon-hp',         surat.no_hp);
+    setNilai('pemohon-keperluan',  surat.keperluan);
+    setNilai('lahan-jalan',        surat.jalan_dusun);
+    setNilai('lahan-desa-input',   surat.desa);
+    setNilai('lahan-kec',          surat.kecamatan);
+    setNilai('lahan-kab',          surat.kabupaten);
+}
+
+function setNilai(id, nilai) {
+    const el = document.getElementById(id);
+    if (el) el.value = nilai || '';
+}
+
+/**
+ * "2026-09-20T10:35:00" → "10:35:00"
+ */
+function ambilJamDariIso(iso) {
+    if (!iso || typeof iso !== 'string') return '';
+    const bagian = iso.split('T');
+    return bagian[1] || '';
+}
+
+/**
+ * Tentukan tipe wilayah (Desa/Kelurahan) dari nama desa.
+ * Dipakai untuk label di PDF.
+ */
+function perbaruiMatchedTipe(namaDesa) {
+    if (!namaDesa) {
+        matchedTipe = null;
+        return;
+    }
+    const cari = namaDesa.trim().toLowerCase();
+    const found = databaseWilayah.find((item) => item.nama.toLowerCase() === cari);
+    matchedTipe = found ? found.tipe : null;
+}
+
+/**
+ * Ambil TTD dari store "ttd" berdasarkan ttd_id, tampilkan di preview.
+ */
+function muatTtdKePreview(ttdId) {
+    dbAmbilTtd(ttdId).then((record) => {
+        const preview = document.getElementById('preview-ttd');
+        const imgPreview = document.getElementById('img-preview-ttd');
+
+        if (record && record.gambar) {
+            ttdData = record.gambar;
+            if (imgPreview) imgPreview.src = record.gambar;
+            if (preview) preview.style.display = 'block';
+        } else {
+            // TTD_ID ada, tapi gambarnya tidak ada di store
+            // (mungkin karena IndexedDB dihapus lalu restore dari XLS)
+            ttdData = null;
+            if (preview) preview.style.display = 'none';
+            console.warn('TTD_ID ditemukan tapi gambar tidak ada:', ttdId);
+        }
+    }).catch((err) => {
+        console.error('Gagal memuat TTD:', err);
+        ttdData = null;
+        const preview = document.getElementById('preview-ttd');
+        if (preview) preview.style.display = 'none';
+    });
+}
