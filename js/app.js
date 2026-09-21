@@ -78,7 +78,7 @@
         // ============================================
         // FUNGSI UTILITY
         // ============================================
-        function showAlert(msg) {
+        function showToast(msg) {
             document.getElementById('custom-alert-msg').innerText = msg;
             document.getElementById('custom-alert-modal').style.display = 'flex';
         }
@@ -125,7 +125,7 @@
         }
 
         window.onerror = function (msg, url, line) {
-            showAlert("Error Sistem:\n" + msg + "\n(baris " + line + ")");
+            showToast("Error Sistem:\n" + msg + "\n(baris " + line + ")");
             return true;
         };
 
@@ -163,7 +163,7 @@
                 if (watchID !== null) navigator.geolocation.clearWatch(watchID);
                 watchID = navigator.geolocation.watchPosition(updatePosition, handleError, geoOptions);
             } else {
-                showAlert("Perangkat Anda tidak mendukung fitur GPS.");
+                showToast("Perangkat Anda tidak mendukung fitur GPS.");
             }
         }
 
@@ -269,7 +269,7 @@
         }
 
         function pusatkanPetaKeGPS() {
-            if (!currentLat || !currentLng) return showAlert('Tunggu hingga sinyal GPS terunci!');
+            if (!currentLat || !currentLng) return showToast('Tunggu hingga sinyal GPS terunci!');
             initMap();
             mapInstance.setBearing(0);
             mapInstance.setView([Number(currentLat), Number(currentLng)], 18);
@@ -280,7 +280,7 @@
             event.preventDefault();
             const input = document.getElementById('map-search-input');
             const query = input.value.trim();
-            if (!query) return showAlert('Masukkan alamat yang ingin dicari.');
+            if (!query) return showToast('Masukkan alamat yang ingin dicari.');
 
             const searchButton = event.submitter;
             if (searchButton) searchButton.disabled = true;
@@ -290,7 +290,7 @@
                 const response = await fetch(url, { headers: { Accept: 'application/json' } });
                 if (!response.ok) throw new Error('Layanan pencarian tidak tersedia.');
                 const results = await response.json();
-                if (!results.length) return showAlert('Alamat tidak ditemukan. Coba gunakan nama wilayah yang lebih lengkap.');
+                if (!results.length) return showToast('Alamat tidak ditemukan. Coba gunakan nama wilayah yang lebih lengkap.');
 
                 const result = results[0];
                 const position = [Number(result.lat), Number(result.lon)];
@@ -302,7 +302,7 @@
                     `<b>Hasil Pencarian</b><br>${result.display_name}`
                 ).openPopup();
             } catch (error) {
-                showAlert('Pencarian alamat gagal. Periksa koneksi internet lalu coba lagi.');
+                showToast('Pencarian alamat gagal. Periksa koneksi internet lalu coba lagi.');
             } finally {
                 if (searchButton) searchButton.disabled = false;
             }
@@ -327,7 +327,7 @@
         }
 
         function simpanTitikDariPeta() {
-            if (!mapInstance) return showAlert('Peta belum siap.');
+            if (!mapInstance) return showToast('Peta belum siap.');
             const center = mapInstance.getCenter();
             simpanTitikDenganKoordinat(center.lat, center.lng, currentAcc || '-');
         }
@@ -375,7 +375,7 @@
 
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(teksSalinan).then(() => {
-                    showAlert("✅ Semua data berhasil disalin ke clipboard!");
+                    showToast("✅ Semua data berhasil disalin ke clipboard!");
                 }).catch(() => fallbackCopy(teksSalinan));
             } else {
                 fallbackCopy(teksSalinan);
@@ -383,13 +383,13 @@
         }
 
         function copyKoordinatAktif() {
-            if (!currentLng || !currentLat) return showAlert("Tunggu hingga sinyal GPS terunci!");
+            if (!currentLng || !currentLat) return showToast("Tunggu hingga sinyal GPS terunci!");
 
             const teksAktif = `${currentLng}, ${currentLat}`;
 
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(teksAktif).then(() => {
-                    showAlert("Koordinat aktif berhasil disalin:\n" + teksAktif);
+                    showToast("Koordinat aktif berhasil disalin:\n" + teksAktif);
                 }).catch(() => fallbackCopy(teksAktif));
             } else {
                 fallbackCopy(teksAktif);
@@ -406,16 +406,16 @@
             ta.select();
             try {
                 document.execCommand('copy');
-                showAlert("Koordinat berhasil disalin:\n" + text);
+                showToast("Koordinat berhasil disalin:\n" + text);
             } catch (e) {
-                showAlert("Gagal menyalin otomatis:\n" + text);
+                showToast("Gagal menyalin otomatis:\n" + text);
             }
             document.body.removeChild(ta);
         }
 
         function simpanTitik() {
     if (!currentLat || !currentLng) {
-        showAlert("Tunggu GPS mendapat sinyal terlebih dahulu!");
+        showToast("Tunggu GPS mendapat sinyal terlebih dahulu!");
         return false;
     }
 
@@ -424,7 +424,7 @@
 
         function simpanTitikDenganKoordinat(lat, lng, acc) {
     if (!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) {
-        showAlert("Koordinat titik tidak valid!");
+        showToast("Koordinat titik tidak valid!");
         return false;
     }
 
@@ -460,7 +460,7 @@
         const nilaiAwal = `${t.lng}, ${t.lat}`;
         showPrompt("Edit Koordinat (Format: Longitude, Latitude):", nilaiAwal, function (koordinatBaru) {
             if (!koordinatBaru || !koordinatBaru.includes(",")) {
-                return showAlert("Format salah! Gunakan pemisah koma.\nContoh: 118.848438, -2.672878");
+                return showToast("Format salah! Gunakan pemisah koma.\nContoh: 118.848438, -2.672878");
             }
 
             const parts = koordinatBaru.split(",");
@@ -468,7 +468,7 @@
             const latBaru = parts[1].trim();
 
             if (isNaN(lngBaru) || isNaN(latBaru)) {
-                return showAlert("Angka Longitude atau Latitude tidak valid!");
+                return showToast("Angka Longitude atau Latitude tidak valid!");
             }
 
             daftarTitik[index].nama = namaBaru.replace(/,/g, " ");
@@ -632,7 +632,7 @@
                 }
             }
             if (isEmpty) {
-                showAlert('Harap tulis tanda tangan terlebih dahulu!');
+                showToast('Harap tulis tanda tangan terlebih dahulu!');
                 return;
             }
 
@@ -662,7 +662,7 @@
                 ttdData = compressedCanvas.toDataURL('image/jpeg', 0.9);
                 tampilkanPreviewTtd();
                 tutupModalTtd();
-                showAlert('✅ Tanda tangan berhasil disimpan!');
+                showToast('✅ Tanda tangan berhasil disimpan!');
             };
             img.src = dataUrl;
         }
@@ -917,7 +917,7 @@
 
                 initEditorCanvasTanpaCrop();
 
-                showAlert('✅ Crop berhasil diterapkan!');
+                showToast('✅ Crop berhasil diterapkan!');
             };
             img.src = fotoSementara;
         }
@@ -950,7 +950,7 @@
 
         function enhanceFoto() {
     if (!editorCanvas || !editorCtx) {
-        showAlert('Silakan unggah foto terlebih dahulu!');
+        showToast('Silakan unggah foto terlebih dahulu!');
         return;
     }
 
@@ -1014,10 +1014,10 @@
         editorCtx.putImageData(imgData, 0, 0);
         fotoSementara = editorCanvas.toDataURL('image/jpeg', 0.95);
 
-        showAlert('✅ Enhance selesai! Background putih, tanda tangan tetap tajam.');
+        showToast('✅ Enhance selesai! Background putih, tanda tangan tetap tajam.');
     } catch (error) {
         console.error('Gagal memproses gambar:', error);
-        showAlert('Terjadi kesalahan saat memproses gambar: ' + error.message);
+        showToast('Terjadi kesalahan saat memproses gambar: ' + error.message);
     }
 }
 
@@ -1025,7 +1025,7 @@
             if (fotoAsli) {
                 fotoSementara = fotoAsli;
                 initEditorCanvas();
-                showAlert('↺ Foto direset ke semula');
+                showToast('↺ Foto direset ke semula');
             }
         }
 
@@ -1034,7 +1034,7 @@
                 ttdData = fotoSementara;
                 tampilkanPreviewTtd();
                 tutupEditor();
-                showAlert('✅ Tanda tangan hasil edit berhasil disimpan!');
+                showToast('✅ Tanda tangan hasil edit berhasil disimpan!');
             }
         }
 
@@ -1049,7 +1049,7 @@
                 .then(dataUrl => {
                     bukaEditorFoto(dataUrl);
                 })
-                .catch(err => showAlert('Gagal memproses foto: ' + err.message));
+                .catch(err => showToast('Gagal memproses foto: ' + err.message));
         }
 
         function tampilkanPreviewTtd() {
@@ -1067,7 +1067,7 @@
             showConfirm('Apakah Anda yakin ingin menghapus tanda tangan?', function() {
                 ttdData = null;
                 document.getElementById('preview-ttd').style.display = 'none';
-                showAlert('Tanda tangan telah dihapus.');
+                showToast('Tanda tangan telah dihapus.');
             });
         }
 
@@ -1178,14 +1178,14 @@
                     renderGaleriFoto();
 
                     if (validResults.length === results.length) {
-                        showAlert(`✅ Berhasil menambahkan ${validResults.length} foto.`);
+                        showToast(`✅ Berhasil menambahkan ${validResults.length} foto.`);
                     } else {
-                        showAlert(`⚠️ ${validResults.length} dari ${results.length} foto berhasil diproses.`);
+                        showToast(`⚠️ ${validResults.length} dari ${results.length} foto berhasil diproses.`);
                     }
                 })
                 .catch(err => {
                     console.error('Gagal memproses foto dokumentasi:', err);
-                    showAlert("Gagal memproses foto: " + err.message);
+                    showToast("Gagal memproses foto: " + err.message);
                 });
 
             // Reset input agar file yang sama dapat dipilih lagi.
@@ -1261,7 +1261,7 @@
         }
 
         function hapusSemuaFoto() {
-            if (daftarFoto.length === 0) return showAlert("Belum ada foto yang dilampirkan.");
+            if (daftarFoto.length === 0) return showToast("Belum ada foto yang dilampirkan.");
             showConfirm("Apakah Anda yakin ingin menghapus SELURUH foto?", function() {
                 daftarFoto = [];
                 renderGaleriFoto();
@@ -1477,7 +1477,7 @@ doc.text(nama, posXCenter, y, { align: 'center' });
         function prosesSurat(mode) {
             try {
                 if (daftarTitik.length === 0) {
-                    return showAlert("Isi minimal satu titik koordinat!");
+                    return showToast("Isi minimal satu titik koordinat!");
                 }
 
                 const nama = document.getElementById("pemohon-nama").value.trim();
@@ -1485,7 +1485,7 @@ doc.text(nama, posXCenter, y, { align: 'center' });
                 const desaVal = document.getElementById("lahan-desa-input").value.trim();
 
                 if (!nama || !hp || !desaVal) {
-                    return showAlert("Harap lengkapi field mandatory (*): Nama, No HP, dan Desa/Kelurahan!");
+                    return showToast("Harap lengkapi field mandatory (*): Nama, No HP, dan Desa/Kelurahan!");
                 }
 
                 const doc = buatDokumenPDF();
@@ -1501,7 +1501,7 @@ doc.text(nama, posXCenter, y, { align: 'center' });
                 }
 
             } catch (err) {
-                showAlert("Gagal memproses PDF: " + err.message);
+                showToast("Gagal memproses PDF: " + err.message);
             }
         }
 
@@ -1510,7 +1510,7 @@ doc.text(nama, posXCenter, y, { align: 'center' });
         // ============================================
         function simpanTxt() {
             if (daftarTitik.length === 0) {
-                return showAlert("Belum ada titik tersimpan untuk disimpan ke file TXT!");
+                return showToast("Belum ada titik tersimpan untuk disimpan ke file TXT!");
             }
 
             const nama = document.getElementById("pemohon-nama").value.trim();
@@ -1568,7 +1568,7 @@ doc.text(nama, posXCenter, y, { align: 'center' });
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             } catch (err) {
-                showAlert("Gagal menyimpan file TXT: " + err.message);
+                showToast("Gagal menyimpan file TXT: " + err.message);
             }
         }
 
@@ -1614,10 +1614,10 @@ doc.text(nama, posXCenter, y, { align: 'center' });
                     }
 
                     updateTampilanLog();
-                    showAlert("File TXT berhasil dimuat ke dalam form!");
+                    showToast("File TXT berhasil dimuat ke dalam form!");
 
                 } catch (err) {
-                    showAlert("Format file TXT tidak sesuai atau rusak!");
+                    showToast("Format file TXT tidak sesuai atau rusak!");
                 }
 
                 event.target.value = '';
@@ -1954,7 +1954,7 @@ function simpanKeDaftar() {
     const nilai = ambilNilaiForm();
     const pesanError = validasiForm(nilai);
     if (pesanError) {
-        showAlert(pesanError);
+        showToast(pesanError);
         return;
     }
 
@@ -1981,7 +1981,7 @@ function simpanKeDaftar() {
         showToast('✅ Data berhasil disimpan ke daftar.');
     }).catch((err) => {
         console.error('Gagal menyimpan ke daftar:', err);
-        showAlert('Gagal menyimpan data: ' + err.message);
+        showToast('Gagal menyimpan data: ' + err.message);
     });
 }
 /* ============================================================
@@ -2066,7 +2066,7 @@ function hapusDataTerpilih() {
     const idTerpilih = ambilIdTerpilih();
 
     if (idTerpilih.length === 0) {
-        showAlert('Pilih dulu data yang mau dihapus.');
+        showToast('Pilih dulu data yang mau dihapus.');
         return;
     }
 
@@ -2086,7 +2086,7 @@ function hapusDataTerpilih() {
             muatDaftarData();
         }).catch((err) => {
             console.error('Gagal menghapus:', err);
-            showAlert('Gagal menghapus data: ' + err.message);
+            showToast('Gagal menghapus data: ' + err.message);
         });
     });
 }
