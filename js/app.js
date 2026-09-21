@@ -2117,7 +2117,6 @@ function hapusSemuaData() {
                 dbHapusSemuaSurat(),
                 dbHapusSemuaTtd()
             ]).then(() => {
-                showAlert('✅ Semua data berhasil dihapus.');
                 muatDaftarData();
             }).catch((err) => {
                 console.error('Gagal menghapus semua:', err);
