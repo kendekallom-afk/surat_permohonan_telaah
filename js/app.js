@@ -2055,10 +2055,6 @@ function kosongkanSemua() {
    HAPUS DATA DARI DAFTAR
    ============================================================ */
 
-/**
- * Hapus surat yang dicentang di popup, sekaligus TTD-nya.
- * Dipanggil dari tombol "🗑️ Hapus" di baris kontrol popup.
- */
 function hapusDataTerpilih() {
     const idTerpilih = ambilIdTerpilih();
 
@@ -2072,7 +2068,6 @@ function hapusDataTerpilih() {
         : `Yakin hapus ${idTerpilih.length} data ini?`;
 
     showConfirm(pesan, function () {
-        // Hapus tiap surat + TTD-nya secara berurutan
         let rantai = Promise.resolve();
 
         idTerpilih.forEach((idSurat) => {
@@ -2081,7 +2076,7 @@ function hapusDataTerpilih() {
 
         rantai.then(() => {
             showAlert(`✅ ${idTerpilih.length} data berhasil dihapus.`);
-            muatDaftarData(); // refresh popup
+            muatDaftarData();
         }).catch((err) => {
             console.error('Gagal menghapus:', err);
             showAlert('Gagal menghapus data: ' + err.message);
@@ -2089,14 +2084,10 @@ function hapusDataTerpilih() {
     });
 }
 
-/**
- * Hapus satu surat + TTD-nya (kalau ada).
- */
 function hapusSatuSurat(idSurat) {
     return dbAmbilSurat(idSurat).then((surat) => {
         if (!surat) return;
 
-        // Hapus TTD dulu (kalau ada)
         if (surat.ttd_id) {
             return dbHapusTtd(surat.ttd_id).then(() => {
                 return dbHapusSurat(idSurat);
@@ -2107,12 +2098,7 @@ function hapusSatuSurat(idSurat) {
     });
 }
 
-/**
- * Hapus SEMUA data — kosongkan kedua store.
- * Dipanggil dari tombol "Hapus Semua" di footer popup.
- */
 function hapusSemuaData() {
-    // Cek dulu apakah ada data
     dbAmbilSemuaSurat().then((semua) => {
         if (!semua || semua.length === 0) {
             showAlert('Belum ada data yang bisa dihapus.');
@@ -2126,7 +2112,7 @@ function hapusSemuaData() {
                 dbHapusSemuaTtd()
             ]).then(() => {
                 showAlert('✅ Semua data berhasil dihapus.');
-                muatDaftarData(); // refresh popup
+                muatDaftarData();
             }).catch((err) => {
                 console.error('Gagal menghapus semua:', err);
                 showAlert('Gagal menghapus semua data: ' + err.message);
