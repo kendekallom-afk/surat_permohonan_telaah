@@ -1977,6 +1977,81 @@ function simpanKeDaftar() {
     });
 }
 /* ============================================================
+   MULAI SURAT BARU — kosongkan form, titik, dan TTD
+   ============================================================ */
+
+function mulaiSuratBaru() {
+    // Cek dulu apakah ada isi — kalau ada, konfirmasi
+    const adaIsi = formAdaIsinya();
+
+    if (!adaIsi) {
+        kosongkanSemua();
+        return;
+    }
+
+    showConfirm('Kosongkan form dan mulai data baru?', function () {
+        kosongkanSemua();
+    });
+}
+
+function formAdaIsinya() {
+    const fieldCek = [
+        'pemohon-nama', 'pemohon-pekerjaan', 'pemohon-alamat',
+        'pemohon-hp', 'pemohon-keperluan',
+        'lahan-jalan', 'lahan-desa-input', 'lahan-kec'
+    ];
+    for (const id of fieldCek) {
+        const el = document.getElementById(id);
+        if (el && el.value.trim() !== '') return true;
+    }
+    if (daftarTitik && daftarTitik.length > 0) return true;
+    if (ttdData) return true;
+    if (daftarFoto && daftarFoto.length > 0) return true;
+    return false;
+}
+
+function kosongkanSemua() {
+    // 1) Kosongkan field form
+    setNilai('pemohon-nama', '');
+    setNilai('pemohon-pekerjaan', '');
+    setNilai('pemohon-alamat', '');
+    setNilai('pemohon-hp', '');
+    setNilai('pemohon-keperluan', '');
+    setNilai('lahan-jalan', '');
+    setNilai('lahan-desa-input', '');
+    setNilai('lahan-kec', '');
+    setNilai('lahan-kab', 'Mamuju, Provinsi Sulawesi Barat');
+
+    // 2) Kosongkan titik
+    daftarTitik = [];
+    localStorage.removeItem('daftarTitik');
+    updateTampilanLog();
+
+    // 3) Kosongkan TTD
+    ttdData = null;
+    const previewTtd = document.getElementById('preview-ttd');
+    if (previewTtd) previewTtd.style.display = 'none';
+
+    // 4) Reset matchedTipe
+    matchedTipe = null;
+
+    // 5) Kosongkan foto dokumentasi
+    daftarFoto = [];
+    if (typeof renderGaleriFoto === 'function') renderGaleriFoto();
+
+    // 6) Tutup peta kalau sedang terbuka
+    const mapView = document.getElementById('map-view');
+    const gpsView = document.getElementById('gps-view');
+    const formView = document.getElementById('form-view');
+    if (mapView && !mapView.classList.contains('view-hidden')) {
+        if (mapView) mapView.classList.add('view-hidden');
+        if (gpsView) gpsView.classList.remove('view-hidden');
+        if (formView) formView.classList.remove('view-hidden');
+    }
+
+    showAlert('✅ Form dikosongkan. Siap isi data baru.');
+}
+/* ============================================================
    POPUP DATA TERSIMPAN
    ============================================================ */
 
@@ -2395,42 +2470,5 @@ function muatTtdKePreview(ttdId) {
         ttdData = null;
         const preview = document.getElementById('preview-ttd');
         if (preview) preview.style.display = 'none';
-    });
-}
-/* ============================================================
-   MULAI SURAT BARU — kosongkan form, titik, dan TTD
-   ============================================================ */
-
-function mulaiSuratBaru() {
-    showConfirm('Kosongkan form dan mulai data baru?', function () {
-        // 1) Kosongkan field form
-        setNilai('pemohon-nama', '');
-        setNilai('pemohon-pekerjaan', '');
-        setNilai('pemohon-alamat', '');
-        setNilai('pemohon-hp', '');
-        setNilai('pemohon-keperluan', '');
-        setNilai('lahan-jalan', '');
-        setNilai('lahan-desa-input', '');
-        setNilai('lahan-kec', '');
-        setNilai('lahan-kab', 'Mamuju, Provinsi Sulawesi Barat');
-
-        // 2) Kosongkan titik
-        daftarTitik = [];
-        localStorage.removeItem('daftarTitik');
-        updateTampilanLog();
-
-        // 3) Kosongkan TTD
-        ttdData = null;
-        const previewTtd = document.getElementById('preview-ttd');
-        if (previewTtd) previewTtd.style.display = 'none';
-
-        // 4) Reset matchedTipe
-        matchedTipe = null;
-
-        // 5) Kosongkan foto dokumentasi
-        daftarFoto = [];
-        renderGaleriFoto();
-
-        showAlert('✅ Form dikosongkan. Siap isi data baru.');
     });
 }
