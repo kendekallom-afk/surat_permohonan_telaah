@@ -2122,7 +2122,7 @@ function hapusSemuaData() {
                 muatDaftarData();
             }).catch((err) => {
                 console.error('Gagal menghapus semua:', err);
-                showAlert('Gagal menghapus semua data: ' + err.message);
+                showToast('Gagal menghapus semua data: ' + err.message);
             });
         });
     });
@@ -2139,7 +2139,7 @@ function exportDataTerpilih() {
     const idTerpilih = ambilIdTerpilih();
 
     if (idTerpilih.length === 0) {
-        showAlert('Pilih dulu data yang mau di-export.');
+        showToast('Pilih dulu data yang mau di-export.');
         return;
     }
 
@@ -2151,7 +2151,7 @@ function exportDataTerpilih() {
         const valid = daftarSurat.filter((s) => s !== null && s !== undefined);
 
         if (valid.length === 0) {
-            showAlert('Tidak ada data yang bisa di-export.');
+            showToast('Tidak ada data yang bisa di-export.');
             return;
         }
 
@@ -2165,7 +2165,7 @@ function exportDataTerpilih() {
         showToast(`✅ ${valid.length} data berhasil di-export.`);
     }).catch((err) => {
         console.error('Gagal export:', err);
-        showAlert('Gagal export data: ' + err.message);
+        showToast('Gagal export data: ' + err.message);
     });
 }
 
@@ -2286,7 +2286,7 @@ function unduhFile(konten, namaFile, mimeType) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     } catch (err) {
-        showAlert('Gagal mengunduh file: ' + err.message);
+        showToast('Gagal mengunduh file: ' + err.message);
     }
 }
 /* ============================================================
@@ -2318,28 +2318,28 @@ function bacaFileXls(event) {
             const baris = parseXlsKeBaris(html);
 
             if (baris.length === 0) {
-                showAlert('File tidak berisi data yang bisa dibaca.');
+                showToast('File tidak berisi data yang bisa dibaca.');
                 return;
             }
 
             const hasil = groupBarisKeSurat(baris);
 
             if (hasil.surat.length === 0) {
-                showAlert('Tidak ada data valid yang bisa diimpor.');
+                showToast('Tidak ada data valid yang bisa diimpor.');
                 return;
             }
 
             simpanHasilImport(hasil);
         } catch (err) {
             console.error('Gagal parse XLS:', err);
-            showAlert('Format file XLS tidak sesuai: ' + err.message);
+            showToast('Format file XLS tidak sesuai: ' + err.message);
         }
 
         event.target.value = '';
     };
 
     reader.onerror = function () {
-        showAlert('Gagal membaca file.');
+        showToast('Gagal membaca file.');
         event.target.value = '';
     };
 
@@ -2491,11 +2491,11 @@ function simpanHasilImport(hasil) {
         pesan += `• ${ditimpa} surat ditimpa\n`;
         if (dilewati > 0) pesan += `• ${dilewati} baris dilewati (data tidak lengkap)`;
 
-        showAlert(pesan);
+        showToast(pesan);
         muatDaftarData(); // refresh popup
     }).catch((err) => {
         console.error('Gagal simpan hasil import:', err);
-        showAlert('Gagal menyimpan hasil import: ' + err.message);
+        showToast('Gagal menyimpan hasil import: ' + err.message);
     });
 }
 /* ============================================================
@@ -2523,7 +2523,7 @@ function muatDaftarData() {
         renderDaftarData(semua);
     }).catch((err) => {
     console.error('Gagal memuat daftar:', err);
-    showAlert('Gagal memuat data tersimpan.');
+    showToast('Gagal memuat data tersimpan.');
 });
 }
 
@@ -2757,7 +2757,7 @@ function simpanKeDaftar() {
     const nilai = ambilNilaiForm();
     const pesanError = validasiForm(nilai);
     if (pesanError) {
-        showAlert(pesanError);
+        showToast(pesanError);
         return;
     }
 
@@ -2788,7 +2788,7 @@ function simpanKeDaftar() {
         showToast('✅ Data berhasil disimpan ke daftar.');
     }).catch((err) => {
         console.error('Gagal menyimpan ke daftar:', err);
-        showAlert('Gagal menyimpan data: ' + err.message);
+        showToast('Gagal menyimpan data: ' + err.message);
     });
 }
 /* ============================================================
@@ -2804,7 +2804,7 @@ function bukaSuratKeForm(idSurat) {
 
     dbAmbilSurat(idSurat).then((surat) => {
         if (!surat) {
-            showAlert('Data tidak ditemukan.');
+            showToast('Data tidak ditemukan.');
             return;
         }
 
@@ -2843,10 +2843,10 @@ function bukaSuratKeForm(idSurat) {
             formView.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        showAlert(`✅ Data "${surat.nama_pemohon}" berhasil dimuat.`);
+        showToast(`✅ Data "${surat.nama_pemohon}" berhasil dimuat.`);
     }).catch((err) => {
         console.error('Gagal membuka surat:', err);
-        showAlert('Gagal membuka data: ' + err.message);
+        showToast('Gagal membuka data: ' + err.message);
     });
 }
 
