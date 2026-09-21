@@ -2917,3 +2917,33 @@ function muatTtdKePreview(ttdId) {
         if (preview) preview.style.display = 'none';
     });
 }
+
+/* ============================================================
+   TOAST — notifikasi kecil yang hilang sendiri
+   ============================================================ */
+
+function showToast(pesan, tipe, durasi) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    if (tipe === 'sukses') toast.classList.add('toast-sukses');
+    if (tipe === 'error') toast.classList.add('toast-error');
+    toast.textContent = pesan;
+
+    container.appendChild(toast);
+
+    // Trigger animasi masuk
+    requestAnimationFrame(() => {
+        toast.classList.add('tampil');
+    });
+
+    // Hilang otomatis
+    setTimeout(() => {
+        toast.classList.remove('tampil');
+        setTimeout(() => {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 300);
+    }, durasi || 2500);
+}
