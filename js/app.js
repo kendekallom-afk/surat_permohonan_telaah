@@ -1705,6 +1705,7 @@ doc.text(nama, posXCenter, y, { align: 'center' });
         
         // Auto-save setiap 10 detik
         setInterval(autoSaveData, 10000);
+        pasangKlikLuarPopupData();
     });
     
     // ============================================
@@ -2509,6 +2510,18 @@ function bukaPopupData() {
     const modal = document.getElementById('modal-data-tersimpan');
     if (modal) modal.style.display = 'flex';
     muatDaftarData();
+}
+function pasangKlikLuarPopupData() {
+    const modal = document.getElementById('modal-data-tersimpan');
+    if (!modal) return;
+
+    modal.addEventListener('click', function (event) {
+        // Kalau yang diklik adalah overlay (modal itu sendiri),
+        // bukan elemen di dalam box → tutup
+        if (event.target === modal) {
+            tutupPopupData();
+        }
+    });
 }
 
 function tutupPopupData() {
